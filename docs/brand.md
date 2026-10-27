@@ -98,7 +98,7 @@ The app is a gauge you glance at, not a place you spend time. Every tab has one 
 - **Grid:** 8 pt; list-first layouts with hairline separators; section titles as small caps labels; 16 pt gutters; nothing floats.
 - **Icon:** the mark (heartbeat to arrow, see "The mark" above), white on `#0D366B`, no gloss, no text.
 
-**Screens (what it shows / the one action), app 0.6.1**
+**Screens (what it shows / the one action), app 0.6.2**
 - **Export, "Export your Apple Health data":** status tile (Up to date with a green check, or the one fix), Folder, Your AI (connected client, or Copy the setup message), Sync from Health (automatic after every workout), Your files (Workouts, Days), Ideas for your AI (six Export prompts), the support card. Action: none when done; pull to sync.
 - **Import, "Import workout plans":** status tile (Up to date, or "N plans waiting"), Folder (the plans folder), Your AI, Sync to Watch (the Automatic switch), Waiting for you (Put on Watch, See parts), On your Watch (Remove from Watch), Earlier, Ideas for your AI (five Import prompts).
 - **Settings:** the Health data folder and the Workout plans folder, Health access, notifications, what gets exported, privacy (What left this phone, usage statistics, sync log), about (version, docs, support, privacy policy, Restore purchases).

@@ -699,10 +699,10 @@ as the runtime reports them.
   `scripts/build-npm.sh` builds the platform packages (macOS natively, Linux musl and
   Windows GNU through `cargo zigbuild`), `npm/test/local-registry.sh` tests the result
   end to end against a local registry, `scripts/publish-npm.sh` publishes.
-  Live since 2026-10-26 (0.5.0), current 0.6.1, published by the npm user `pt-consultancy`
+  Live since 2026-10-26 (0.5.0), current 0.6.2, published by the npm user `pt-consultancy`
   with passkey 2FA: run `scripts/publish-npm.sh` in a terminal, press Enter at the prompt,
   tick "do not challenge for 5 minutes" and approve once for all six packages.
-- **Official MCP registry.** Listed as `com.healthaccessmcp/healthaccess-mcp` (0.6.1,
+- **Official MCP registry.** Listed as `com.healthaccessmcp/healthaccess-mcp` (0.6.2,
   active) since 2026-10-27, pointing at the npm package. `package.json` carries
   `mcpName`; `npm/server.json` is the entry; the namespace is verified by a TXT record on
   healthaccessmcp.com whose private key lives outside the repo in

@@ -9,12 +9,12 @@ Health Access is middleware. It does the one thing Apple requires a phone app fo
 Three parts:
 
 - The iPhone app, "Health Access" (iOS 17 or later). Three tabs: Export (reads HealthKit, writes `workouts/*.json`, `days/*.json`, `index.json`, `briefing.md`, `catalog.json`, `profile.json` into a folder the user picked), Import (puts AI-written workout plans onto the Apple Watch through WorkoutKit, by a tap or automatically, and writes `plans/*.status.json`), Settings. No server, no account. In testing; the App Store release is next.
-- `healthaccess-mcp`, an MCP server over stdio (Rust, MIT). Reads the folder, writes `plans/<id>.json`, a small presence file under `mcp/clients/` and the two rating fields of a workout, nothing else. Thirteen tools, eleven prompts, three resources. Live on npm (0.6.1) and in the official MCP registry.
+- `healthaccess-mcp`, an MCP server over stdio (Rust, MIT). Reads the folder, writes `plans/<id>.json`, a small presence file under `mcp/clients/` and the two rating fields of a workout, nothing else. Thirteen tools, eleven prompts, three resources. Live on npm (0.6.2) and in the official MCP registry.
 - `healthaccess`, a command line with the same views (`list`, `show`, `summary`, `rate`, `plan push|status|list`, `day`, `days`, `catalog`, `profile`, `ecgs`, `briefing`, `prompts`, `doctor`). Live, in the same npm package: `npx -y -p healthaccess-mcp healthaccess <command>`.
 
 The folder can be anywhere the iOS Files app can open: iCloud Drive, Dropbox, Google Drive, OneDrive, Proton Drive, SMB/NAS, On My iPhone. The one rule: the computer where the AI runs must see the same folder. The server finds it on its own (section 4); `--dir` names it when the search does not.
 
-What is planned, not live, as of 2026-10-27: the app on the App Store (it is in testing), a Claude directory plugin (prepared), a Homebrew tap and a crates.io package, the public source repository.
+What is planned, not live, as of 2026-10-27: the app on the App Store (it is in testing), a Claude directory plugin (prepared), a Homebrew tap and a crates.io package. The source is public (MIT): https://github.com/leonhardprinz/healthaccess-mcp
 
 Project history: the codename was "Tide" until 2026-10-25. Old identifiers are accepted forever as aliases (section 13). The repository directory on disk may still be called `tide`.
 

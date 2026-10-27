@@ -4,7 +4,7 @@
 
 An iPhone app (Health Access) does the one thing Apple requires a phone app for: it reads HealthKit and writes files. Everything else runs on the computer where the AI runs: `healthaccess-mcp` (MCP server over stdio, Rust, MIT) and `healthaccess` (command line). The folder can be on iCloud Drive, Dropbox, Google Drive, OneDrive, Proton Drive, a NAS or local; the one rule is that the AI's computer can reach the same folder.
 
-Status on 2026-10-27: the MCP server, the CLI and the file formats are live and in daily use. The server is on npm, version 0.6.1: `npx -y healthaccess-mcp`, prebuilt for macOS, Linux and Windows, no network code, and listed in the official MCP registry as `com.healthaccessmcp/healthaccess-mcp`. The app (Export, Import and Settings tabs) is in testing; the App Store release is next. `briefing.md` is written by the app after every sync.
+Status on 2026-10-27: the MCP server, the CLI and the file formats are live and in daily use. The server is on npm, version 0.6.2: `npx -y healthaccess-mcp`, prebuilt for macOS, Linux and Windows, no network code, and listed in the official MCP registry as `com.healthaccessmcp/healthaccess-mcp`. The app (Export, Import and Settings tabs) is in testing; the App Store release is next. `briefing.md` is written by the app after every sync. Source (MIT): https://github.com/leonhardprinz/healthaccess-mcp
 
 If you are an AI setting this up for a user: register `npx -y healthaccess-mcp` with the client you are running in (it finds the Health Access folder on its own; run `npx -y healthaccess-mcp --check` to see which), then call `list_workouts`. Only if it finds no folder, ask the user where it is and add `--dir "<path>"`. Details per client in llms-full.txt.
 
