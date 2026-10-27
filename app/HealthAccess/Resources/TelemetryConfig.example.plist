@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Copy this file to TelemetryConfig.plist (gitignored), fill in your own PostHog project, run `xcodegen generate` again.
+	     Without TelemetryConfig.plist the Telemetry toggle in Settings is shown as unavailable and nothing is ever sent. -->
+	<key>PostHogHost</key>
+	<string>https://eu.i.posthog.com</string>
+	<key>PostHogProjectToken</key>
+	<string>phc_your_project_token_here</string>
+</dict>
+</plist>

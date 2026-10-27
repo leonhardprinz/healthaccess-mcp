@@ -1,0 +1,14 @@
+{
+  "calls": 123,
+  "client": {
+    "name": "Claude Code",
+    "version": "2.1.0"
+  },
+  "first_seen": "2026-05-09T17:20:41Z",
+  "id": "9f3c1a7e5b2d4c80",
+  "last_seen": "2026-05-14T06:11:02Z",
+  "last_tool": "list_workouts",
+  "machine": "Alex's MacBook Pro",
+  "mcp_version": "0.2.0",
+  "schema": "healthaccess.client.v1"
+}

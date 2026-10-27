@@ -1,0 +1,14 @@
+{
+  "name": "healthaccess-mcp",
+  "displayName": "Health Access MCP",
+  "version": "0.6.2",
+  "description": "Apple Health and Apple Watch workouts for Claude, from files on your own computer. Reads the folder the Health Access iPhone app writes and puts workout plans back on the Watch. Eleven prompts that ask first, read second and write last.",
+  "author": {
+    "name": "Prinz Tech Consulting d.o.o.",
+    "email": "support@healthaccessmcp.com",
+    "url": "https://healthaccessmcp.com"
+  },
+  "homepage": "https://healthaccessmcp.com",
+  "license": "MIT",
+  "keywords": ["apple-health", "apple-watch", "healthkit", "workouts", "training", "sleep"]
+}

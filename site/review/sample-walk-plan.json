@@ -1,0 +1,50 @@
+{
+  "blocks": [
+    {
+      "repeat": 3,
+      "steps": [
+        {
+          "goal": {
+            "type": "time_s",
+            "value": 180
+          },
+          "kind": "work",
+          "label": "Brisk, can still talk",
+          "zone": 2
+        },
+        {
+          "goal": {
+            "type": "time_s",
+            "value": 120
+          },
+          "kind": "recovery",
+          "label": "Easy pace, relax shoulders"
+        }
+      ]
+    }
+  ],
+  "cooldown": {
+    "goal": {
+      "type": "time_s",
+      "value": 300
+    },
+    "label": "Slow, breathe out long",
+    "zone": 1
+  },
+  "created_at": "2026-10-27T13:00:00Z",
+  "created_by": "healthaccess-review-sample",
+  "id": "review-sample-walk",
+  "name": "Sample walk",
+  "notes": "A sample plan for trying the Import tab: 25 minutes of walking with three brisk parts.",
+  "schema": "healthaccess.plan.v1",
+  "scheduled_for": null,
+  "sport": "walk",
+  "warmup": {
+    "goal": {
+      "type": "time_s",
+      "value": 300
+    },
+    "label": "Easy, warm up",
+    "zone": 1
+  }
+}

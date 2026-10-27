@@ -1,0 +1,2015 @@
+{
+  "app_version": "0.4.0",
+  "generated": "2026-05-14T06:03:17Z",
+  "sdk": "iOS 27.1",
+  "types": {
+    "HKActivitySummaryTypeIdentifier": {
+      "authorized": null,
+      "exported_in": "days",
+      "first": "2026-02-13",
+      "has_data": true,
+      "kind": "activity_summary",
+      "last": "2026-05-14",
+      "samples_90d": 90
+    },
+    "HKCategoryTypeIdentifierAbdominalCramps": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierAcne": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierAppetiteChanges": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierAppleStandHour": {
+      "authorized": null,
+      "exported_in": "days",
+      "first": "2026-02-13",
+      "has_data": true,
+      "kind": "category",
+      "last": "2026-05-14",
+      "samples_90d": 1128
+    },
+    "HKCategoryTypeIdentifierAppleWalkingSteadinessEvent": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierAudioExposureEvent": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierBladderIncontinence": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierBleedingAfterMenopause": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierBleedingAfterPregnancy": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierBleedingDuringPregnancy": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierBloating": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierBreastPain": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierCervicalMucusQuality": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierChestTightnessOrPain": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierChills": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierConstipation": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierContraceptive": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierCoughing": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierDiarrhea": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierDizziness": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierDrySkin": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierEnvironmentalAudioExposureEvent": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierFainting": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierFatigue": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierFever": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierGeneralizedBodyAche": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierHairLoss": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierHandwashingEvent": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierHeadache": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierHeadphoneAudioExposureEvent": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierHeartburn": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierHighHeartRateEvent": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierHotFlashes": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierHypertensionEvent": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierInfrequentMenstrualCycles": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierIntermenstrualBleeding": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierIrregularHeartRhythmEvent": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierIrregularMenstrualCycles": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierLactation": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierLossOfSmell": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierLossOfTaste": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierLowCardioFitnessEvent": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierLowHeartRateEvent": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierLowerBackPain": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierMemoryLapse": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierMenopausalState": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierMenstrualFlow": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierMindfulSession": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierMoodChanges": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierNausea": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierNightSweats": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierOvulationTestResult": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierPelvicPain": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierPersistentIntermenstrualBleeding": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierPregnancy": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierPregnancyTestResult": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierProgesteroneTestResult": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierProlongedMenstrualPeriods": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierRapidPoundingOrFlutteringHeartbeat": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierRunnyNose": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierSexualActivity": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierShortnessOfBreath": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierSinusCongestion": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierSkippedHeartbeat": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierSleepAnalysis": {
+      "authorized": null,
+      "exported_in": "days",
+      "first": "2026-02-13",
+      "has_data": true,
+      "kind": "category",
+      "last": "2026-05-14",
+      "samples_90d": 2214
+    },
+    "HKCategoryTypeIdentifierSleepApneaEvent": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierSleepChanges": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierSoreThroat": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierToothbrushingEvent": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierVaginalDryness": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierVomiting": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCategoryTypeIdentifierWheezing": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "category",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCharacteristicTypeIdentifierActivityMoveMode": {
+      "authorized": null,
+      "exported_in": "profile",
+      "first": null,
+      "has_data": true,
+      "kind": "characteristic",
+      "last": null,
+      "samples_90d": null
+    },
+    "HKCharacteristicTypeIdentifierBiologicalSex": {
+      "authorized": null,
+      "exported_in": "profile",
+      "first": null,
+      "has_data": true,
+      "kind": "characteristic",
+      "last": null,
+      "samples_90d": null
+    },
+    "HKCharacteristicTypeIdentifierBloodType": {
+      "authorized": null,
+      "exported_in": "profile",
+      "first": null,
+      "has_data": true,
+      "kind": "characteristic",
+      "last": null,
+      "samples_90d": null
+    },
+    "HKCharacteristicTypeIdentifierDateOfBirth": {
+      "authorized": null,
+      "exported_in": "profile",
+      "first": null,
+      "has_data": true,
+      "kind": "characteristic",
+      "last": null,
+      "samples_90d": null
+    },
+    "HKCharacteristicTypeIdentifierFitzpatrickSkinType": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "characteristic",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCharacteristicTypeIdentifierWheelchairUse": {
+      "authorized": null,
+      "exported_in": "profile",
+      "first": null,
+      "has_data": true,
+      "kind": "characteristic",
+      "last": null,
+      "samples_90d": null
+    },
+    "HKClinicalTypeIdentifierAllergyRecord": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "clinical",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKClinicalTypeIdentifierClinicalNoteRecord": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "clinical",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKClinicalTypeIdentifierConditionRecord": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "clinical",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKClinicalTypeIdentifierCoverageRecord": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "clinical",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKClinicalTypeIdentifierImmunizationRecord": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "clinical",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKClinicalTypeIdentifierLabResultRecord": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "clinical",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKClinicalTypeIdentifierMedicationRecord": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "clinical",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKClinicalTypeIdentifierProcedureRecord": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "clinical",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKClinicalTypeIdentifierVitalSignRecord": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "clinical",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCorrelationTypeIdentifierBloodPressure": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "correlation",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKCorrelationTypeIdentifierFood": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "correlation",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKDataTypeIdentifierAudiogram": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "audiogram",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKDataTypeIdentifierElectrocardiogram": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "electrocardiogram",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKDataTypeIdentifierHeartbeatSeries": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "heartbeat_series",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKDataTypeIdentifierStateOfMind": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "state_of_mind",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKDataTypeIdentifierUserAnnotatedMedicationConcept": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "medication_concept",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKDocumentTypeIdentifierCDA": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "document",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKMedicationDoseEventTypeIdentifierMedicationDoseEvent": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "medication_dose_event",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierActiveEnergyBurned": {
+      "authorized": null,
+      "exported_in": "days",
+      "first": "2026-02-13",
+      "has_data": true,
+      "kind": "quantity",
+      "last": "2026-05-14",
+      "samples_90d": 61284
+    },
+    "HKQuantityTypeIdentifierAppleExerciseTime": {
+      "authorized": null,
+      "exported_in": "days",
+      "first": "2026-02-13",
+      "has_data": true,
+      "kind": "quantity",
+      "last": "2026-05-14",
+      "samples_90d": 4120
+    },
+    "HKQuantityTypeIdentifierAppleMoveTime": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierAppleSleepingBreathingDisturbances": {
+      "authorized": null,
+      "exported_in": "days",
+      "first": "2026-02-14",
+      "has_data": true,
+      "kind": "quantity",
+      "last": "2026-05-14",
+      "samples_90d": 84
+    },
+    "HKQuantityTypeIdentifierAppleSleepingWristTemperature": {
+      "authorized": null,
+      "exported_in": "days",
+      "first": "2026-02-14",
+      "has_data": true,
+      "kind": "quantity",
+      "last": "2026-05-14",
+      "samples_90d": 86
+    },
+    "HKQuantityTypeIdentifierAppleStandTime": {
+      "authorized": null,
+      "exported_in": "days",
+      "first": "2026-02-13",
+      "has_data": true,
+      "kind": "quantity",
+      "last": "2026-05-14",
+      "samples_90d": 7830
+    },
+    "HKQuantityTypeIdentifierAppleWalkingSteadiness": {
+      "authorized": null,
+      "exported_in": "days",
+      "first": "2026-02-16",
+      "has_data": true,
+      "kind": "quantity",
+      "last": "2026-05-14",
+      "samples_90d": 12
+    },
+    "HKQuantityTypeIdentifierAtrialFibrillationBurden": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierBasalBodyTemperature": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierBasalEnergyBurned": {
+      "authorized": null,
+      "exported_in": "days",
+      "first": "2026-02-13",
+      "has_data": true,
+      "kind": "quantity",
+      "last": "2026-05-14",
+      "samples_90d": 29412
+    },
+    "HKQuantityTypeIdentifierBloodAlcoholContent": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierBloodGlucose": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierBloodPressureDiastolic": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierBloodPressureSystolic": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierBodyFatPercentage": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierBodyMass": {
+      "authorized": null,
+      "exported_in": "days",
+      "first": "2026-02-15",
+      "has_data": true,
+      "kind": "quantity",
+      "last": "2026-05-14",
+      "samples_90d": 38
+    },
+    "HKQuantityTypeIdentifierBodyMassIndex": {
+      "authorized": null,
+      "exported_in": "days",
+      "first": "2026-02-15",
+      "has_data": true,
+      "kind": "quantity",
+      "last": "2026-05-14",
+      "samples_90d": 38
+    },
+    "HKQuantityTypeIdentifierBodyTemperature": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierCrossCountrySkiingSpeed": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierCyclingCadence": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierCyclingFunctionalThresholdPower": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierCyclingPower": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierCyclingSpeed": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietaryBiotin": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietaryCaffeine": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietaryCalcium": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietaryCarbohydrates": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietaryChloride": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietaryCholesterol": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietaryChromium": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietaryCopper": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietaryEnergyConsumed": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietaryFatMonounsaturated": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietaryFatPolyunsaturated": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietaryFatSaturated": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietaryFatTotal": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietaryFiber": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietaryFolate": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietaryIodine": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietaryIron": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietaryMagnesium": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietaryManganese": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietaryMolybdenum": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietaryNiacin": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietaryPantothenicAcid": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietaryPhosphorus": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietaryPotassium": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietaryProtein": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietaryRiboflavin": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietarySelenium": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietarySodium": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietarySugar": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietaryThiamin": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietaryVitaminA": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietaryVitaminB12": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietaryVitaminB6": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietaryVitaminC": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietaryVitaminD": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietaryVitaminE": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietaryVitaminK": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietaryWater": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDietaryZinc": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDistanceCrossCountrySkiing": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDistanceCycling": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDistanceDownhillSnowSports": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDistancePaddleSports": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDistanceRowing": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDistanceSkatingSports": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierDistanceSwimming": {
+      "authorized": null,
+      "exported_in": "workouts",
+      "first": "2026-02-17",
+      "has_data": true,
+      "kind": "quantity",
+      "last": "2026-05-14",
+      "samples_90d": 1206
+    },
+    "HKQuantityTypeIdentifierDistanceWalkingRunning": {
+      "authorized": null,
+      "exported_in": "days",
+      "first": "2026-02-13",
+      "has_data": true,
+      "kind": "quantity",
+      "last": "2026-05-14",
+      "samples_90d": 17902
+    },
+    "HKQuantityTypeIdentifierDistanceWheelchair": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierElectrodermalActivity": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierEnvironmentalAudioExposure": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierEnvironmentalSoundReduction": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierEstimatedWorkoutEffortScore": {
+      "authorized": null,
+      "exported_in": "workouts",
+      "first": "2026-02-17",
+      "has_data": true,
+      "kind": "quantity",
+      "last": "2026-05-14",
+      "samples_90d": 23
+    },
+    "HKQuantityTypeIdentifierFlightsClimbed": {
+      "authorized": null,
+      "exported_in": "days",
+      "first": "2026-02-13",
+      "has_data": true,
+      "kind": "quantity",
+      "last": "2026-05-14",
+      "samples_90d": 1104
+    },
+    "HKQuantityTypeIdentifierForcedExpiratoryVolume1": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierForcedVitalCapacity": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierHeadphoneAudioExposure": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierHeartRate": {
+      "authorized": null,
+      "exported_in": "workouts",
+      "first": "2026-02-13",
+      "has_data": true,
+      "kind": "quantity",
+      "last": "2026-05-14",
+      "samples_90d": 84210
+    },
+    "HKQuantityTypeIdentifierHeartRateRecoveryOneMinute": {
+      "authorized": null,
+      "exported_in": "workouts",
+      "first": "2026-02-17",
+      "has_data": true,
+      "kind": "quantity",
+      "last": "2026-05-14",
+      "samples_90d": 23
+    },
+    "HKQuantityTypeIdentifierHeartRateVariabilityRMSSD": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierHeartRateVariabilitySDNN": {
+      "authorized": null,
+      "exported_in": "days",
+      "first": "2026-02-13",
+      "has_data": true,
+      "kind": "quantity",
+      "last": "2026-05-14",
+      "samples_90d": 412
+    },
+    "HKQuantityTypeIdentifierHeight": {
+      "authorized": null,
+      "exported_in": "days",
+      "first": "2026-02-15",
+      "has_data": true,
+      "kind": "quantity",
+      "last": "2026-05-14",
+      "samples_90d": 1
+    },
+    "HKQuantityTypeIdentifierInhalerUsage": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierInsulinDelivery": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierLeanBodyMass": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierNikeFuel": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierNumberOfAlcoholicBeverages": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierNumberOfTimesFallen": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierOxygenSaturation": {
+      "authorized": null,
+      "exported_in": "days",
+      "first": "2026-02-13",
+      "has_data": true,
+      "kind": "quantity",
+      "last": "2026-05-14",
+      "samples_90d": 1230
+    },
+    "HKQuantityTypeIdentifierPaddleSportsSpeed": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierPeakExpiratoryFlowRate": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierPeripheralPerfusionIndex": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierPhysicalEffort": {
+      "authorized": null,
+      "exported_in": "days",
+      "first": "2026-02-13",
+      "has_data": true,
+      "kind": "quantity",
+      "last": "2026-05-14",
+      "samples_90d": 6420
+    },
+    "HKQuantityTypeIdentifierPushCount": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierRespiratoryRate": {
+      "authorized": null,
+      "exported_in": "days",
+      "first": "2026-02-14",
+      "has_data": true,
+      "kind": "quantity",
+      "last": "2026-05-14",
+      "samples_90d": 2870
+    },
+    "HKQuantityTypeIdentifierRestingHeartRate": {
+      "authorized": null,
+      "exported_in": "days",
+      "first": "2026-02-13",
+      "has_data": true,
+      "kind": "quantity",
+      "last": "2026-05-14",
+      "samples_90d": 90
+    },
+    "HKQuantityTypeIdentifierRowingSpeed": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierRunningGroundContactTime": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierRunningPower": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierRunningSpeed": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierRunningStrideLength": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierRunningVerticalOscillation": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierSixMinuteWalkTestDistance": {
+      "authorized": null,
+      "exported_in": "days",
+      "first": "2026-02-16",
+      "has_data": true,
+      "kind": "quantity",
+      "last": "2026-05-14",
+      "samples_90d": 13
+    },
+    "HKQuantityTypeIdentifierStairAscentSpeed": {
+      "authorized": null,
+      "exported_in": "days",
+      "first": "2026-02-13",
+      "has_data": true,
+      "kind": "quantity",
+      "last": "2026-05-14",
+      "samples_90d": 232
+    },
+    "HKQuantityTypeIdentifierStairDescentSpeed": {
+      "authorized": null,
+      "exported_in": "days",
+      "first": "2026-02-13",
+      "has_data": true,
+      "kind": "quantity",
+      "last": "2026-05-14",
+      "samples_90d": 198
+    },
+    "HKQuantityTypeIdentifierStepCount": {
+      "authorized": null,
+      "exported_in": "days",
+      "first": "2026-02-13",
+      "has_data": true,
+      "kind": "quantity",
+      "last": "2026-05-14",
+      "samples_90d": 11540
+    },
+    "HKQuantityTypeIdentifierSwimmingStrokeCount": {
+      "authorized": null,
+      "exported_in": "workouts",
+      "first": "2026-02-17",
+      "has_data": true,
+      "kind": "quantity",
+      "last": "2026-05-14",
+      "samples_90d": 1118
+    },
+    "HKQuantityTypeIdentifierTimeInDaylight": {
+      "authorized": null,
+      "exported_in": "days",
+      "first": "2026-02-13",
+      "has_data": true,
+      "kind": "quantity",
+      "last": "2026-05-14",
+      "samples_90d": 2210
+    },
+    "HKQuantityTypeIdentifierUVExposure": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierUnderwaterDepth": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierVO2Max": {
+      "authorized": null,
+      "exported_in": "days",
+      "first": "2026-02-14",
+      "has_data": true,
+      "kind": "quantity",
+      "last": "2026-05-14",
+      "samples_90d": 24
+    },
+    "HKQuantityTypeIdentifierWaistCircumference": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierWalkingAsymmetryPercentage": {
+      "authorized": null,
+      "exported_in": "days",
+      "first": "2026-02-13",
+      "has_data": true,
+      "kind": "quantity",
+      "last": "2026-05-14",
+      "samples_90d": 610
+    },
+    "HKQuantityTypeIdentifierWalkingDoubleSupportPercentage": {
+      "authorized": null,
+      "exported_in": "days",
+      "first": "2026-02-13",
+      "has_data": true,
+      "kind": "quantity",
+      "last": "2026-05-14",
+      "samples_90d": 1470
+    },
+    "HKQuantityTypeIdentifierWalkingHeartRateAverage": {
+      "authorized": null,
+      "exported_in": "days",
+      "first": "2026-02-13",
+      "has_data": true,
+      "kind": "quantity",
+      "last": "2026-05-14",
+      "samples_90d": 89
+    },
+    "HKQuantityTypeIdentifierWalkingSpeed": {
+      "authorized": null,
+      "exported_in": "days",
+      "first": "2026-02-13",
+      "has_data": true,
+      "kind": "quantity",
+      "last": "2026-05-14",
+      "samples_90d": 1480
+    },
+    "HKQuantityTypeIdentifierWalkingStepLength": {
+      "authorized": null,
+      "exported_in": "days",
+      "first": "2026-02-13",
+      "has_data": true,
+      "kind": "quantity",
+      "last": "2026-05-14",
+      "samples_90d": 1480
+    },
+    "HKQuantityTypeIdentifierWaterTemperature": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "quantity",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKQuantityTypeIdentifierWorkoutEffortScore": {
+      "authorized": null,
+      "exported_in": "workouts",
+      "first": "2026-02-17",
+      "has_data": true,
+      "kind": "quantity",
+      "last": "2026-05-14",
+      "samples_90d": 21
+    },
+    "HKScoredAssessmentTypeIdentifierGAD7": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "scored_assessment",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKScoredAssessmentTypeIdentifierPHQ9": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "scored_assessment",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKVisionPrescriptionTypeIdentifier": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "vision_prescription",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKWorkoutRouteTypeIdentifier": {
+      "authorized": null,
+      "exported_in": "none",
+      "first": null,
+      "has_data": false,
+      "kind": "workout_route",
+      "last": null,
+      "samples_90d": 0
+    },
+    "HKWorkoutTypeIdentifier": {
+      "authorized": null,
+      "exported_in": "workouts",
+      "first": "2026-02-17",
+      "has_data": true,
+      "kind": "workout",
+      "last": "2026-05-14",
+      "samples_90d": 23
+    }
+  },
+  "unknown_types_with_data": []
+}

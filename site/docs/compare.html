@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Health Access MCP compared with Health Auto Export, HealthPipe, Health MCP: Private Sync and Health Bridge for AI</title>
+<meta name="description" content="Facts only: where the data lives, account or not, formats, MCP, plans back to the Watch, open source, price. Health Access MCP next to Health Auto Export, HealthPipe, Health MCP: Private Sync, Health Bridge for AI and Apple's own export.">
+<link rel="canonical" href="https://healthaccessmcp.com/docs/compare">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Health Access MCP">
+<meta property="og:title" content="Compared with the others">
+<meta property="og:description" content="Where the data lives, account or not, MCP, plans back to the Watch, open source, price. Facts only, unknowns marked.">
+<meta property="og:url" content="https://healthaccessmcp.com/docs/compare">
+<meta property="og:image" content="https://healthaccessmcp.com/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body class="doc">
+<div class="wrap">
+<nav class="top">
+  <a class="brand" href="/"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0D366B"/><g fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" transform="translate(9.6 9.6) scale(0.7)"><path d="M6 34 H20 L26 20 L34 48 L40 34 H52"/><path d="M46 26 L56 34 L46 42"/></g></svg>Health Access <span>MCP</span></a>
+  <a href="/docs/claude-code">Install</a>
+  <a href="/docs/files">Files</a>
+  <a href="/docs/plans">Plans</a>
+  <a href="/docs/prompts">Ideas for your AI</a>
+  <a href="/docs/privacy">Privacy</a>
+  <a href="/docs/compare" aria-current="page">Compare</a>
+  <a href="/llms.txt">llms.txt</a>
+  <a href="/support">Support</a>
+</nav>
+<p class="crumbs"><a href="/">Health Access MCP</a> / About / Compare</p>
+
+<header class="hero">
+  <span class="label">About</span>
+  <h1>Compared with the others</h1>
+  <p class="answer">Five ways to get Apple Health data to an AI, plus Apple's own export. Facts only, checked against each product's own listing or site on 2026-10-25. What we could not confirm is marked, not guessed. The differences that matter: where your data lives, whether you need an account, and whether anything goes back to the Watch.</p>
+</header>
+
+<main>
+<div class="tablewrap">
+<table>
+  <thead><tr><th>Product</th><th>Where your data lives</th><th>Account</th><th>What the AI gets</th><th>MCP</th><th>Plans back to the Watch</th><th>Open source</th><th>Price</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><b>Health Access MCP</b></td>
+      <td>A folder you choose on your own storage (iCloud Drive, Dropbox, Google Drive, OneDrive, Proton Drive, a NAS, local)</td>
+      <td>None</td>
+      <td>JSON per workout and per day, index, briefing.md, catalog; a command line</td>
+      <td>Yes, local over stdio, thirteen tools</td>
+      <td>Yes: custom workouts with step names via WorkoutKit (pool swim, indoor row)</td>
+      <td>Yes, MIT (server and CLI)</td>
+      <td>Free. An optional tip in the app removes its support card. App Store soon</td>
+    </tr>
+    <tr>
+      <td>Health Auto Export</td>
+      <td>Destinations you pick: iCloud Drive, Google Drive, Dropbox, REST API, Home Assistant, MQTT, iOS Calendar, email; a Mac companion app</td>
+      <td>None</td>
+      <td>CSV, JSON, Markdown, GPX; 150+ metrics</td>
+      <td>Yes, a built-in read-only server queried over your network, per its listing</td>
+      <td>No; its MCP server is read-only per its listing</td>
+      <td>No</td>
+      <td>Free download; Basic $2.99 once; Premium $1.99 a month, $6.99 a year or $24.99 once (US App Store prices)</td>
+    </tr>
+    <tr>
+      <td>HealthPipe</td>
+      <td>Their servers in Germany</td>
+      <td>Yes, Sign in with Apple</td>
+      <td>The categories you choose, through their service</td>
+      <td>Yes, remote: you connect an MCP-capable assistant to their service</td>
+      <td>No; read-only by design</td>
+      <td class="unk">Not stated</td>
+      <td>Free during the TestFlight beta; a subscription is announced to follow</td>
+    </tr>
+    <tr>
+      <td>Health MCP: Private Sync</td>
+      <td>Their encrypted cloud with a trusted execution environment (TEE), per its App Store listing</td>
+      <td>Yes</td>
+      <td class="unk">Not stated in detail</td>
+      <td>Yes, remote</td>
+      <td class="unk">Not found in its listing</td>
+      <td class="unk">Not stated</td>
+      <td>Free (App Store, seller Iddo Gino, released September 2026)</td>
+    </tr>
+    <tr>
+      <td>Health Bridge for AI (Apple Health AI Bridge)</td>
+      <td>A receiver you run on your own Mac or Linux machine, SQLite on disk; sync away from home needs your own private HTTPS route</td>
+      <td>None</td>
+      <td>Nine read-only MCP tools (time series, workouts, sleep, daily summary, sources) and a command line</td>
+      <td>Yes, local, read-only</td>
+      <td>No; read-only by design</td>
+      <td>Yes (license not checked)</td>
+      <td>App free, per its listing. iOS 18 or later</td>
+    </tr>
+    <tr>
+      <td>Apple's own export</td>
+      <td>A zip file you export by hand from the Health app</td>
+      <td>None</td>
+      <td>One XML file with your whole history, every time</td>
+      <td>No</td>
+      <td>No</td>
+      <td>No</td>
+      <td>Free</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h2>How to read the table</h2>
+<p>Three of the five products put your data on a computer you own or chose: Health Access MCP (a folder), Health Auto Export (destinations you pick) and Health Bridge for AI (a receiver you run). Two put it on theirs: HealthPipe and Health MCP: Private Sync (encrypted and in a trusted execution environment, but theirs). Only Health Access MCP writes anything back to the Watch. That is the one row that is not a matter of preference; everything else depends on what you want.</p>
+
+<h2>Notes per product</h2>
+<h3>Health Auto Export</h3>
+<p>The established one, by Lybron Sobers, on the App Store since 2016. It exports 150 or more metrics as CSV, JSON, Markdown or GPX to many destinations, has automations and a Mac companion, and its listing now advertises a built-in MCP server, read-only, queried over your network. If you want everything Apple Health holds in a spreadsheet, it is the broader tool. Health Access MCP is narrower on purpose: workouts with every interval named, daily vitals, a one-page briefing, and the way back to the Watch. In this category the failure that matters most is an export that silently did not happen, which is why Health Access shows a sync log and says it is waiting for the phone to be unlocked instead of pretending.</p>
+<h3>HealthPipe</h3>
+<p>An iPhone app that syncs the Health categories you choose to an account on their servers in Germany, where MCP-capable assistants you approve can read them. Read-only. Free while in TestFlight, with a subscription announced. The honest trade: no Mac and no folder to manage, in exchange for a copy of your health data on someone else's server.</p>
+<h3>Health MCP: Private Sync</h3>
+<p>On the App Store since September 2026, seller Iddo Gino, free. Your Health data goes to their encrypted cloud and is processed in a trusted execution environment, and a remote MCP server serves it to the assistant you connect. The trade is the same as HealthPipe's: nothing to run on your own computer, in exchange for a copy of your health data on a server that is not yours, even if it is encrypted and attested. Nothing goes back to the Watch.</p>
+<h3>Health Bridge for AI</h3>
+<p>Open source, by roian6, also known as Apple Health AI Bridge: an iPhone companion sends your records to a receiver you run on your own computer, which stores them in SQLite and serves nine read-only MCP tools with source attribution. Needs iOS 18. The closest to Health Access MCP in spirit, and the better choice if you want time series across many Health types rather than workouts in depth. It does not write to the Watch.</p>
+<h3>Apple's own export</h3>
+<p>Health app, your picture, "Export All Health Data": a zip with one XML file holding everything, every time. No automation, no per-workout files, nothing an AI reads well without a parser. It is the fallback everyone has, and the reason the other five exist.</p>
+
+<h2>What we could not confirm</h2>
+<ul>
+  <li>Health MCP: Private Sync: what exactly the AI gets, and whether its code is open. Its listing does not say.</li>
+  <li>Health Auto Export's MCP server is described as read-only in its listing, so it does not write workouts to the Watch; we did not test it.</li>
+  <li>Whether HealthPipe's code is open. Its site does not say.</li>
+  <li>Health Bridge for AI's license. The project calls itself open source; we did not check the license file.</li>
+  <li>Prices change and differ by country; the Health Auto Export figures are the US App Store on 2026-10-25.</li>
+</ul>
+<p class="small">Sources: each product's App Store listing or website, read on 2026-10-25. Corrections welcome at support@healthaccessmcp.com; a row changes the day a fact does.</p>
+
+<div class="next"><b>Next:</b> <a href="/docs/privacy">Where your data goes with Health Access</a> <a href="/docs/plans">Plans back to the Watch</a> <a href="/">Start</a></div>
+</main>
+
+<footer class="site">
+  <div class="cols">
+    <div><h4>Connect an AI</h4><ul><li><a href="/docs/claude-code">Claude Code</a></li><li><a href="/docs/claude-desktop">Claude Desktop</a></li><li><a href="/docs/cursor">Cursor</a></li><li><a href="/docs/chatgpt">ChatGPT</a></li><li><a href="/docs/local-models">Local models</a></li></ul></div>
+    <div><h4>Reference</h4><ul><li><a href="/docs/files">The folder is the API</a></li><li><a href="/docs/plans">Plans and Put on Watch</a></li><li><a href="/docs/prompts">Ideas for your AI</a></li><li><a href="/ref/mcp.md">Tool reference</a></li><li><a href="/ref/schema.md">Data contract</a></li></ul></div>
+    <div><h4>For AIs</h4><ul><li><a href="/llms.txt">llms.txt</a></li><li><a href="/llms-full.txt">llms-full.txt</a></li><li><a href="https://www.npmjs.com/package/healthaccess-mcp">npm package</a></li></ul></div>
+    <div><h4>About</h4><ul><li><a href="/docs/privacy">Privacy in plain words</a></li><li><a href="/privacy-policy">Privacy policy</a></li><li><a href="/support">Support</a></li><li><a href="/docs/compare">Compared with the others</a></li></ul></div>
+  </div>
+  <p class="fine">Health Access MCP is made by Prinz Technology Consultancy, svetovanje na področju informacijskih tehnologij d.o.o. (Prinz Tech Consulting), Dunajska cesta 33, 1000 Ljubljana, Slovenia. Registration number 7326106000, VAT ID SI86067494, contact@prinz-tc.com. The MCP server and the command line are under the MIT licence. Apple, Apple Watch, Apple Health and HealthKit are trademarks of Apple Inc.; this project is not affiliated with Apple.</p>
+</footer>
+</div>
+</body>
+</html>

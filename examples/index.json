@@ -1,0 +1,32 @@
+{
+  "schema": "healthaccess.index.v1",
+  "updated": "2026-05-14T06:03:17Z",
+  "workouts": [
+    {
+      "activity": "pool_swim",
+      "avg_hr": 129,
+      "distance_m": 1200,
+      "duration_s": 2166,
+      "effort": 6,
+      "effort_source": "apple",
+      "file": "workouts/2026-05-14_0712_PoolSwim_7A1C3E90.json",
+      "id": "7A1C3E90-5B2D-4F61-9C8E-2A7D40B6E1F3",
+      "plan_name": "S12",
+      "source": "Apple Watch",
+      "start": "2026-05-14T05:12:04Z"
+    },
+    {
+      "activity": "indoor_row",
+      "avg_hr": 137,
+      "distance_m": null,
+      "duration_s": 1680,
+      "effort": 7,
+      "effort_source": "apple",
+      "file": "workouts/2026-05-12_0630_IndoorRow_3F8B2D41.json",
+      "id": "3F8B2D41-9E6C-4A17-B2D8-5C3E7F9A1B04",
+      "plan_name": "R4",
+      "source": "Apple Watch",
+      "start": "2026-05-12T04:30:11Z"
+    }
+  ]
+}

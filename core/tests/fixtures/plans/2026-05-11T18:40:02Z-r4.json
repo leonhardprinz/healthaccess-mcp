@@ -1,0 +1,52 @@
+{
+  "blocks": [
+    {
+      "repeat": 4,
+      "steps": [
+        {
+          "goal": {
+            "type": "time_s",
+            "value": 240
+          },
+          "kind": "work",
+          "label": "24 spm, pull harder if HR under 147",
+          "zone": 3
+        },
+        {
+          "goal": {
+            "type": "time_s",
+            "value": 60
+          },
+          "kind": "recovery",
+          "label": "Paddle, 16 spm",
+          "zone": 1
+        }
+      ]
+    }
+  ],
+  "cooldown": {
+    "goal": {
+      "type": "time_s",
+      "value": 300
+    },
+    "label": "Paddle it out, drop the rate",
+    "zone": 1
+  },
+  "created_at": "2026-05-11T18:40:02Z",
+  "created_by": "claude-code",
+  "id": "2026-05-11T18:40:02Z-r4",
+  "name": "R4",
+  "notes": "Four steady pieces at 24 spm with a minute of paddling between them. The Watch reads low on the rower, so go by rate and effort; heart rate is a hint. Target effort 6 to 7.",
+  "pool_length_m": null,
+  "scheduled_for": "2026-05-12T04:30:00Z",
+  "schema": "healthaccess.plan.v1",
+  "sport": "indoor_row",
+  "warmup": {
+    "goal": {
+      "type": "time_s",
+      "value": 180
+    },
+    "label": "Easy, 18 spm, find the rhythm",
+    "zone": 1
+  }
+}

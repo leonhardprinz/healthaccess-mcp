@@ -1,0 +1,27 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "com.healthaccessmcp/healthaccess-mcp",
+  "title": "Health Access MCP",
+  "description": "Apple Health and Apple Watch workouts for your AI, from local files. Plans go back to the Watch.",
+  "websiteUrl": "https://healthaccessmcp.com",
+  "version": "0.6.2",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "healthaccess-mcp",
+      "version": "0.6.2",
+      "transport": {
+        "type": "stdio"
+      },
+      "packageArguments": [
+        {
+          "type": "named",
+          "name": "--dir",
+          "description": "The Health Access folder. Optional: without it the server finds the folder in iCloud Drive, the other file providers or ~/Documents.",
+          "isRequired": false,
+          "format": "filepath"
+        }
+      ]
+    }
+  ]
+}

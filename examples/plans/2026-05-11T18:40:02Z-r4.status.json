@@ -1,0 +1,9 @@
+{
+  "at": "2026-05-11T18:41:20Z",
+  "error": null,
+  "method": "schedule",
+  "plan_id": "2026-05-11T18:40:02Z-r4",
+  "scheduled_for": "2026-05-12T04:30:00Z",
+  "state": "scheduled",
+  "workoutkit_id": "8B1F6C3A-2D4E-4F90-A7B3-6E5D4C3B2A19"
+}

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plans and Put on Watch: how an AI-written workout gets onto your Apple Watch</title>
+<meta name="description" content="The Health Access plan format (healthaccess.plan.v1), the validation rules, a full example, and the flow from push_plan to a custom workout with step names on your Apple Watch.">
+<link rel="canonical" href="https://healthaccessmcp.com/docs/plans">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Health Access MCP">
+<meta property="og:title" content="Plans and Put on Watch">
+<meta property="og:description" content="The plan format, the rules, a full example, and the flow from push_plan to a custom workout on your Apple Watch.">
+<meta property="og:url" content="https://healthaccessmcp.com/docs/plans">
+<meta property="og:image" content="https://healthaccessmcp.com/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body class="doc">
+<div class="wrap">
+<nav class="top">
+  <a class="brand" href="/"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0D366B"/><g fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" transform="translate(9.6 9.6) scale(0.7)"><path d="M6 34 H20 L26 20 L34 48 L40 34 H52"/><path d="M46 26 L56 34 L46 42"/></g></svg>Health Access <span>MCP</span></a>
+  <a href="/docs/claude-code">Install</a>
+  <a href="/docs/files">Files</a>
+  <a href="/docs/plans" aria-current="page">Plans</a>
+  <a href="/docs/prompts">Ideas for your AI</a>
+  <a href="/docs/privacy">Privacy</a>
+  <a href="/docs/compare">Compare</a>
+  <a href="/llms.txt">llms.txt</a>
+  <a href="/support">Support</a>
+</nav>
+<p class="crumbs"><a href="/">Health Access MCP</a> / Reference / Plans</p>
+
+<header class="hero">
+  <span class="label">Reference</span>
+  <h1>Plans and "Put on Watch"</h1>
+  <p class="answer">Your AI writes one small JSON file. The app turns it into a custom workout with the step names on your wrist and puts it on the Watch, one tap. When you swim it, the exported session comes back with those names on every interval. This page is the format, the rules and the flow.</p>
+</header>
+
+<main>
+<h2>The flow</h2>
+<ol>
+  <li><b>Your AI calls <code>push_plan</code></b> with the plan below (or writes the file itself, or you run <code>healthaccess plan push session.json</code>). The server validates it, fills <code>id</code>, <code>created_at</code> and <code>schema</code>, and writes <code>plans/&lt;id&gt;.json</code>. The id is the UTC time plus the slug of the name: <code>2026-05-13T19:02:11Z-s12</code>.</li>
+  <li><b>The folder syncs to the phone.</b> The app scans <code>plans/</code> on launch, when it comes to the foreground and after every export, so the plan shows up in the app's <b>Import</b> tab as "Your AI wrote S27", with the day and time it will go onto the Watch. If the app was not in front, you get a notification.</li>
+  <li><b>It goes onto the Watch.</b> WorkoutKit schedules it in the Watch's Workout app, under Scheduled, for the plan's <code>scheduled_for</code>; a plan without a time (or whose time has passed) gets the next morning at 10:00. The app checks the scheduler afterwards, so the status is a fact. Two ways:
+    <ul>
+      <li><b>One tap</b> (the default): "Put on Watch" on the plan, then a confirmation that names the day and time.</li>
+      <li><b>Automatically</b>: with "Put new plans on my Watch automatically" switched on in the Import tab, the app does it on its own the next time it runs or iOS wakes it, usually within a few hours, and sends a notification per plan. iOS does not wake apps the second a file lands in iCloud Drive, so this is not instant.</li>
+    </ul>
+    "Remove from Watch" takes a scheduled plan off again and marks it <code>cancelled</code>. "Preview on Watch" under See parts opens Apple's sheet instead, which installs a plain custom workout without a date and does not report back (<code>method: preview</code>). Apple Fitness+ programs stay Apple's; plans appear in the Workout app.</li>
+  <li><b>The app writes <code>plans/&lt;id&gt;.status.json</code></b>: <code>scheduled</code>, <code>failed</code> (with the error text) or <code>cancelled</code>. Your AI reads it with <code>get_plan_status</code>; until the file exists the state is <code>pending</code>.</li>
+  <li><b>You do the session.</b> The Watch shows each step's label. HealthKit drops the labels when it saves the workout, but it keeps the WorkoutKit id, so the exported file gets an exact <code>plan_ref</code> and every step gets its <code>label</code> back from the plan.</li>
+</ol>
+
+<h2>The format</h2>
+<pre>{
+  "name": "S27",                         <span class="c"># shown in the app and on the Watch, 40 characters at most</span>
+  "sport": "pool_swim",                  <span class="c"># run, cycle, walk, pool_swim, indoor_row, ... (list below)</span>
+  "pool_length_m": 50,                   <span class="c"># a reminder for you; the Watch keeps its own setting</span>
+  "warmup":   {"goal": {"type": "time_s", "value": 120}, "zone": 1},
+  "blocks": [
+    {"repeat": 4, "steps": [
+      {"kind": "work",     "goal": {"type": "distance_m", "value": 50}, "zone": 1, "label": "FR easy, long strokes"},
+      {"kind": "recovery", "goal": {"type": "time_s", "value": 30}}
+    ]}
+  ],
+  "cooldown": {"goal": {"type": "distance_m", "value": 100}, "zone": 1},
+  "notes": "what this session is for, shown in the app",
+  "scheduled_for": "2026-10-27T07:30:00Z" <span class="c"># optional; also used to match the finished workout</span>
+}</pre>
+<h3>Rules the server checks</h3>
+<ul>
+  <li><code>sport</code> is one of <code>run</code>, <code>indoor_run</code>, <code>walk</code>, <code>hike</code>, <code>cycle</code>, <code>indoor_cycle</code>, <code>pool_swim</code>, <code>open_water_swim</code>, <code>indoor_row</code>, <code>hiit</code> or <code>elliptical</code>. <code>hiit</code> and <code>elliptical</code> take time goals only.</li>
+  <li><code>name</code> is not empty and at most 40 characters.</li>
+  <li>At least one block. <code>repeat</code> from 1 to 99, each block with at least one step.</li>
+  <li><code>goal.type</code> is <code>time_s</code> or <code>distance_m</code>, with a positive value.</li>
+  <li><code>zone</code>, when given, is 1 to 5. These are the Watch's own heart-rate zones; the Watch alerts when you leave the zone.</li>
+  <li><code>label</code> at most 40 characters. Write it as an instruction you can read on the wrist mid-length: "KICK on back, no board, hips up". The app truncates longer labels and logs it.</li>
+  <li><code>kind</code> is <code>work</code> or <code>recovery</code>. Rests are real rests.</li>
+  <li>Every violation is reported in one message, so the AI can fix them all at once.</li>
+</ul>
+
+<h2>A full example</h2>
+<p>The plan behind the example swim on the <a href="/docs/files">files page</a>, <code>plans/2026-05-13T19:02:11Z-s12.json</code> in the repository's <a href="/examples/README.md">synthetic example folder</a>: 1,200 m in six parts, about 36 minutes, as <code>push_plan</code> wrote it.</p>
+<pre>{
+  "schema": "healthaccess.plan.v1",
+  "id": "2026-05-13T19:02:11Z-s12",
+  "name": "S12",
+  "sport": "pool_swim",
+  "pool_length_m": 50,
+  "warmup": {"goal": {"type": "distance_m", "value": 200}, "zone": 1, "label": "FR easy, find your breathing"},
+  "blocks": [
+    {"repeat": 3, "steps": [
+      {"kind": "work", "goal": {"type": "distance_m", "value": 50}, "zone": 1, "label": "DRILL 6-3-6: 6 kicks side, 3 strokes"},
+      {"kind": "work", "goal": {"type": "distance_m", "value": 50}, "zone": 1, "label": "FR easy, long strokes"},
+      {"kind": "recovery", "goal": {"type": "time_s", "value": 30}}
+    ]},
+    {"repeat": 4, "steps": [
+      {"kind": "work", "goal": {"type": "distance_m", "value": 100}, "zone": 2, "label": "FR 100 steady, breathe every 3"},
+      {"kind": "recovery", "goal": {"type": "time_s", "value": 40}}
+    ]},
+    {"repeat": 2, "steps": [
+      {"kind": "work", "goal": {"type": "time_s", "value": 120}, "zone": 1, "label": "KICK on back, no board, hips up"},
+      {"kind": "recovery", "goal": {"type": "time_s", "value": 45}}
+    ]},
+    {"repeat": 1, "steps": [
+      {"kind": "work", "goal": {"type": "distance_m", "value": 100}, "zone": 2, "label": "FR 100, carry the drill into it"}
+    ]}
+  ],
+  "cooldown": {"goal": {"type": "distance_m", "value": 100}, "zone": 1, "label": "Easy, any stroke, long exhale"},
+  "notes": "Technique week 2. Short drill reps, then four steady 100s to carry the feel over. Kick on back is for the hips, not for speed. Target effort 5 to 6.",
+  "created_by": "claude-code",
+  "created_at": "2026-05-13T19:02:11Z",
+  "scheduled_for": "2026-05-14T05:00:00Z"
+}</pre>
+<p>The <a href="/docs/prompts">swim idea</a> usually puts a two-minute time step first: the athlete starts the workout in the shower, so the Watch is already in swim mode at the pool edge and no length is lost to fumbling with a wet screen. This plan warms up over 200 m instead; both work.</p>
+
+<h2>What came back</h2>
+<p>The app's answer, <code>plans/2026-05-13T19:02:11Z-s12.status.json</code>, after WorkoutKit scheduled it for the next morning (<code>method: schedule</code>; a plan installed through Apple's sheet says <code>preview</code> and has no <code>scheduled_for</code>):</p>
+<pre>{
+  "plan_id": "2026-05-13T19:02:11Z-s12",
+  "state": "scheduled",
+  "at": "2026-05-13T19:04:40Z",
+  "method": "schedule",
+  "workoutkit_id": "D4E7A2C1-6F3B-4E8A-9B5C-1A2F3E4D5C6B",
+  "scheduled_for": "2026-05-14T05:00:00Z",
+  "error": null
+}</pre>
+<p><code>workoutkit_id</code> is what links the finished swim back to this plan: the exported session on the files page carries <code>plan_ref</code> S12 and every step has its label back. <code>get_plan_status</code> returns the same fields; <code>list_plans</code> returns them for every plan in the folder, with planned distance and time.</p>
+
+<h2>Limits, all Apple's</h2>
+<ul>
+  <li><b>Pool length</b> cannot be set from a plan. WorkoutKit has no parameter for it; the Watch uses its own setting. The app shows <code>pool_length_m</code> as a reminder.</li>
+  <li><b>Step names on the Watch</b> need iOS 18. On iOS 17 the workout installs without labels, and the app logs it.</li>
+  <li><b>Labels</b> longer than 40 characters are cut.</li>
+  <li><b>Zone alerts</b> an activity does not support are dropped and logged.</li>
+  <li><b>Sports</b>: pool swim and indoor rowing today. Running and cycling plans are a question of adding goal types and testing, not of the format.</li>
+</ul>
+
+<div class="next"><b>Next:</b> <a href="/docs/prompts">Ideas for your AI</a> <a href="/docs/files">What is in the folder</a> <a href="/ref/mcp.md">push_plan in the tool reference</a></div>
+</main>
+
+<footer class="site">
+  <div class="cols">
+    <div><h4>Connect an AI</h4><ul><li><a href="/docs/claude-code">Claude Code</a></li><li><a href="/docs/claude-desktop">Claude Desktop</a></li><li><a href="/docs/cursor">Cursor</a></li><li><a href="/docs/chatgpt">ChatGPT</a></li><li><a href="/docs/local-models">Local models</a></li></ul></div>
+    <div><h4>Reference</h4><ul><li><a href="/docs/files">The folder is the API</a></li><li><a href="/docs/plans">Plans and Put on Watch</a></li><li><a href="/docs/prompts">Ideas for your AI</a></li><li><a href="/ref/mcp.md">Tool reference</a></li><li><a href="/ref/schema.md">Data contract</a></li></ul></div>
+    <div><h4>For AIs</h4><ul><li><a href="/llms.txt">llms.txt</a></li><li><a href="/llms-full.txt">llms-full.txt</a></li><li><a href="https://www.npmjs.com/package/healthaccess-mcp">npm package</a></li></ul></div>
+    <div><h4>About</h4><ul><li><a href="/docs/privacy">Privacy in plain words</a></li><li><a href="/privacy-policy">Privacy policy</a></li><li><a href="/support">Support</a></li><li><a href="/docs/compare">Compared with the others</a></li></ul></div>
+  </div>
+  <p class="fine">Health Access MCP is made by Prinz Technology Consultancy, svetovanje na področju informacijskih tehnologij d.o.o. (Prinz Tech Consulting), Dunajska cesta 33, 1000 Ljubljana, Slovenia. Registration number 7326106000, VAT ID SI86067494, contact@prinz-tc.com. The MCP server and the command line are under the MIT licence. Apple, Apple Watch, Apple Health and HealthKit are trademarks of Apple Inc.; this project is not affiliated with Apple.</p>
+</footer>
+</div>
+</body>
+</html>

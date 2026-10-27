@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ideas for your AI: prompts for Health Access MCP</title>
+<meta name="description" content="Ideas for your AI: eleven prompts, suggestions only, that ship with Health Access MCP. Export: weekly check-in, explain my last session, sleep and recovery, trends, a summary for your coach. Plans: plan my next session or my week, change my plan, build up to a goal, for any sport.">
+<link rel="canonical" href="https://healthaccessmcp.com/docs/prompts">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Health Access MCP">
+<meta property="og:title" content="Ideas for your AI">
+<meta property="og:description" content="Eleven prompts for your AI in two groups, for any sport. Each asks first, reads second, writes last.">
+<meta property="og:url" content="https://healthaccessmcp.com/docs/prompts">
+<meta property="og:image" content="https://healthaccessmcp.com/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body class="doc">
+<div class="wrap">
+<nav class="top">
+  <a class="brand" href="/"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0D366B"/><g fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" transform="translate(9.6 9.6) scale(0.7)"><path d="M6 34 H20 L26 20 L34 48 L40 34 H52"/><path d="M46 26 L56 34 L46 42"/></g></svg>Health Access <span>MCP</span></a>
+  <a href="/docs/claude-code">Install</a>
+  <a href="/docs/files">Files</a>
+  <a href="/docs/plans">Plans</a>
+  <a href="/docs/prompts" aria-current="page">Ideas for your AI</a>
+  <a href="/docs/privacy">Privacy</a>
+  <a href="/docs/compare">Compare</a>
+  <a href="/llms.txt">llms.txt</a>
+  <a href="/support">Support</a>
+</nav>
+<p class="crumbs"><a href="/">Health Access MCP</a> / Reference / Ideas for your AI</p>
+
+<header class="hero">
+  <span class="label">Reference</span>
+  <h1>Ideas for your AI</h1>
+  <p class="answer">Eleven prompts in two groups, suggestions only. They are not part of the setup: use them, change them or ignore them. What you share with an AI, and what it tells you, is between you and that AI. Every prompt here asks before it reads data, and reads data before it writes anything. A plan written without asking how you feel is a guess with formatting.</p>
+</header>
+
+<main>
+<p class="small">Voice: plain, short. The AI talks to the athlete the way a good coach does. The <b>id</b> is the name the MCP server exposes the prompt under, so a client that lists prompts can pick it from a menu instead of pasting. The text below is the source of truth for both.</p>
+
+<h2 id="export">Export: understand what your Watch recorded</h2>
+
+<article class="prompt-full" id="weekly_checkin">
+  <h3>1. Weekly check-in</h3>
+  <p class="small">Four questions about your week, then one win, one change and one question back.</p>
+  <div class="meta">id: <code>weekly_checkin</code> · args: none</div>
+  <div class="text">
+  <p>Ask, one message:</p>
+  <ol>
+    <li>How was the week, in two sentences?</li>
+    <li>Sleep: roughly how many hours, and how did you wake up?</li>
+    <li>Stress at work or home, 1 to 10?</li>
+    <li>Anything hurting?</li>
+  </ol>
+  <p>Then read <code>training_summary</code> for 4 weeks and <code>get_days</code> for the last 14 days (sleep, resting heart rate, HRV, activity). Compare what was planned with what happened: sessions done, how hard they felt versus what the heart rate says, resting heart rate and HRV trend.</p>
+  <p>Reply with: what went well (one specific thing with a number), what to change (one thing), and one question for me. Keep it to what fits on a phone screen.</p>
+  </div>
+</article>
+
+<article class="prompt-full" id="explain_last_session">
+  <h3>2. Explain my last session</h3>
+  <p class="small">Your latest session in plain words: the parts, the heart rate, what it means for next time.</p>
+  <div class="meta">id: <code>explain_last_session</code> · args: <code>id</code> (optional)</div>
+  <div class="text">
+  <p>One question: what did you want from this session?</p>
+  <p>Then <code>get_workout</code> on the latest session (or the id I gave) with laps. Explain it in plain words: what the parts were, where the heart rate went relative to the plan, where pace or power changed, anything odd (a part done fast that was meant to be easy, a lap the Watch probably miscounted). End with one sentence about what it means for next time. No charts, no jargon without a one-line explanation.</p>
+  </div>
+</article>
+
+<article class="prompt-full" id="overdoing_it">
+  <h3>3. Am I overdoing it?</h3>
+  <p class="small">Resting heart rate, HRV, sleep and load over three weeks, read as a hypothesis, not a verdict.</p>
+  <div class="meta">id: <code>overdoing_it</code> · args: none</div>
+  <div class="text">
+  <p>Ask:</p>
+  <ol>
+    <li>How have you been sleeping the last week?</li>
+    <li>Motivation to train, 1 to 10?</li>
+    <li>Any illness, travel, or big life stress right now?</li>
+  </ol>
+  <p>Then <code>get_days</code> for 21 days (resting heart rate, HRV, sleep) and <code>training_summary</code> for 4 weeks (load, effort). Look for resting heart rate up, HRV down, effort up at the same load, sleep down.</p>
+  <p>Answer as a hypothesis, not a verdict: what the numbers suggest, how confident you are, and what would change your mind. If anything points to illness or a heart rhythm issue, say to see a doctor, not an AI.</p>
+  </div>
+</article>
+
+<article class="prompt-full" id="sleep_and_recovery">
+  <h3>4. How am I sleeping and recovering?</h3>
+  <p class="small">Four weeks of sleep, heart and breathing next to your training, with one thing to try.</p>
+  <div class="meta">id: <code>sleep_and_recovery</code> · args: <code>days</code> (default 28)</div>
+  <div class="text">
+  <p>Ask:</p>
+  <ol>
+    <li>How rested do you feel most mornings, 1 to 10?</li>
+    <li>Anything that changed lately: bedtime, alcohol, caffeine late in the day, a new baby, shifts, travel?</li>
+  </ol>
+  <p>Then <code>get_days</code> for that many days with the sleep, heart and respiratory groups. Look at sleep duration and timing, how regular bedtimes are, resting heart rate, HRV, breathing rate and, if the Watch has it, wrist temperature. Line them up against the training days from <code>training_summary</code>.</p>
+  <p>Tell me in five sentences what the data shows, which one pattern is worth acting on, and one small thing to try for two weeks. Say plainly when a gap in the data means you cannot tell.</p>
+  </div>
+</article>
+
+<article class="prompt-full" id="long_term_trends">
+  <h3>5. What changed over the last months?</h3>
+  <p class="small">The first and the last month of a quarter compared: what moved and what did not.</p>
+  <div class="meta">id: <code>long_term_trends</code> · args: <code>weeks</code> (default 12)</div>
+  <div class="text">
+  <p>One question first: what would you like to have improved over this time?</p>
+  <p>Then read <code>training_summary</code> for that many weeks, <code>get_days</code> for the same range (resting heart rate, HRV, VO2 max, weight, steps, sleep) and <code>get_profile</code>. Compare the first four weeks with the last four.</p>
+  <p>Reply with: three things that moved, each with the before and after numbers, one thing that did not move although you expected it to, and what you would keep doing. Separate what the numbers show from what you guess.</p>
+  </div>
+</article>
+
+<article class="prompt-full" id="coach_summary">
+  <h3>6. Prepare this for my coach or doctor</h3>
+  <p class="small">A one-page summary of the last weeks for a coach, a doctor or a physio.</p>
+  <div class="meta">id: <code>coach_summary</code> · args: <code>weeks</code> (default 4)</div>
+  <div class="text">
+  <p>Ask: who is this for (a coach, a doctor, a physio), what do they care about most, and how do they like to receive things (email, PDF, printout)?</p>
+  <p>Then read <code>training_summary</code>, the sessions and <code>get_days</code> for that period. Write a one-page summary they can use: sessions done, total volume, how hard they felt versus heart rate, resting heart rate, HRV and sleep trends, anything I reported, open questions. Plain language, numbers where they help, nothing invented, no diagnosis. Offer it as text first, then in the format they asked for.</p>
+  </div>
+</article>
+
+<h2 id="plans">Import: workout plans from your AI onto the Watch</h2>
+
+<article class="prompt-full" id="next_session">
+  <h3>7. Plan my next session</h3>
+  <p class="small">One session for any sport, for the day and time you say, with instructions on the wrist.</p>
+  <div class="meta">id: <code>next_session</code> · args: none</div>
+  <div class="text">
+  <p>Ask me these, one message, numbered, then wait:</p>
+  <ol>
+    <li>Which sport, and where (pool or open water, road or treadmill, outdoors or on a trainer)?</li>
+    <li>When will you do it: day and time?</li>
+    <li>How much time do you have?</li>
+    <li>How did the last session feel, 1 to 10, and anything sore?</li>
+    <li>What is this phase for: getting back into it, building endurance, getting faster, or just enjoying it?</li>
+    <li>Anything to avoid (an injury, equipment you do not have, a pool length, a route)?</li>
+  </ol>
+  <p>Then read <code>training_summary</code> for the last 4 weeks and <code>get_workout</code> for the last 3 sessions of that sport. Note what the effort ratings say versus what the heart rate says; those often disagree, and effort wins.</p>
+  <p>Write one session that fits the answers: an easy warm-up, the main part, a cool-down. Every step label is an instruction I can read on the wrist, under 40 characters, like "Easy, can talk in full sentences" or "Hard, 8 of 10, steady". Use distance or time goals that make sense for the sport, and heart-rate zones only if my Watch data shows they are believable. Rests are real rests.</p>
+  <p>Show it as a list with a one-line why. If I say yes, call <code>push_plan</code> with that day and time as <code>scheduled_for</code>, then tell me: "It is in the Health Access app under Import, for Wednesday 10:00."</p>
+  </div>
+</article>
+
+<article class="prompt-full" id="plan_my_week">
+  <h3>8. Plan my week</h3>
+  <p class="small">Your training days as a short table, mostly easy, written as plans after your yes.</p>
+  <div class="meta">id: <code>plan_my_week</code> · args: none</div>
+  <div class="text">
+  <p>Ask, one message, numbered:</p>
+  <ol>
+    <li>Which days and times can you train this week, and for how long each?</li>
+    <li>Which sports?</li>
+    <li>What is the goal of this week: easy, normal or a harder week?</li>
+    <li>How did last week feel overall, 1 to 10, and anything sore?</li>
+    <li>Anything fixed: a group run, a class, a match, a rest day you want?</li>
+  </ol>
+  <p>Then read <code>training_summary</code> for 4 weeks and <code>get_days</code> for the last 7 days (sleep, resting heart rate, HRV).</p>
+  <p>Propose the week as a short table: day, time, sport, session in one line, how hard (easy, moderate, hard). Keep most sessions easy and never put two hard days in a row unless I asked for it. If my recovery data looks poor, say so and make the week lighter.</p>
+  <p>Wait for my yes or my changes. Then call <code>push_plan</code> once per session, each with its own <code>scheduled_for</code>. Tell me they are in the Import tab and that "Put new plans on my Watch automatically" puts them on the Watch without a tap.</p>
+  </div>
+</article>
+
+<article class="prompt-full" id="adjust_plans">
+  <h3>9. Change my plan</h3>
+  <p class="small">Missed a day or feel tired: the smallest change to the sessions still ahead.</p>
+  <div class="meta">id: <code>adjust_plans</code> · args: none</div>
+  <div class="text">
+  <p>Ask: what happened (missed a session, feel tired or sore, ill, travelling, more time than expected), and what is still possible this week?</p>
+  <p>Then <code>list_plans</code> and <code>get_plan_status</code> for the ones still ahead, the last session from <code>list_workouts</code> and <code>get_days</code> for the last 3 days.</p>
+  <p>Suggest the smallest change that works: move, shorten, swap for something easier, or drop a session. Never try to catch up missed work by doubling up. Show the new version next to the old one. If I say yes, write the changed sessions with <code>push_plan</code>, each with its new <code>scheduled_for</code>, and tell me which old ones to take off the Watch with "Remove from Watch" in the Import tab, because the app does not delete plans on its own.</p>
+  </div>
+</article>
+
+<article class="prompt-full" id="build_up_to_goal">
+  <h3>10. Build up to a goal</h3>
+  <p class="small">A realistic route to a goal and a date, written one week at a time.</p>
+  <div class="meta">id: <code>build_up_to_goal</code> · args: none</div>
+  <div class="text">
+  <p>Ask, one message, numbered:</p>
+  <ol>
+    <li>What is the goal, and by when (a distance, an event, a time to beat, just fitter)?</li>
+    <li>Where are you now: what did a normal week look like over the last month?</li>
+    <li>How many days a week can you train, and on which days?</li>
+    <li>Any injury history I should plan around?</li>
+  </ol>
+  <p>Then read <code>training_summary</code> for 12 weeks, the sessions closest to the goal and <code>get_profile</code>.</p>
+  <p>Tell me first whether the goal and the date are realistic from where I am, and if not, what is. Then sketch the weeks up to the goal in a short table: week, focus, number of sessions, longest session. Increase slowly, with an easier week every third or fourth week.</p>
+  <p>Write only the next week as real sessions, after my yes, with <code>push_plan</code> and a <code>scheduled_for</code> each. Tell me to come back each week with this prompt or "Plan my week", so the next week can use what the Watch recorded.</p>
+  </div>
+</article>
+
+<article class="prompt-full" id="convert_workout">
+  <h3>11. Make my workout a Watch workout</h3>
+  <p class="small">A workout from a coach, a club or an app, turned into one the Watch can run.</p>
+  <div class="meta">id: <code>convert_workout</code> · args: none</div>
+  <div class="text">
+  <p>Ask me to paste or describe the workout (from a coach, a club, a training app, a book), which sport it is, and when I will do it.</p>
+  <p>Turn it into a plan the Watch can run: warm-up, the repeated parts as blocks with repeats, cool-down, every goal as a distance or a time. Labels under 40 characters that say what to do. If something cannot be expressed (a goal by pace only, a drill with no distance or time), say what you changed and why.</p>
+  <p>Show the parts as a list. If I say yes, call <code>push_plan</code> with <code>scheduled_for</code>, then tell me it is in the Import tab.</p>
+  </div>
+</article>
+
+<h2>Why they are shaped like this</h2>
+<p>Three reasons, each learned the hard way. Effort and heart rate disagree more often than you would think, and when they do, effort is the better signal, so the AI has to ask for it. A session written before asking about time, pool length and soreness is a session that gets skipped. And a plan file that appears in the app without a yes is a surprise, which is the one thing a coach must never be.</p>
+<p>The source file is <a href="/ref/prompts.md"><code>docs/prompts.md</code></a> in the repository. If a copy differs from it, the file is right.</p>
+
+<div class="next"><b>Next:</b> <a href="/docs/plans">What push_plan writes</a> <a href="/docs/files">What the AI reads</a> <a href="/docs/claude-code">Connect Claude Code</a></div>
+</main>
+
+<footer class="site">
+  <div class="cols">
+    <div><h4>Connect an AI</h4><ul><li><a href="/docs/claude-code">Claude Code</a></li><li><a href="/docs/claude-desktop">Claude Desktop</a></li><li><a href="/docs/cursor">Cursor</a></li><li><a href="/docs/chatgpt">ChatGPT</a></li><li><a href="/docs/local-models">Local models</a></li></ul></div>
+    <div><h4>Reference</h4><ul><li><a href="/docs/files">The folder is the API</a></li><li><a href="/docs/plans">Plans and Put on Watch</a></li><li><a href="/docs/prompts">Ideas for your AI</a></li><li><a href="/ref/mcp.md">Tool reference</a></li><li><a href="/ref/schema.md">Data contract</a></li></ul></div>
+    <div><h4>For AIs</h4><ul><li><a href="/llms.txt">llms.txt</a></li><li><a href="/llms-full.txt">llms-full.txt</a></li><li><a href="https://www.npmjs.com/package/healthaccess-mcp">npm package</a></li></ul></div>
+    <div><h4>About</h4><ul><li><a href="/docs/privacy">Privacy in plain words</a></li><li><a href="/privacy-policy">Privacy policy</a></li><li><a href="/support">Support</a></li><li><a href="/docs/compare">Compared with the others</a></li></ul></div>
+  </div>
+  <p class="fine">Health Access MCP is made by Prinz Technology Consultancy, svetovanje na področju informacijskih tehnologij d.o.o. (Prinz Tech Consulting), Dunajska cesta 33, 1000 Ljubljana, Slovenia. Registration number 7326106000, VAT ID SI86067494, contact@prinz-tc.com. The MCP server and the command line are under the MIT licence. Apple, Apple Watch, Apple Health and HealthKit are trademarks of Apple Inc.; this project is not affiliated with Apple.</p>
+</footer>
+</div>
+</body>
+</html>

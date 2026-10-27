@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apple Health in Cursor: Health Access MCP setup</title>
+<meta name="description" content="Add Health Access MCP to ~/.cursor/mcp.json and Cursor's agent can read your Apple Watch workouts and vitals, and write training plans back to the Watch.">
+<link rel="canonical" href="https://healthaccessmcp.com/docs/cursor">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Health Access MCP">
+<meta property="og:title" content="Apple Health in Cursor">
+<meta property="og:description" content="One entry in ~/.cursor/mcp.json. Then Cursor's agent reads your Apple Watch workouts and vitals and writes plans back to the Watch.">
+<meta property="og:url" content="https://healthaccessmcp.com/docs/cursor">
+<meta property="og:image" content="https://healthaccessmcp.com/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body class="doc">
+<div class="wrap">
+<nav class="top">
+  <a class="brand" href="/"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0D366B"/><g fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" transform="translate(9.6 9.6) scale(0.7)"><path d="M6 34 H20 L26 20 L34 48 L40 34 H52"/><path d="M46 26 L56 34 L46 42"/></g></svg>Health Access <span>MCP</span></a>
+  <a href="/docs/claude-code" aria-current="page">Install</a>
+  <a href="/docs/files">Files</a>
+  <a href="/docs/plans">Plans</a>
+  <a href="/docs/prompts">Ideas for your AI</a>
+  <a href="/docs/privacy">Privacy</a>
+  <a href="/docs/compare">Compare</a>
+  <a href="/llms.txt">llms.txt</a>
+  <a href="/support">Support</a>
+</nav>
+<p class="crumbs"><a href="/">Health Access MCP</a> / Connect an AI / Cursor</p>
+
+<header class="hero">
+  <span class="label">Connect an AI</span>
+  <h1>Apple Health in Cursor</h1>
+  <p class="answer">One entry in <code>~/.cursor/mcp.json</code>, no path to type: the server finds your Health Access folder on its own. Then the agent in Cursor's chat can read your sessions and vitals and write a plan to your Watch.</p>
+</header>
+
+<main>
+<h2>Before you start</h2>
+<ol>
+  <li>The Health Access app has written files into your folder, and the folder syncs to this computer.</li>
+  <li>Node.js 18 or newer is installed (<code>npx --version</code> prints a number).</li>
+</ol>
+
+<h2>Add the server</h2>
+<p>Global, for every project: <code>~/.cursor/mcp.json</code>. For one project only: <code>.cursor/mcp.json</code> in that project. Same content either way.</p>
+<pre>{
+  "mcpServers": {
+    "healthaccess": {
+      "command": "npx",
+      "args": ["-y", "healthaccess-mcp"]
+    }
+  }
+}</pre>
+<ul>
+  <li>The server looks in iCloud Drive, then Dropbox, Google Drive, OneDrive and Box, then <code>~/Documents</code>. To name the folder yourself, add <code>"--dir", "/absolute/path/to/your folder"</code> to <code>args</code>.</li>
+  <li>If Cursor reports <code>spawn npx ENOENT</code>, put the full path from <code>which npx</code> into <code>command</code>.</li>
+  <li>Cursor's settings also have an MCP section with an "add server" button that writes the same file. Either way works.</li>
+</ul>
+
+<h2>Check</h2>
+<p>Cursor Settings, the MCP section: <code>healthaccess</code> should show a green dot and the thirteen tools. If it is red, run the command yourself in a terminal and read the error:</p>
+<pre>npx -y healthaccess-mcp --check</pre>
+
+<h2>Then say to it</h2>
+<p>In the chat panel, in Agent mode:</p>
+<pre class="wrapcode">Use the healthaccess tools. List my last 5 workouts, one line each, then read the training summary for 4 weeks. Tell me how this week compares to the one before, in three sentences. Ask me how the last session felt before you judge it.</pre>
+<p>Cursor asks before each tool call unless you allow the server. If you want ideas for what to ask, the <a href="/docs/prompts">prompts</a> work here unchanged.</p>
+
+<h2>Why Cursor for this at all</h2>
+<p>Because the folder is also a repository you can open. Open your Health Access folder in Cursor and the agent has the MCP tools and the raw JSON side by side: ask it to write a script over <code>workouts/*.json</code>, and it can test the script on the real files. <a href="/docs/files">The folder is the API.</a></p>
+
+<div class="next"><b>Next:</b> <a href="/docs/claude-code">Claude Code</a> <a href="/docs/local-models">Local models</a> <a href="/docs/files">What is in the folder</a> <a href="/ref/mcp.md">Tool reference</a></div>
+</main>
+
+<footer class="site">
+  <div class="cols">
+    <div><h4>Connect an AI</h4><ul><li><a href="/docs/claude-code">Claude Code</a></li><li><a href="/docs/claude-desktop">Claude Desktop</a></li><li><a href="/docs/cursor">Cursor</a></li><li><a href="/docs/chatgpt">ChatGPT</a></li><li><a href="/docs/local-models">Local models</a></li></ul></div>
+    <div><h4>Reference</h4><ul><li><a href="/docs/files">The folder is the API</a></li><li><a href="/docs/plans">Plans and Put on Watch</a></li><li><a href="/docs/prompts">Ideas for your AI</a></li><li><a href="/ref/mcp.md">Tool reference</a></li><li><a href="/ref/schema.md">Data contract</a></li></ul></div>
+    <div><h4>For AIs</h4><ul><li><a href="/llms.txt">llms.txt</a></li><li><a href="/llms-full.txt">llms-full.txt</a></li><li><a href="https://www.npmjs.com/package/healthaccess-mcp">npm package</a></li></ul></div>
+    <div><h4>About</h4><ul><li><a href="/docs/privacy">Privacy in plain words</a></li><li><a href="/privacy-policy">Privacy policy</a></li><li><a href="/support">Support</a></li><li><a href="/docs/compare">Compared with the others</a></li></ul></div>
+  </div>
+  <p class="fine">Health Access MCP is made by Prinz Technology Consultancy, svetovanje na področju informacijskih tehnologij d.o.o. (Prinz Tech Consulting), Dunajska cesta 33, 1000 Ljubljana, Slovenia. Registration number 7326106000, VAT ID SI86067494, contact@prinz-tc.com. The MCP server and the command line are under the MIT licence. Apple, Apple Watch, Apple Health and HealthKit are trademarks of Apple Inc.; this project is not affiliated with Apple.</p>
+</footer>
+</div>
+</body>
+</html>

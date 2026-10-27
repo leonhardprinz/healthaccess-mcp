@@ -1,0 +1,33 @@
+Apple won't let your AI read your Watch. This does.
+
+Health Access is middleware. It does the one thing Apple requires a phone app for, writing your workouts and daily health data as JSON into a folder you pick, and then it gets out of the way. Your AI reads that folder, through the MCP or just as files. If it writes you a workout plan, one tap puts it on your Watch, or none with Automatic on.
+
+WHAT GOES INTO THE FOLDER
+- Every workout from Apple Health: laps, splits, heart rate, stroke and SWOLF for swims, the effort rating your Watch asks for.
+- One file per day: sleep, resting heart rate, HRV, VO2 max, weight, steps and everything else you allow.
+- A short briefing your AI can read first, and a catalog of what was exported.
+
+WHO IT IS FOR
+- You have an Apple Watch and an AI coach (Claude, ChatGPT, Cursor, a local model) and want it to see your actual sessions instead of what you remember to type.
+- You coach yourself in the pool, on the rower or on the road, and want a coach that has read every session, not the last screenshot.
+- You will not put your health data on someone else's server. The folder is yours, on the storage you already use: iCloud Drive, Dropbox, Google Drive, OneDrive, a NAS, or just On My iPhone.
+- You have a human coach. Share the same folder and they get the real splits.
+
+PLANS BACK TO THE WATCH
+Your AI writes the session as a small file. The Import tab turns it into a custom workout with the step names on your wrist, at the day and time the plan says. Run, walk, hike, cycle, swim, row, HIIT and more.
+
+HOW TO CONNECT YOUR AI
+On your computer, one command: npx -y healthaccess-mcp. It finds the folder on its own. The app copies a setup message you can paste into your AI, and it shows when your AI is connected. Eleven suggested prompts are in the app, from a weekly check-in to planning your week.
+
+PRIVACY
+No account, no server. Your health data goes only into the folder you choose. Usage statistics are off by default; if you turn them on, they are event names and counts, never a health value, file name or folder path. "What left this phone" in Settings lists every request the app made.
+What you share with an AI, and what it tells you, is between you and that AI.
+
+HONEST LIMITS
+Health data can only be read while the phone is unlocked, so a workout finished with the phone in the bag exports the next time the phone is unlocked, not before. And the Watch keeps its own pool length setting, the plan can't set it.
+
+There are no charts in the app. The AI is the user of this data, so the effort goes into the files, the MCP and the docs.
+
+Free. An optional in-app purchase removes the support card, or buys the dev a coffee.
+
+Docs and setup: healthaccessmcp.com

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apple Health with local models: Ollama, LM Studio, Goose, Codex CLI and Health Access MCP</title>
+<meta name="description" content="Any MCP host that launches a stdio server can read your Apple Watch workouts through Health Access MCP. LM Studio, Goose and Codex CLI configs, and the no-MCP path for Ollama: the files and the healthaccess command line.">
+<link rel="canonical" href="https://healthaccessmcp.com/docs/local-models">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Health Access MCP">
+<meta property="og:title" content="Apple Health with local models">
+<meta property="og:description" content="Any MCP host that launches a stdio server works. LM Studio and Goose configs, and the no-MCP path for Ollama.">
+<meta property="og:url" content="https://healthaccessmcp.com/docs/local-models">
+<meta property="og:image" content="https://healthaccessmcp.com/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body class="doc">
+<div class="wrap">
+<nav class="top">
+  <a class="brand" href="/"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0D366B"/><g fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" transform="translate(9.6 9.6) scale(0.7)"><path d="M6 34 H20 L26 20 L34 48 L40 34 H52"/><path d="M46 26 L56 34 L46 42"/></g></svg>Health Access <span>MCP</span></a>
+  <a href="/docs/claude-code" aria-current="page">Install</a>
+  <a href="/docs/files">Files</a>
+  <a href="/docs/plans">Plans</a>
+  <a href="/docs/prompts">Ideas for your AI</a>
+  <a href="/docs/privacy">Privacy</a>
+  <a href="/docs/compare">Compare</a>
+  <a href="/llms.txt">llms.txt</a>
+  <a href="/support">Support</a>
+</nav>
+<p class="crumbs"><a href="/">Health Access MCP</a> / Connect an AI / Local models</p>
+
+<header class="hero">
+  <span class="label">Connect an AI</span>
+  <h1>Apple Health with local models</h1>
+  <p class="answer">Any MCP host that can launch a program on your computer works: give it the command <code>npx -y healthaccess-mcp</code>. A bare model runner like Ollama has no MCP host built in, so there you use the files or the command line instead. Either way nothing leaves your Mac, which is the point of running locally.</p>
+</header>
+
+<main>
+<h2>The one command every host needs</h2>
+<pre>npx -y healthaccess-mcp</pre>
+<p>Transport: stdio. No environment variables required. The server finds your Health Access folder on its own (iCloud Drive, then the other file providers, then <code>~/Documents</code>); add <code>--dir "/absolute/path"</code> to name it. Needs Node.js 18 or newer for <code>npx</code>; a GUI app that does not see your shell's PATH needs the full path from <code>which npx</code>. From source instead: <code>cargo install --path mcp --locked</code> in the repository.</p>
+
+<h2>LM Studio</h2>
+<p>LM Studio hosts MCP servers from version 0.3.17 on and uses the same <code>mcp.json</code> notation as Cursor. In the right sidebar, open the <b>Program</b> tab, then <b>Install</b>, then <b>Edit mcp.json</b>, and add:</p>
+<pre>{
+  "mcpServers": {
+    "healthaccess": {
+      "command": "npx",
+      "args": ["-y", "healthaccess-mcp"]
+    }
+  }
+}</pre>
+<p class="small">Pick a model that handles tool calls well; small models often call <code>list_workouts</code> fine and then struggle with the longer <code>get_workout</code> result. Ask for one session at a time and leave the heart-rate series out (it is off by default).</p>
+
+<h2>Goose</h2>
+<p>Goose, Block's open-source agent, adds stdio servers as extensions. Interactive: <code>goose configure</code>, then <b>Add Extension</b>, then <b>Command-line Extension</b>, and paste the command above when asked. Or edit <code>~/.config/goose/config.yaml</code>: <span class="tag confirm">to confirm</span></p>
+<pre>extensions:
+  healthaccess:
+    name: Health Access
+    type: stdio
+    cmd: npx
+    args:
+      - -y
+      - healthaccess-mcp
+    enabled: true
+    timeout: 300</pre>
+
+<h2>Codex CLI</h2>
+<p>OpenAI's Codex CLI starts stdio servers itself. One command registers the server for every project:</p>
+<pre>codex mcp add healthaccess -- npx -y healthaccess-mcp</pre>
+<p>Or edit <code>~/.codex/config.toml</code> (<code>.codex/config.toml</code> in a trusted project scopes it to that project):</p>
+<pre>[mcp_servers.healthaccess]
+command = "npx"
+args = ["-y", "healthaccess-mcp"]
+startup_timeout_sec = 60</pre>
+<p class="small">Codex gives a server 10 seconds to start by default. The first start downloads the server from npm, so 60 leaves room; later starts take well under a second. Check with <code>codex mcp list</code>, or <code>/mcp</code> inside a Codex session. Codex talks to OpenAI's cloud models unless you point it at a local one, so what it reads from the folder goes to that model's provider.</p>
+
+<h2>Any other host</h2>
+<p>If the host has a config file with <code>mcpServers</code>, the <a href="/docs/claude-desktop">Claude Desktop snippet</a> is the one to copy. If it asks for a command and arguments, the command is <code>npx</code> and the arguments are <code>-y</code> and <code>healthaccess-mcp</code>. The server announces itself as <code>healthaccess-mcp</code> and lists thirteen tools.</p>
+
+<h2>Ollama and other plain runners: no MCP, still works</h2>
+<p>The folder is the API, so a model that can read text can read your training data. Two ways:</p>
+<ol>
+  <li><b>The briefing.</b> <code>briefing.md</code>, one page the app writes after every sync, fits any context window.</li>
+  <li><b>The command line.</b> <code>healthaccess</code> prints the same views the MCP serves, as tables or as JSON with <code>--json</code>. It comes in the same npm package (<code>npm install -g healthaccess-mcp</code> puts both on your PATH). Pipe them in:
+<pre>healthaccess summary --weeks 4 --json \
+  | ollama run llama3.2 "This is my swimming and rowing training summary by week. In five sentences, what changed over the four weeks, and what would you ask me before suggesting anything?"
+
+healthaccess show 7A1C3E90 --json \
+  | ollama run llama3.2 "Explain this swim session to me in plain words: the parts, where the heart rate went, anything odd."</pre></li>
+</ol>
+<p class="small">A plan back to the Watch works the same way without the MCP: have the model write the <a href="/docs/plans">plan JSON</a>, then <code>healthaccess plan push session.json</code> validates it and drops it into <code>plans/</code>. The app shows "Put on Watch" within a minute.</p>
+
+<h2>Then say to it</h2>
+<pre class="wrapcode">List my last 5 workouts, one line each. Pick the one you would most want to know more about and tell me why, in two sentences. Then ask me how it felt.</pre>
+
+<div class="next"><b>Next:</b> <a href="/docs/files">What is in the folder</a> <a href="/docs/prompts">Ideas for your AI</a> <a href="/docs/privacy">What leaves the phone</a> <a href="/ref/mcp.md">Tool and CLI reference</a></div>
+</main>
+
+<footer class="site">
+  <div class="cols">
+    <div><h4>Connect an AI</h4><ul><li><a href="/docs/claude-code">Claude Code</a></li><li><a href="/docs/claude-desktop">Claude Desktop</a></li><li><a href="/docs/cursor">Cursor</a></li><li><a href="/docs/chatgpt">ChatGPT</a></li><li><a href="/docs/local-models">Local models</a></li></ul></div>
+    <div><h4>Reference</h4><ul><li><a href="/docs/files">The folder is the API</a></li><li><a href="/docs/plans">Plans and Put on Watch</a></li><li><a href="/docs/prompts">Ideas for your AI</a></li><li><a href="/ref/mcp.md">Tool reference</a></li><li><a href="/ref/schema.md">Data contract</a></li></ul></div>
+    <div><h4>For AIs</h4><ul><li><a href="/llms.txt">llms.txt</a></li><li><a href="/llms-full.txt">llms-full.txt</a></li><li><a href="https://www.npmjs.com/package/healthaccess-mcp">npm package</a></li></ul></div>
+    <div><h4>About</h4><ul><li><a href="/docs/privacy">Privacy in plain words</a></li><li><a href="/privacy-policy">Privacy policy</a></li><li><a href="/support">Support</a></li><li><a href="/docs/compare">Compared with the others</a></li></ul></div>
+  </div>
+  <p class="fine">Health Access MCP is made by Prinz Technology Consultancy, svetovanje na področju informacijskih tehnologij d.o.o. (Prinz Tech Consulting), Dunajska cesta 33, 1000 Ljubljana, Slovenia. Registration number 7326106000, VAT ID SI86067494, contact@prinz-tc.com. The MCP server and the command line are under the MIT licence. Apple, Apple Watch, Apple Health and HealthKit are trademarks of Apple Inc.; this project is not affiliated with Apple.</p>
+</footer>
+</div>
+</body>
+</html>

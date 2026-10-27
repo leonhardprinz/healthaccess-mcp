@@ -1,0 +1,93 @@
+# Builds universal macOS binaries (arm64 + x86_64) of healthaccess-mcp and
+# healthaccess on every tag v*, and attaches them to a GitHub release together
+# with a sha256 file for the Homebrew formula (packaging/homebrew).
+#
+# Nothing here publishes to crates.io or to the Homebrew tap; those stay manual.
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+# Runs only on a version tag pushed by a maintainer (no pull_request triggers), so forks
+# never get a token. Third-party actions are pinned to commit hashes.
+permissions: {}
+
+jobs:
+  macos-universal:
+    runs-on: macos-14
+    permissions:
+      contents: write   # only the last step uses it, to create the release
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262   # v4
+        with:
+          persist-credentials: false
+
+      - name: Check that the tag matches the workspace version
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME#v}"
+          VERSION="$(grep -m1 '^version = ' Cargo.toml | sed -E 's/version = "(.*)"/\1/')"
+          echo "tag $TAG, Cargo.toml $VERSION"
+          test "$TAG" = "$VERSION"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      - name: Install Rust (stable) with both macOS targets
+        run: |
+          set -euo pipefail
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+          rustup target add aarch64-apple-darwin x86_64-apple-darwin
+
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0   # v2
+
+      - name: Build release binaries for both architectures
+        run: |
+          set -euo pipefail
+          cargo build --release --locked -p healthaccess-mcp --no-default-features --target aarch64-apple-darwin
+          cargo build --release --locked -p healthaccess-cli --target aarch64-apple-darwin
+          cargo build --release --locked -p healthaccess-mcp --no-default-features --target x86_64-apple-darwin
+          cargo build --release --locked -p healthaccess-cli --target x86_64-apple-darwin
+
+      - name: Make universal binaries and the tarball
+        run: |
+          set -euo pipefail
+          mkdir -p dist/universal
+          for bin in healthaccess-mcp healthaccess; do
+            lipo -create \
+              "target/aarch64-apple-darwin/release/$bin" \
+              "target/x86_64-apple-darwin/release/$bin" \
+              -output "dist/universal/$bin"
+            lipo -info "dist/universal/$bin"
+          done
+          cp LICENSE docs/mcp.md dist/universal/
+          TARBALL="healthaccess-mcp-${VERSION}-macos-universal.tar.gz"
+          tar -czf "dist/$TARBALL" -C dist/universal healthaccess-mcp healthaccess LICENSE mcp.md
+          (cd dist && shasum -a 256 "$TARBALL" > "$TARBALL.sha256")
+          cat "dist/$TARBALL.sha256"
+          echo "TARBALL=$TARBALL" >> "$GITHUB_ENV"
+
+      - name: Smoke test the universal binaries
+        run: |
+          set -euo pipefail
+          dist/universal/healthaccess-mcp --version
+          dist/universal/healthaccess --version
+          dist/universal/healthaccess prompts
+
+      - name: Create the GitHub release and attach the files
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65   # v2
+        with:
+          name: "healthaccess-mcp ${{ env.VERSION }}"
+          generate_release_notes: true
+          body: |
+            Universal macOS build (arm64 + x86_64) of `healthaccess-mcp` and `healthaccess`.
+
+            Install by hand: untar, move both binaries onto your PATH, then
+            `claude mcp add --scope user healthaccess -- /path/to/healthaccess-mcp --dir "<your folder>"`.
+
+            Homebrew: copy the sha256 from the `.sha256` file into
+            `packaging/homebrew/healthaccess-mcp.rb` in the tap.
+          files: |
+            dist/${{ env.TARBALL }}
+            dist/${{ env.TARBALL }}.sha256

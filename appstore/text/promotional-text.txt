@@ -1,0 +1,1 @@
+Apple Health workouts and vitals as JSON in a folder you own, a local MCP server for any AI, and training plans back to your Apple Watch. No account, no server.

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apple Health in Claude Code: Health Access MCP setup</title>
+<meta name="description" content="One command, npx -y healthaccess-mcp, registers Health Access MCP with Claude Code. Then Claude can list your Apple Watch workouts, read a session, read vitals and write a plan back to the Watch.">
+<link rel="canonical" href="https://healthaccessmcp.com/docs/claude-code">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Health Access MCP">
+<meta property="og:title" content="Apple Health in Claude Code">
+<meta property="og:description" content="One command registers the server. Then Claude Code reads your Apple Watch workouts and vitals and writes plans back to the Watch.">
+<meta property="og:url" content="https://healthaccessmcp.com/docs/claude-code">
+<meta property="og:image" content="https://healthaccessmcp.com/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body class="doc">
+<div class="wrap">
+<nav class="top">
+  <a class="brand" href="/"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0D366B"/><g fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" transform="translate(9.6 9.6) scale(0.7)"><path d="M6 34 H20 L26 20 L34 48 L40 34 H52"/><path d="M46 26 L56 34 L46 42"/></g></svg>Health Access <span>MCP</span></a>
+  <a href="/docs/claude-code" aria-current="page">Install</a>
+  <a href="/docs/files">Files</a>
+  <a href="/docs/plans">Plans</a>
+  <a href="/docs/prompts">Ideas for your AI</a>
+  <a href="/docs/privacy">Privacy</a>
+  <a href="/docs/compare">Compare</a>
+  <a href="/llms.txt">llms.txt</a>
+  <a href="/support">Support</a>
+</nav>
+<p class="crumbs"><a href="/">Health Access MCP</a> / Connect an AI / Claude Code</p>
+
+<header class="hero">
+  <span class="label">Connect an AI</span>
+  <h1>Apple Health in Claude Code</h1>
+  <p class="answer">One command registers the server. After that, Claude Code can list your Apple Watch workouts, open a session with every interval and heart rate, read your vitals, and write a plan that lands on your Watch.</p>
+</header>
+
+<main>
+<h2>Before you start</h2>
+<ol>
+  <li>The Health Access app on your iPhone has written files into your folder, and that folder syncs to this computer (iCloud Drive, Dropbox, Google Drive, OneDrive, Box).</li>
+  <li>Node.js 18 or newer is installed, so <code>npx</code> exists. Check: <code>npx --version</code>. If not, install it from <a href="https://nodejs.org">nodejs.org</a> or with <code>brew install node</code>.</li>
+</ol>
+
+<h2>Register the server</h2>
+<pre class="wrapcode">claude mcp add --scope user healthaccess -- npx -y healthaccess-mcp</pre>
+<ul>
+  <li>That is the whole setup. The first start downloads the server for your computer from npm (a few MB); later starts use the copy npm keeps.</li>
+  <li>No path needed: the server looks for your Health Access folder in iCloud Drive, then in Dropbox, Google Drive, OneDrive and Box, then in <code>~/Documents</code>, and uses the one the app updated last.</li>
+  <li>To name the folder yourself, add it at the end: <code>npx -y healthaccess-mcp --dir "/path/to/your/folder"</code>. iCloud Drive folders live under <code>~/Library/Mobile Documents/com~apple~CloudDocs/</code>; the other providers under <code>~/Library/CloudStorage/</code>.</li>
+  <li><code>--scope user</code> makes the server available in every project. Leave it out and it is registered for the current project only.</li>
+</ul>
+<p>The same thing as a project file, <code>.mcp.json</code> in the project root, if you prefer to check it into a repository:</p>
+<pre>{
+  "mcpServers": {
+    "healthaccess": {
+      "command": "npx",
+      "args": ["-y", "healthaccess-mcp"]
+    }
+  }
+}</pre>
+
+<h2>Check</h2>
+<pre>claude mcp list                         <span class="c"># healthaccess should show as connected</span>
+npx -y healthaccess-mcp --check         <span class="c"># prints the folder it found and where from</span></pre>
+<p>Inside a Claude Code session, <code>/mcp</code> lists the server and its thirteen tools: <code>list_workouts</code>, <code>get_workout</code>, <code>get_vitals</code>, <code>training_summary</code>, <code>rate_workout</code>, <code>push_plan</code>, <code>get_plan_status</code>, <code>list_plans</code>, <code>get_day</code>, <code>get_days</code>, <code>get_catalog</code>, <code>get_profile</code>, <code>list_ecgs</code>. The Health Access app shows "Connected" once a session has started the server.</p>
+
+<h2>Then say to it</h2>
+<pre class="wrapcode">List my last 5 workouts, one line each. Then open the newest one and tell me in plain words what the parts were and where the heart rate went. Before you judge it, ask me how it felt.</pre>
+<p>If you want ideas for what to ask next, the <a href="/docs/prompts">prompts</a> are suggestions in the shape that works: ask first, read second, write last.</p>
+
+<h2>If something is off</h2>
+<ul>
+  <li><b>"no Health Access folder found"</b>: the folder has not synced to this computer yet, or it lives somewhere the search does not look. Open it in Finder, then pass it with <code>--dir</code>.</li>
+  <li><b>Two folders found</b>: the server does not guess, because one of them could be a folder someone shared with you. It lists both and stops. Pass <code>--dir</code> with yours, or put <code>dir = "…"</code> into <code>~/.config/healthaccess/config.toml</code>.</li>
+  <li><b>A workout is missing in <code>list_workouts</code></b> but the file exists: the app's <code>index.json</code> lags behind. Ids are also resolved by scanning <code>workouts/</code>, so <code>get_workout</code> with the file name or the 8-character id in it still works.</li>
+  <li><b>Logs</b> go to stderr. <code>HEALTHACCESS_LOG=debug</code> turns them up. Claude Code shows server stderr under <code>/mcp</code>.</li>
+  <li><b>Folder and zone bounds</b> can also be set once in <code>~/.config/healthaccess/config.toml</code>; the <code>--dir</code> argument wins over it.</li>
+  <li><b>From source</b> instead of npm: Rust stable, then <code>cargo install --path mcp --locked</code> in the repository, and register <code>healthaccess-mcp</code> instead of <code>npx -y healthaccess-mcp</code>.</li>
+</ul>
+
+<div class="next"><b>Next:</b> <a href="/docs/claude-desktop">Claude Desktop</a> <a href="/docs/prompts">Ideas for your AI</a> <a href="/docs/files">What is in the folder</a> <a href="/ref/mcp.md">Tool reference</a></div>
+</main>
+
+<footer class="site">
+  <div class="cols">
+    <div><h4>Connect an AI</h4><ul><li><a href="/docs/claude-code">Claude Code</a></li><li><a href="/docs/claude-desktop">Claude Desktop</a></li><li><a href="/docs/cursor">Cursor</a></li><li><a href="/docs/chatgpt">ChatGPT</a></li><li><a href="/docs/local-models">Local models</a></li></ul></div>
+    <div><h4>Reference</h4><ul><li><a href="/docs/files">The folder is the API</a></li><li><a href="/docs/plans">Plans and Put on Watch</a></li><li><a href="/docs/prompts">Ideas for your AI</a></li><li><a href="/ref/mcp.md">Tool reference</a></li><li><a href="/ref/schema.md">Data contract</a></li></ul></div>
+    <div><h4>For AIs</h4><ul><li><a href="/llms.txt">llms.txt</a></li><li><a href="/llms-full.txt">llms-full.txt</a></li><li><a href="https://www.npmjs.com/package/healthaccess-mcp">npm package</a></li></ul></div>
+    <div><h4>About</h4><ul><li><a href="/docs/privacy">Privacy in plain words</a></li><li><a href="/privacy-policy">Privacy policy</a></li><li><a href="/support">Support</a></li><li><a href="/docs/compare">Compared with the others</a></li></ul></div>
+  </div>
+  <p class="fine">Health Access MCP is made by Prinz Technology Consultancy, svetovanje na področju informacijskih tehnologij d.o.o. (Prinz Tech Consulting), Dunajska cesta 33, 1000 Ljubljana, Slovenia. Registration number 7326106000, VAT ID SI86067494, contact@prinz-tc.com. The MCP server and the command line are under the MIT licence. Apple, Apple Watch, Apple Health and HealthKit are trademarks of Apple Inc.; this project is not affiliated with Apple.</p>
+</footer>
+</div>
+</body>
+</html>

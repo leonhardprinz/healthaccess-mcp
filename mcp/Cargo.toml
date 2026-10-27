@@ -1,0 +1,47 @@
+[package]
+name = "healthaccess-mcp"
+description = "Health Access MCP server: Apple Health workouts, vitals and a one-page briefing for your AI over stdio, plans back to the Apple Watch"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+authors.workspace = true
+keywords.workspace = true
+categories = ["command-line-utilities", "development-tools"]
+readme = "../docs/mcp.md"
+# The end-to-end test reads the core crate's synthetic fixtures; not part of the package.
+exclude = ["tests/"]
+
+[[bin]]
+name = "healthaccess-mcp"
+path = "src/main.rs"
+
+[features]
+# `telemetry` compiles the HTTP client. Telemetry is still OFF at runtime unless
+# `--telemetry` or `telemetry = true` in config.toml is given. Build with
+# `--no-default-features` for a binary that contains no network code at all.
+default = ["telemetry"]
+telemetry = ["dep:reqwest"]
+
+[dependencies]
+healthaccess-core = { workspace = true }
+rmcp = { workspace = true }
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+schemars = { workspace = true }
+chrono = { workspace = true }
+clap = { workspace = true }
+anyhow = { workspace = true }
+uuid = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+reqwest = { workspace = true, optional = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
+
+[lints]
+workspace = true

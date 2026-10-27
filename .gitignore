@@ -1,0 +1,10 @@
+.DS_Store
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+DerivedData/
+build/
+target/
+*.swp
+app/HealthAccess/Resources/TelemetryConfig.plist
+dist/
+.wrangler/

@@ -1,0 +1,36 @@
+[package]
+name = "healthaccess-core"
+description = "Health Access MCP core: the models of the Apple Health export folder, the folder store, derived training views, the briefing, the prompts and the Apple .workout codec"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+authors.workspace = true
+keywords.workspace = true
+categories = ["filesystem", "encoding"]
+readme = "../docs/mcp.md"
+# The integration tests read synthetic fixtures (tests/fixtures, copies of examples/);
+# they are not part of the crate. `prompts.md` (a symlink to ../docs/prompts.md) is
+# packaged as a regular file.
+exclude = ["tests/"]
+
+[lib]
+name = "healthaccess_core"
+path = "src/lib.rs"
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+chrono = { workspace = true }
+thiserror = { workspace = true }
+toml = { workspace = true }
+dirs = { workspace = true }
+uuid = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
+
+[lints]
+workspace = true

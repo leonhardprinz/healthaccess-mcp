@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy: where your Apple Health data goes with Health Access MCP</title>
+<meta name="description" content="No server, no account. Your data goes into the folder you picked and nowhere else. What leaves the phone: nothing, unless you turn usage statistics on, and then exactly these event names.">
+<link rel="canonical" href="https://healthaccessmcp.com/docs/privacy">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Health Access MCP">
+<meta property="og:title" content="Where does my data go?">
+<meta property="og:description" content="Into the folder you picked, nowhere else. No server, no account. What leaves the phone, exactly.">
+<meta property="og:url" content="https://healthaccessmcp.com/docs/privacy">
+<meta property="og:image" content="https://healthaccessmcp.com/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body class="doc">
+<div class="wrap">
+<nav class="top">
+  <a class="brand" href="/"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0D366B"/><g fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" transform="translate(9.6 9.6) scale(0.7)"><path d="M6 34 H20 L26 20 L34 48 L40 34 H52"/><path d="M46 26 L56 34 L46 42"/></g></svg>Health Access <span>MCP</span></a>
+  <a href="/docs/claude-code">Install</a>
+  <a href="/docs/files">Files</a>
+  <a href="/docs/plans">Plans</a>
+  <a href="/docs/prompts">Ideas for your AI</a>
+  <a href="/docs/privacy" aria-current="page">Privacy</a>
+  <a href="/docs/compare">Compare</a>
+  <a href="/llms.txt">llms.txt</a>
+  <a href="/support">Support</a>
+</nav>
+<p class="crumbs"><a href="/">Health Access MCP</a> / About / Privacy</p>
+
+<header class="hero">
+  <span class="label">About</span>
+  <h1>Where does my data go?</h1>
+  <p class="answer">Into the folder you picked, and nowhere else. There is no server to send it to and no account to tie it to. The app has a screen called "What left this phone", and it is always empty, because nothing does, unless you turn usage statistics on. Then exactly the events listed below leave, and they never contain a health value.</p>
+</header>
+
+<main>
+<h2>What there is not</h2>
+<ul>
+  <li><b>No server.</b> Nothing of ours runs anywhere but on your phone and your computer. The MCP server is a program on your Mac that reads a folder; it listens on nothing.</li>
+  <li><b>No account.</b> Nothing to sign up for, so nothing to leak, sell or lose.</li>
+  <li><b>No write access to Apple Health.</b> The app asks only to read, and only the types you tick. Plans go to the Watch through WorkoutKit, which is a separate permission and does not touch your health records.</li>
+  <li><b>No analytics by default.</b> Usage statistics are off until you flip the switch in Settings. There is no tracking SDK configured to track, no advertising identifier, no crash reporting that carries data.</li>
+</ul>
+
+<h2>What leaves the phone</h2>
+<h3>1. Your files, to your own storage</h3>
+<p>The folder you picked syncs through the provider you chose: iCloud Drive, Dropbox, Google Drive, OneDrive, Proton Drive, your NAS. That is your account with them, under their terms, and the same place your photos or documents already go. Choose "On My iPhone" and nothing leaves the phone at all, but then your AI on the computer cannot reach the folder either. The files are plain JSON; encrypt the folder if your provider offers it. The MCP server on your computer writes one small file into the same folder, <code>mcp/clients/&lt;id&gt;.json</code>: the client's name and version, your computer's name, a call count and the name of the last tool, so the app can show that an AI is connected. Never tool arguments, never results.</p>
+
+<h3>2. Usage statistics, only if you turn them on</h3>
+<p>Off by default. When on, the app sends these events to PostHog, an analytics service, from the phone:</p>
+<div class="tablewrap">
+<table>
+  <thead><tr><th>Event</th><th>Properties</th></tr></thead>
+  <tbody>
+    <tr><td class="mono">app_opened</td><td>none</td></tr>
+    <tr><td class="mono">export_completed</td><td><code>workout_count</code>, <code>duration_ms</code>, <code>trigger</code> (observer, background task, foreground or manual)</td></tr>
+    <tr><td class="mono">export_failed</td><td><code>error_domain</code>, <code>code</code></td></tr>
+    <tr><td class="mono">plan_scheduled</td><td>none</td></tr>
+    <tr><td class="mono">plan_put_on_watch</td><td><code>method</code> (schedule, auto or preview)</td></tr>
+    <tr><td class="mono">setup_message_copied</td><td>none</td></tr>
+    <tr><td class="mono">ai_connected</td><td><code>client</code> (claude-code, claude-desktop, cursor, codex, lm-studio, goose or other), once per AI client. Never the computer's name, the file name or a version.</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Each event also carries the app version and build, the OS name and version, the device type (iPhone), the analytics SDK's name and version, and a random id created at install that is not your Apple ID and not your name. An allowlist strips everything else the SDK would normally attach: locale, time zone, network, screen size. Never a health value, never a file name, never a folder path. The event helpers in the code accept only numbers and fixed words, so a health value cannot get in by accident.</p>
+
+<h3>3. The MCP server's own statistics, only if you turn them on</h3>
+<p>The server you get with <code>npx -y healthaccess-mcp</code> has none: the binaries on npm are built without the HTTP client, so they contain no network code at all. None of the binaries we publish can send statistics: npm and the release archives are all built without the HTTP client. Only a build you make yourself from source with the default features can, and even then it stays off unless you set both <code>telemetry = true</code> and a PostHog key in <code>~/.config/healthaccess/config.toml</code> (or pass <code>--telemetry</code>). When on, two events go to the configured PostHog host from your computer:</p>
+<div class="tablewrap">
+<table>
+  <thead><tr><th>Event</th><th>Properties</th></tr></thead>
+  <tbody>
+    <tr><td class="mono">mcp_started</td><td><code>version</code></td></tr>
+    <tr><td class="mono">mcp_tool_called</td><td><code>tool</code>, <code>duration_ms</code>, <code>ok</code>, and on failure <code>error_kind</code>, one of <code>io</code>, <code>json</code>, <code>schema</code>, <code>not_found</code>, <code>ambiguous</code>, <code>validation</code>, <code>refused</code>, <code>codec</code>, <code>config</code></td></tr>
+  </tbody>
+</table>
+</div>
+<p>Plus the server's name and version, the OS name, and an anonymous random id written to the config file on first use. Never tool arguments, never results, never workout contents, file names or paths. To build from source without network code too: <code>cargo install --path mcp --no-default-features</code>.</p>
+
+<h3>4. Whatever you ask your AI to read</h3>
+<p>This one is yours to decide, and it is the big one. When you ask Claude, ChatGPT or Cursor about your swim, the session data the AI reads becomes part of that conversation and goes to that company's servers under their terms. That is the AI you chose, not something this app does. If you want the data to stay on your Mac, use a <a href="/docs/local-models">local model</a>; the MCP does not care which.</p>
+
+<h2>Where to check</h2>
+<ul>
+  <li><b>In the app:</b> Settings, Trust, "What left this phone". And the sync log, which lists every background wake and what it wrote.</li>
+  <li><b>On the computer:</b> <code>npx -y healthaccess-mcp --check</code> prints the telemetry state. The event lists above are in <code>Telemetry.swift</code> and <code>mcp/src/telemetry.rs</code>; the repository goes public soon.</li>
+  <li><b>This site</b> sets no cookies, runs no analytics and loads nothing from anyone but its host; even the typefaces are served from here.</li>
+  <li><b>The formal version</b> of all this, with the legal bases and your rights: the <a href="/privacy-policy">privacy policy</a>.</li>
+</ul>
+
+<h2>Apple's part</h2>
+<p>Apple keeps Health data encrypted while the phone is locked, which is why the app can only export once the phone has been unlocked. The app declares in its privacy manifest that it does no tracking, and it has no entitlement to write to Health. Health records never go to iCloud through this app; only the files you asked it to write go to the folder you chose.</p>
+
+<div class="next"><b>Next:</b> <a href="/docs/files">What is in the folder</a> <a href="/docs/compare">How the others handle it</a> <a href="/docs/local-models">Keep it on your Mac with a local model</a></div>
+</main>
+
+<footer class="site">
+  <div class="cols">
+    <div><h4>Connect an AI</h4><ul><li><a href="/docs/claude-code">Claude Code</a></li><li><a href="/docs/claude-desktop">Claude Desktop</a></li><li><a href="/docs/cursor">Cursor</a></li><li><a href="/docs/chatgpt">ChatGPT</a></li><li><a href="/docs/local-models">Local models</a></li></ul></div>
+    <div><h4>Reference</h4><ul><li><a href="/docs/files">The folder is the API</a></li><li><a href="/docs/plans">Plans and Put on Watch</a></li><li><a href="/docs/prompts">Ideas for your AI</a></li><li><a href="/ref/mcp.md">Tool reference</a></li><li><a href="/ref/schema.md">Data contract</a></li></ul></div>
+    <div><h4>For AIs</h4><ul><li><a href="/llms.txt">llms.txt</a></li><li><a href="/llms-full.txt">llms-full.txt</a></li><li><a href="https://www.npmjs.com/package/healthaccess-mcp">npm package</a></li></ul></div>
+    <div><h4>About</h4><ul><li><a href="/docs/privacy">Privacy in plain words</a></li><li><a href="/privacy-policy">Privacy policy</a></li><li><a href="/support">Support</a></li><li><a href="/docs/compare">Compared with the others</a></li></ul></div>
+  </div>
+  <p class="fine">Health Access MCP is made by Prinz Technology Consultancy, svetovanje na področju informacijskih tehnologij d.o.o. (Prinz Tech Consulting), Dunajska cesta 33, 1000 Ljubljana, Slovenia. Registration number 7326106000, VAT ID SI86067494, contact@prinz-tc.com. The MCP server and the command line are under the MIT licence. Apple, Apple Watch, Apple Health and HealthKit are trademarks of Apple Inc.; this project is not affiliated with Apple.</p>
+</footer>
+</div>
+</body>
+</html>

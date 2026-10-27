@@ -1,0 +1,28 @@
+[package]
+name = "healthaccess-cli"
+description = "Health Access MCP command-line tool: list, show, summarise and rate Apple Health workouts, print the briefing and the prompts, push plans, check the folder"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+authors.workspace = true
+keywords.workspace = true
+categories = ["command-line-utilities"]
+readme = "../docs/mcp.md"
+
+[[bin]]
+name = "healthaccess"
+path = "src/main.rs"
+
+[dependencies]
+healthaccess-core = { workspace = true }
+clap = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+anyhow = { workspace = true }
+chrono = { workspace = true }
+
+[lints]
+workspace = true

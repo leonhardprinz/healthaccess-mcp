@@ -1,0 +1,63 @@
+{
+  "identifier" : "7E2A6C10-4B1F-4D7E-9A3C-5F8B2D1E0C44",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "4.99",
+      "familyShareable" : false,
+      "internalID" : "2C9E1B0A-0001-4F6D-8E7A-1A2B3C4D5E01",
+      "localizations" : [
+        {
+          "description" : "Removes the support card at the bottom of Home, for good.",
+          "displayName" : "Remove the support card",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.healthaccessmcp.app.support.card",
+      "referenceName" : "Remove the support card",
+      "type" : "NonConsumable"
+    },
+    {
+      "displayPrice" : "2.99",
+      "familyShareable" : false,
+      "internalID" : "2C9E1B0A-0002-4F6D-8E7A-1A2B3C4D5E02",
+      "localizations" : [
+        {
+          "description" : "A coffee for the developer. The support card stays.",
+          "displayName" : "Coffee for the dev",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.healthaccessmcp.app.support.coffee",
+      "referenceName" : "Coffee for the dev",
+      "type" : "Consumable"
+    }
+  ],
+  "settings" : {
+    "_applicationInternalID" : "",
+    "_developerTeamID" : "45QGX5KWKH",
+    "_failTransactionsEnabled" : false,
+    "_locale" : "en_IE",
+    "_storefront" : "DEU",
+    "_storeKitErrors" : [
+      { "current" : null, "enabled" : false, "name" : "Load Products" },
+      { "current" : null, "enabled" : false, "name" : "Purchase" },
+      { "current" : null, "enabled" : false, "name" : "Verification" },
+      { "current" : null, "enabled" : false, "name" : "App Store Sync" },
+      { "current" : null, "enabled" : false, "name" : "Subscription Status" },
+      { "current" : null, "enabled" : false, "name" : "App Transaction" },
+      { "current" : null, "enabled" : false, "name" : "Manage Subscriptions Sheet" },
+      { "current" : null, "enabled" : false, "name" : "Refund Request Sheet" },
+      { "current" : null, "enabled" : false, "name" : "Offer Code Redeem Sheet" }
+    ]
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

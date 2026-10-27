@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Does Health Access MCP work with ChatGPT? Apple Health in ChatGPT</title>
+<meta name="description" content="Through the files, yes. Through the MCP, not today: ChatGPT only connects to remote HTTPS MCP servers on some plans, and Health Access MCP runs on your Mac. What is true today and the two paths that work.">
+<link rel="canonical" href="https://healthaccessmcp.com/docs/chatgpt">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Health Access MCP">
+<meta property="og:title" content="Apple Health in ChatGPT: what works today">
+<meta property="og:description" content="Through the files, yes. Through the MCP, not today. What is true about ChatGPT's MCP support, and the two paths that work.">
+<meta property="og:url" content="https://healthaccessmcp.com/docs/chatgpt">
+<meta property="og:image" content="https://healthaccessmcp.com/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body class="doc">
+<div class="wrap">
+<nav class="top">
+  <a class="brand" href="/"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0D366B"/><g fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" transform="translate(9.6 9.6) scale(0.7)"><path d="M6 34 H20 L26 20 L34 48 L40 34 H52"/><path d="M46 26 L56 34 L46 42"/></g></svg>Health Access <span>MCP</span></a>
+  <a href="/docs/claude-code" aria-current="page">Install</a>
+  <a href="/docs/files">Files</a>
+  <a href="/docs/plans">Plans</a>
+  <a href="/docs/prompts">Ideas for your AI</a>
+  <a href="/docs/privacy">Privacy</a>
+  <a href="/docs/compare">Compare</a>
+  <a href="/llms.txt">llms.txt</a>
+  <a href="/support">Support</a>
+</nav>
+<p class="crumbs"><a href="/">Health Access MCP</a> / Connect an AI / ChatGPT</p>
+
+<header class="hero">
+  <span class="label">Connect an AI</span>
+  <h1>Apple Health in ChatGPT</h1>
+  <p class="answer">Through the files, yes, today. Through the MCP, not today: ChatGPT connects to MCP servers at an HTTPS URL, on some plans only, and does not start a program on your Mac. Health Access MCP is a program on your Mac. Here is what is true and what works.</p>
+</header>
+
+<main>
+<h2>What is true today (October 2026)</h2>
+<ul>
+  <li>ChatGPT can connect to custom MCP servers, but only remote ones: a server with an HTTPS URL. It has no way to launch a local process over stdio, which is how Health Access MCP, and every other local MCP server, talks to its client.</li>
+  <li>Which plans may add a custom MCP server has changed more than once since the feature appeared in 2025. At the time of writing, OpenAI's help center lists it for Business and Enterprise/Edu workspaces, with a read-only form for Pro. <span class="tag confirm">to confirm</span> Check <a href="https://help.openai.com/en/articles/12584461-developer-mode-and-mcp-apps-in-chatgpt">OpenAI's article on developer mode and MCP in ChatGPT</a> before you plan around it.</li>
+  <li>Nothing about Health Access MCP changes for ChatGPT. The server speaks standard MCP. If OpenAI adds local servers, the <a href="/docs/claude-desktop">Claude Desktop snippet</a> is the one you would use.</li>
+</ul>
+
+<h2>Path 1: the files. Works now.</h2>
+<p>The folder is the API. Everything the MCP serves is a plain file in the folder your phone writes, so ChatGPT can read it as an upload.</p>
+<ol>
+  <li><b>The briefing.</b> <code>briefing.md</code> is a one-page summary the app writes after every sync: last four weeks, recent sessions, vitals, the next planned session, open items. Upload it to a conversation, or add it to a ChatGPT project so every chat there starts with it. The command line gives you the same thing: <code>healthaccess summary --weeks 4</code> and <code>healthaccess show &lt;id&gt;</code>; paste the output.</li>
+  <li><b>One session.</b> Upload <code>workouts/2026-05-14_0712_PoolSwim_7A1C3E90.json</code> (or whichever) and ask. The file carries every interval, every length, the heart-rate series and your effort rating. <a href="/docs/files">What the fields mean.</a></li>
+  <li><b>A plan back.</b> Ask ChatGPT to write the session in the <a href="/docs/plans">plan format</a>, save the JSON it gives you into <code>plans/</code>, and the app offers "Put on Watch" within a minute. No MCP needed for that either; the file is the interface.</li>
+</ol>
+<p>Then say to it:</p>
+<pre class="wrapcode">This is my training briefing from Health Access. Read it, then ask me how I slept and how motivated I feel. After my answers, tell me whether the numbers suggest I am overdoing it, as a hypothesis with your confidence, not a verdict.</pre>
+
+<h2>Path 2: a bridge to an HTTPS URL. Possible, not recommended.</h2>
+<p>A stdio-to-HTTP proxy plus a public tunnel turns the local server into a URL that ChatGPT can connect to. It works in principle. We do not recommend it: your training data then travels through a tunnel and sits behind a URL, and the server has no authentication of its own. If you do it anyway, put real authentication in front of it and take it down when you are done.</p>
+
+<h2>Why not just run a cloud server for you</h2>
+<p>Because then there would be a server, an account and a copy of your health data we hold. The <a href="/docs/compare">other products</a> made that choice; this one did not. The folder you own is the whole design.</p>
+
+<div class="next"><b>Next:</b> <a href="/docs/files">What is in the folder</a> <a href="/docs/plans">The plan format</a> <a href="/docs/claude-desktop">Claude Desktop</a> <a href="/docs/local-models">Local models</a></div>
+</main>
+
+<footer class="site">
+  <div class="cols">
+    <div><h4>Connect an AI</h4><ul><li><a href="/docs/claude-code">Claude Code</a></li><li><a href="/docs/claude-desktop">Claude Desktop</a></li><li><a href="/docs/cursor">Cursor</a></li><li><a href="/docs/chatgpt">ChatGPT</a></li><li><a href="/docs/local-models">Local models</a></li></ul></div>
+    <div><h4>Reference</h4><ul><li><a href="/docs/files">The folder is the API</a></li><li><a href="/docs/plans">Plans and Put on Watch</a></li><li><a href="/docs/prompts">Ideas for your AI</a></li><li><a href="/ref/mcp.md">Tool reference</a></li><li><a href="/ref/schema.md">Data contract</a></li></ul></div>
+    <div><h4>For AIs</h4><ul><li><a href="/llms.txt">llms.txt</a></li><li><a href="/llms-full.txt">llms-full.txt</a></li><li><a href="https://www.npmjs.com/package/healthaccess-mcp">npm package</a></li></ul></div>
+    <div><h4>About</h4><ul><li><a href="/docs/privacy">Privacy in plain words</a></li><li><a href="/privacy-policy">Privacy policy</a></li><li><a href="/support">Support</a></li><li><a href="/docs/compare">Compared with the others</a></li></ul></div>
+  </div>
+  <p class="fine">Health Access MCP is made by Prinz Technology Consultancy, svetovanje na področju informacijskih tehnologij d.o.o. (Prinz Tech Consulting), Dunajska cesta 33, 1000 Ljubljana, Slovenia. Registration number 7326106000, VAT ID SI86067494, contact@prinz-tc.com. The MCP server and the command line are under the MIT licence. Apple, Apple Watch, Apple Health and HealthKit are trademarks of Apple Inc.; this project is not affiliated with Apple.</p>
+</footer>
+</div>
+</body>
+</html>

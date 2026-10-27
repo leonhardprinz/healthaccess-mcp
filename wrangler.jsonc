@@ -1,0 +1,18 @@
+// healthaccessmcp.com on Cloudflare Workers (static assets). Deploy: scripts/deploy-site.sh
+{
+  "name": "healthaccessmcp",
+  "main": "site-worker/worker.js",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": false,
+  "assets": {
+    "directory": "./dist/site",
+    "binding": "ASSETS",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page",
+    "run_worker_first": true
+  },
+  "routes": [
+    { "pattern": "healthaccessmcp.com", "custom_domain": true },
+    { "pattern": "www.healthaccessmcp.com", "custom_domain": true }
+  ]
+}

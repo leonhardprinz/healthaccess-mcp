@@ -1,0 +1,44 @@
+{
+  "name": "healthaccess-mcp",
+  "version": "0.6.2",
+  "description": "Apple Health for your AI. An MCP server that reads the folder the Health Access iPhone app writes (workouts, days, vitals, a one-page briefing) and writes workout plans back for the Apple Watch. Local files, no cloud, no account.",
+  "mcpName": "com.healthaccessmcp/healthaccess-mcp",
+  "bin": {
+    "healthaccess-mcp": "bin/healthaccess-mcp.js",
+    "healthaccess": "bin/healthaccess.js"
+  },
+  "files": [
+    "bin",
+    "lib",
+    "README.md",
+    "LICENSE"
+  ],
+  "optionalDependencies": {
+    "healthaccess-mcp-darwin-arm64": "0.6.2",
+    "healthaccess-mcp-darwin-x64": "0.6.2",
+    "healthaccess-mcp-linux-arm64": "0.6.2",
+    "healthaccess-mcp-linux-x64": "0.6.2",
+    "healthaccess-mcp-win32-x64": "0.6.2"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "author": "Prinz Tech Consulting d.o.o. <support@healthaccessmcp.com>",
+  "homepage": "https://healthaccessmcp.com",
+  "bugs": {
+    "email": "support@healthaccessmcp.com",
+    "url": "https://healthaccessmcp.com/support"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "mcp-server",
+    "apple-health",
+    "healthkit",
+    "apple-watch",
+    "workout",
+    "claude",
+    "cursor"
+  ]
+}

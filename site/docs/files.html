@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The folder is the API: Health Access MCP file layout and schema</title>
+<meta name="description" content="What Health Access writes into your folder: workouts/*.json with every interval and length, vitals/*.json and days/*.json per day, index.json, plans/, catalog.json, profile.json and briefing.md. A trimmed example from the synthetic example folder and the rules about who writes what.">
+<link rel="canonical" href="https://healthaccessmcp.com/docs/files">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Health Access MCP">
+<meta property="og:title" content="The folder is the API">
+<meta property="og:description" content="What Health Access writes into your folder, with a trimmed example, and the rules about who writes what.">
+<meta property="og:url" content="https://healthaccessmcp.com/docs/files">
+<meta property="og:image" content="https://healthaccessmcp.com/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body class="doc">
+<div class="wrap">
+<nav class="top">
+  <a class="brand" href="/"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0D366B"/><g fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" transform="translate(9.6 9.6) scale(0.7)"><path d="M6 34 H20 L26 20 L34 48 L40 34 H52"/><path d="M46 26 L56 34 L46 42"/></g></svg>Health Access <span>MCP</span></a>
+  <a href="/docs/claude-code">Install</a>
+  <a href="/docs/files" aria-current="page">Files</a>
+  <a href="/docs/plans">Plans</a>
+  <a href="/docs/prompts">Ideas for your AI</a>
+  <a href="/docs/privacy">Privacy</a>
+  <a href="/docs/compare">Compare</a>
+  <a href="/llms.txt">llms.txt</a>
+  <a href="/support">Support</a>
+</nav>
+<p class="crumbs"><a href="/">Health Access MCP</a> / Reference / Files</p>
+
+<header class="hero">
+  <span class="label">Reference</span>
+  <h1>The folder is the API</h1>
+  <p class="answer">Everything the MCP serves is a plain JSON file in the folder you picked, written by the phone, readable by anything. The MCP is a convenience on top. Here is the layout, an example file trimmed to its shape, and the rules.</p>
+</header>
+
+<main>
+<h2>Layout</h2>
+<pre>Health Access/                            <span class="c"># the folder you picked, any name</span>
+  index.json                              <span class="c"># one row per workout, newest first; the app rewrites it after every export</span>
+  briefing.md                             <span class="c"># one page any AI can read</span>
+  workouts/
+    2026-05-14_0712_PoolSwim_7A1C3E90.json   <span class="c"># &lt;local date_time&gt;_&lt;Activity&gt;_&lt;first 8 of the HealthKit UUID&gt;</span>
+    2026-05-12_0630_IndoorRow_3F8B2D41.json
+  vitals/
+    2026-05-14.json                       <span class="c"># one per day, rewritten when values change</span>
+  days/
+    2026-05-14.json                       <span class="c"># one per day, every Health group (v0.4; vitals/ stays for one release)</span>
+  catalog.json                            <span class="c"># which Health types have data, and where each was exported (v0.4)</span>
+  profile.json                            <span class="c"># age, birth year, sex, blood type, move mode (v0.4)</span>
+  plans/
+    2026-05-13T19:02:11Z-s12.json         <span class="c"># written by your AI (push_plan) or the CLI</span>
+    2026-05-13T19:02:11Z-s12.status.json  <span class="c"># written by the app: did it reach the Watch</span>
+  mcp/clients/
+    &lt;id&gt;.json                             <span class="c"># presence file written by the MCP: client, machine, counts</span></pre>
+
+<h2>Who writes what</h2>
+<div class="tablewrap">
+<table>
+  <thead><tr><th>Path</th><th>Written by</th><th>Read by</th></tr></thead>
+  <tbody>
+    <tr><td class="mono">workouts/*.json</td><td>The app, once per workout. Never overwritten by export. The MCP or CLI may update exactly two keys, <code>effort</code> and <code>feel</code>, through <code>rate_workout</code>.</td><td>MCP, CLI, your AI, you</td></tr>
+    <tr><td class="mono">vitals/*.json</td><td>The app, today and yesterday on every run; 30-day backfill from Settings.</td><td>MCP, CLI, your AI</td></tr>
+    <tr><td class="mono">days/*.json, catalog.json, profile.json</td><td>The app, from v0.4: every Health group per day, the list of types with data and where each was exported, the athlete's characteristics.</td><td>MCP, CLI (<code>healthaccess day</code>, <code>catalog</code>, <code>profile</code>; <code>doctor</code> checks the coverage), your AI</td></tr>
+    <tr><td class="mono">index.json</td><td>The app, after every export and every rating. The MCP updates a row's effort after <code>rate_workout</code>, never adds rows.</td><td>MCP (for listing), CLI</td></tr>
+    <tr><td class="mono">plans/&lt;id&gt;.json</td><td>The MCP (<code>push_plan</code>) or the CLI (<code>healthaccess plan push</code>). Your AI can also write it directly.</td><td>The app</td></tr>
+    <tr><td class="mono">plans/&lt;id&gt;.status.json</td><td>The app, after "Put on Watch".</td><td>MCP (<code>get_plan_status</code>, <code>list_plans</code>)</td></tr>
+    <tr><td class="mono">briefing.md</td><td>The app, after every sync.</td><td>Any AI, a coach, you</td></tr>
+    <tr><td class="mono">mcp/clients/&lt;id&gt;.json</td><td>The MCP, on start and after tool calls, at most once a minute: client name and version, machine name, call count, last tool name. Never arguments or results.</td><td>The app, to show "Connected · Claude Code on Alex's MacBook Pro · last seen 2 min ago"</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Nothing else writes. Nothing ever deletes: a duplicate workout (same start within 2 seconds, same source) stays on disk and is left out of <code>index.json</code>. All JSON is UTF-8 with sorted keys; all timestamps are ISO 8601 in UTC with a <code>Z</code>; the local time is in the file name and in <code>metadata.HKTimeZone</code>.</p>
+
+<h2>An example workout, trimmed</h2>
+<p>This is <code>workouts/2026-05-14_0712_PoolSwim_7A1C3E90.json</code> from the <a href="/examples/README.md">synthetic example folder</a> in the repository (generated by a script, not a real person): a 1,200 m pool swim, swum from the plan S12 on the <a href="/docs/plans">plans page</a>. The full file has 24 steps, 24 lengths and 431 heart-rate samples; here three steps, two lengths and three samples stand in for them. Everything else is as written; keys are sorted on disk.</p>
+<pre>{
+  "schema": "healthaccess.workout.v1",
+  "healthaccess_version": "0.4.0",
+  "id": "7A1C3E90-5B2D-4F61-9C8E-2A7D40B6E1F3",
+  "activity": "pool_swim",
+  "source": "Apple Watch",
+  "start": "2026-05-14T05:12:04Z",
+  "end": "2026-05-14T05:48:10Z",
+  "duration_s": 2166,
+  "distance_m": 1200,
+  "active_kcal": 338.6,
+  "avg_hr": 129,
+  "max_hr": 162,
+  "pool_length_m": 50,
+  "plan_ref": {"plan_id": "2026-05-13T19:02:11Z-s12", "name": "S12"},
+  "steps": [
+    {"key": "0.0.0", "block": 0, "rep": 0, "step": 0, "kind": "warmup", "label": "FR easy, find your breathing",
+     "start": "2026-05-14T05:12:04Z", "end": "2026-05-14T05:16:43Z", "duration_s": 279,
+     "distance_m": 200, "avg_hr": 100, "pace_s_per_100m": 139.5, "goal_met": true},
+    {"key": "1.0.0", "block": 1, "rep": 0, "step": 0, "kind": "work", "label": "DRILL 6-3-6: 6 kicks side, 3 strokes",
+     "start": "2026-05-14T05:16:43Z", "end": "2026-05-14T05:18:08Z", "duration_s": 85,
+     "distance_m": 50, "avg_hr": 125, "pace_s_per_100m": 170.0, "goal_met": true},
+    {"key": "2.3.0", "block": 2, "rep": 3, "step": 0, "kind": "work", "label": "FR 100 steady, breathe every 3",
+     "start": "2026-05-14T05:34:44Z", "end": "2026-05-14T05:36:56Z", "duration_s": 132,
+     "distance_m": 100, "avg_hr": 151, "pace_s_per_100m": 132.0, "goal_met": true}
+  ],
+  "laps": [
+    {"start": "2026-05-14T05:12:07Z", "end": "2026-05-14T05:13:14Z", "duration_s": 67, "stroke": "freestyle", "swolf": 88.0},
+    {"start": "2026-05-14T05:13:14Z", "end": "2026-05-14T05:14:22Z", "duration_s": 68, "stroke": "freestyle", "swolf": 90.0}
+  ],
+  "hr_series": [["2026-05-14T05:12:05Z", 84], ["2026-05-14T05:12:10Z", 85], ["2026-05-14T05:48:06Z", 115]],
+  "recovery_hr": {"end": 115, "1min": 104, "2min": 96},
+  "effort": 6,
+  "effort_source": "apple",
+  "effort_estimated": 5,
+  "feel": null,
+  "metadata": {"HKAverageMETs": "6.84 kcal/hr·kg", "HKIndoorWorkout": "0", "HKLapLength": "50 m", "HKSwimmingLocationType": "1", "HKTimeZone": "Europe/Berlin"}
+}</pre>
+<h3>What the fields mean</h3>
+<dl class="kv">
+  <dt>activity</dt><dd><code>pool_swim</code>, <code>open_water_swim</code>, <code>indoor_row</code>, <code>run</code>, <code>walk</code>, <code>cycle</code>, or <code>other:&lt;HealthKit raw type&gt;</code>.</dd>
+  <dt>zones</dt><dd>Not written any more. Zone seconds are computed by the MCP and the command line from <code>hr_series</code>, with the four upper bounds from <code>zone_bounds</code> in <code>~/.config/healthaccess/config.toml</code> or, without them, an estimate from the age in <code>profile.json</code> (max heart rate 208 minus 0.7 times age; zones end at 72, 79, 86 and 92 percent of it). Every zone result says which it used (<code>bounds_source</code>). Files from before v0.4 may still carry app-computed <code>zones</code>; they are accepted.</dd>
+  <dt>steps</dt><dd>One per interval of a structured workout. <code>key</code> is Apple's <code>block.rep.step</code>, with <code>0.0.0</code> the warm-up and a trailing single step the cool-down. <code>label</code> is the step name from the plan your AI wrote; Apple drops step names on the way to HealthKit, so the app joins them back from the matching plan. A free workout has <code>steps: []</code>.</dd>
+  <dt>laps</dt><dd>One per pool length: stroke (freestyle, backstroke, breaststroke, butterfly, mixed, kickboard) and SWOLF.</dd>
+  <dt>hr_series</dt><dd>Heart rate about every 5 seconds, at least 4 seconds apart. The MCP leaves it out unless asked.</dd>
+  <dt>recovery_hr</dt><dd>Heart rate at the end, one minute and two minutes after. <code>null</code> right after a background export; filled in on the next run.</dd>
+  <dt>effort, feel</dt><dd>Your rating, 1 to 10, and a line of text. The rating comes from your Watch, which asks after a workout; Apple exports it and the file says <code>effort_source: apple</code>. The app never asks. <code>rate_workout</code> writes <code>ai</code> after you told the AI a number; files from older builds may say <code>app</code>. <code>effort_estimated</code> is Apple's own estimate and is never used as your effort.</dd>
+  <dt>plan_ref</dt><dd>The plan this session was started from, matched by the WorkoutKit id the app recorded, else by sport and scheduled time within two hours. <code>null</code> for a workout started on the Watch by hand.</dd>
+  <dt>metadata</dt><dd>Apple's raw workout metadata as strings. <code>HKLapLength</code> is where the pool length comes from.</dd>
+</dl>
+
+<h2>Vitals, one file per day</h2>
+<pre>{
+  "schema": "healthaccess.vitals.v1",
+  "date": "2026-05-14",
+  "resting_hr": 54,
+  "hrv_sdnn_ms": 58.3,
+  "sleep_s": 26160,
+  "body_mass_kg": 78.4,
+  "steps": 9412,
+  "vo2max": 44.1,
+  "bp": null
+}</pre>
+<p>Every field can be <code>null</code>; a day on which only steps were recorded gives a file full of nulls. Sleep is credited to the morning it ended and summed from the one source with the most sleep, so Watch and iPhone are not double-counted. HRV is the day's average; resting heart rate, weight, VO2max and blood pressure are the day's latest. A day with no values gets no file.</p>
+
+<h2>days/, one file per day with everything <span class="tag plan">v0.4</span></h2>
+<p>From v0.4 the app writes <code>days/&lt;date&gt;.json</code> next to <code>vitals/</code>, with every Health group that has data that day: <b>activity</b> (the rings, steps, distances, energy, exercise and stand minutes, daylight), <b>heart</b>, <b>respiratory</b>, <b>sleep</b> (stages and sessions), <b>body</b>, <b>blood</b>, <b>mobility</b>, <b>hearing</b>, <b>nutrition</b>, <b>mind</b>, <b>symptoms</b>, <b>cycle</b>, <b>medications</b>, <b>hygiene</b>, <b>uv</b>, <b>wheelchair</b>. A group is present only when it has data; inside a present group, absent values are an explicit <code>null</code>. The example day, trimmed to three groups:</p>
+<pre>{
+  "schema": "healthaccess.day.v1",
+  "date": "2026-05-14",
+  "activity": {
+    "rings": {
+      "exercise_min": {
+        "actual": 47,
+        "goal": 30
+      },
+      "move_kcal": {
+        "actual": 712.3,
+        "goal": 650
+      },
+      "move_mode": "active_energy",
+      "stand_hours": {
+        "actual": 13,
+        "goal": 12
+      }
+    },
+    "steps": 9412,
+    "distance_walking_running_m": 7180.4,
+    "distance_swimming_m": 1200,
+    "active_energy_kcal": 712.3,
+    "exercise_min": 47,
+    "time_in_daylight_min": 63
+  },
+  "heart": {
+    "resting_hr": 54,
+    "hr": {
+      "avg": 72,
+      "max": 162,
+      "min": 47,
+      "samples": 1184
+    },
+    "hrv_sdnn_ms": 58.3,
+    "vo2max": 44.1
+  },
+  "sleep": {
+    "asleep_s": 26160,
+    "deep_s": 4980,
+    "rem_s": 5760
+  }
+}</pre>
+<p>Two more files come with it. <code>catalog.json</code> lists every HealthKit type the app knows, with <code>has_data</code>, the sample count over 90 days, first and last date, and <code>exported_in</code> (<code>workouts</code>, <code>days</code>, <code>ecg</code>, <code>profile</code> or <code>none</code>), so <code>healthaccess doctor</code> can say "a type with data was exported nowhere" the day it happens. <code>profile.json</code> carries age and birth year (not the birthday), biological sex, blood type, wheelchair use, move mode and skin type. The full contract: <a href="/ref/export-coverage.md"><code>docs/export-coverage.md</code></a>.</p>
+
+<h2>index.json</h2>
+<pre>{
+  "schema": "healthaccess.index.v1",
+  "updated": "2026-05-14T06:03:17Z",
+  "workouts": [
+    {"id": "7A1C3E90-5B2D-4F61-9C8E-2A7D40B6E1F3", "file": "workouts/2026-05-14_0712_PoolSwim_7A1C3E90.json",
+     "activity": "pool_swim", "start": "2026-05-14T05:12:04Z", "duration_s": 2166, "distance_m": 1200,
+     "avg_hr": 129, "effort": 6, "effort_source": "apple", "plan_name": "S12", "source": "Apple Watch"},
+    {"id": "3F8B2D41-9E6C-4A17-B2D8-5C3E7F9A1B04", "file": "workouts/2026-05-12_0630_IndoorRow_3F8B2D41.json",
+     "activity": "indoor_row", "start": "2026-05-12T04:30:11Z", "duration_s": 1680, "distance_m": null,
+     "avg_hr": 137, "effort": 7, "effort_source": "apple", "plan_name": "R4", "source": "Apple Watch"}
+  ]
+}</pre>
+<p>Newest first, no series. The MCP lists from the index and opens a workout file only on demand. If the index lags behind the files, which happens, ids are also resolved by scanning <code>workouts/</code>.</p>
+
+<h2>Plans and their status</h2>
+<p>Your AI writes <code>plans/&lt;id&gt;.json</code>; the app answers with <code>plans/&lt;id&gt;.status.json</code>. The format, the rules and the "Put on Watch" flow have <a href="/docs/plans">their own page</a>. The status file for the plan behind the example swim, as the app wrote it after WorkoutKit scheduled the session for the next morning:</p>
+<pre>{
+  "plan_id": "2026-05-13T19:02:11Z-s12",
+  "state": "scheduled",
+  "at": "2026-05-13T19:04:40Z",
+  "method": "schedule",
+  "workoutkit_id": "D4E7A2C1-6F3B-4E8A-9B5C-1A2F3E4D5C6B",
+  "scheduled_for": "2026-05-14T05:00:00Z",
+  "error": null
+}</pre>
+
+<h2>mcp/clients/&lt;id&gt;.json</h2>
+<p>The one file the MCP writes that is not a plan: a presence note, so the app can show that an AI is connected. Written on server start and after tool calls, at most once a minute, one file per machine and client, overwritten in place. It never contains tool arguments or results.</p>
+<pre>{
+  "schema": "healthaccess.client.v1",
+  "id": "9f3c1a7e5b2d4c80",
+  "client": {
+    "name": "Claude Code",
+    "version": "2.1.0"
+  },
+  "machine": "Alex's MacBook Pro",
+  "mcp_version": "0.2.0",
+  "first_seen": "2026-05-09T17:20:41Z",
+  "last_seen": "2026-05-14T06:11:02Z",
+  "last_tool": "list_workouts",
+  "calls": 123
+}</pre>
+<p>The app shows "Connected · Claude Code on Alex's MacBook Pro · last seen 2 min ago" when any file in the folder is newer than 7 days, else "Not connected yet".</p>
+
+<h2>briefing.md</h2>
+<p>One page of Markdown the app rewrites after every sync, so an AI without the MCP (ChatGPT, a Claude Project, a local model, a human coach) still gets the picture. Sections, in this order: the title with the athlete's name and the time written; <b>Last 4 weeks</b>, one line per ISO week with sessions, distance, time and mean effort; <b>Recent sessions</b>, newest first, at most ten, one line each; <b>Vitals</b>, the latest resting heart rate, HRV, sleep and weight with their dates and the 21-day direction; <b>Next session</b>, the newest plan not yet on the Watch; <b>Open</b>, unrated sessions and plans waiting for a tap; <b>Limits</b>, the two fixed sentences about unlocking and pool length. No charts, no JSON, under 60 lines. An example: <a href="/examples/briefing.md"><code>examples/briefing.md</code></a>.</p>
+
+<h2>Files from before the rename</h2>
+<p>The project was called "Tide" until 2026-10-25. Files written before that carry <code>"schema": "tide.workout.v1"</code> (or <code>tide.workout.v0</code>, the first format), <code>tide.vitals.v1</code>, <code>tide.index.v1</code>, <code>tide.plan.v1</code>, and the key <code>tide_version</code> instead of <code>healthaccess_version</code>. Every reader accepts both for good; nothing is rewritten just to change a tag. The same goes for the environment variable <code>TIDE_DIR</code> and the resource URIs <code>tide://index</code> and <code>tide://workout/&lt;id&gt;</code>.</p>
+
+<p>The complete contract, with every field and the deviations the app documents, is <a href="/ref/schema.md"><code>docs/schema.md</code></a> in the repository.</p>
+
+<div class="next"><b>Next:</b> <a href="/docs/plans">Plans and Put on Watch</a> <a href="/docs/prompts">Ideas for your AI</a> <a href="/docs/privacy">What leaves the phone</a> <a href="/ref/mcp.md">Tool reference</a></div>
+</main>
+
+<footer class="site">
+  <div class="cols">
+    <div><h4>Connect an AI</h4><ul><li><a href="/docs/claude-code">Claude Code</a></li><li><a href="/docs/claude-desktop">Claude Desktop</a></li><li><a href="/docs/cursor">Cursor</a></li><li><a href="/docs/chatgpt">ChatGPT</a></li><li><a href="/docs/local-models">Local models</a></li></ul></div>
+    <div><h4>Reference</h4><ul><li><a href="/docs/files">The folder is the API</a></li><li><a href="/docs/plans">Plans and Put on Watch</a></li><li><a href="/docs/prompts">Ideas for your AI</a></li><li><a href="/ref/mcp.md">Tool reference</a></li><li><a href="/ref/schema.md">Data contract</a></li></ul></div>
+    <div><h4>For AIs</h4><ul><li><a href="/llms.txt">llms.txt</a></li><li><a href="/llms-full.txt">llms-full.txt</a></li><li><a href="https://www.npmjs.com/package/healthaccess-mcp">npm package</a></li></ul></div>
+    <div><h4>About</h4><ul><li><a href="/docs/privacy">Privacy in plain words</a></li><li><a href="/privacy-policy">Privacy policy</a></li><li><a href="/support">Support</a></li><li><a href="/docs/compare">Compared with the others</a></li></ul></div>
+  </div>
+  <p class="fine">Health Access MCP is made by Prinz Technology Consultancy, svetovanje na področju informacijskih tehnologij d.o.o. (Prinz Tech Consulting), Dunajska cesta 33, 1000 Ljubljana, Slovenia. Registration number 7326106000, VAT ID SI86067494, contact@prinz-tc.com. The MCP server and the command line are under the MIT licence. Apple, Apple Watch, Apple Health and HealthKit are trademarks of Apple Inc.; this project is not affiliated with Apple.</p>
+</footer>
+</div>
+</body>
+</html>

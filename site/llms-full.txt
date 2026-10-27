@@ -1,0 +1,556 @@
+# Health Access MCP, the whole thing in one file
+
+Written for an AI that has to install and use Health Access MCP without reading any other page. Version of this file: 2026-10-25. Canonical URL: https://healthaccessmcp.com/llms-full.txt
+
+## 1. What it is
+
+Health Access is middleware. It does the one thing Apple requires a phone app for, writing your workouts and vitals as JSON into a folder you pick, and then it gets out of the way. Your AI reads that folder, through the MCP or just as files. If it writes you a plan, one tap puts it on your Watch.
+
+Three parts:
+
+- The iPhone app, "Health Access" (iOS 17 or later). Three tabs: Export (reads HealthKit, writes `workouts/*.json`, `days/*.json`, `index.json`, `briefing.md`, `catalog.json`, `profile.json` into a folder the user picked), Import (puts AI-written workout plans onto the Apple Watch through WorkoutKit, by a tap or automatically, and writes `plans/*.status.json`), Settings. No server, no account. In testing; the App Store release is next.
+- `healthaccess-mcp`, an MCP server over stdio (Rust, MIT). Reads the folder, writes `plans/<id>.json`, a small presence file under `mcp/clients/` and the two rating fields of a workout, nothing else. Thirteen tools, eleven prompts, three resources. Live on npm (0.6.1) and in the official MCP registry.
+- `healthaccess`, a command line with the same views (`list`, `show`, `summary`, `rate`, `plan push|status|list`, `day`, `days`, `catalog`, `profile`, `ecgs`, `briefing`, `prompts`, `doctor`). Live, in the same npm package: `npx -y -p healthaccess-mcp healthaccess <command>`.
+
+The folder can be anywhere the iOS Files app can open: iCloud Drive, Dropbox, Google Drive, OneDrive, Proton Drive, SMB/NAS, On My iPhone. The one rule: the computer where the AI runs must see the same folder. The server finds it on its own (section 4); `--dir` names it when the search does not.
+
+What is planned, not live, as of 2026-10-27: the app on the App Store (it is in testing), a Claude directory plugin (prepared), a Homebrew tap and a crates.io package, the public source repository.
+
+Project history: the codename was "Tide" until 2026-10-25. Old identifiers are accepted forever as aliases (section 13). The repository directory on disk may still be called `tide`.
+
+## 2. The order of things
+
+Once, about five minutes, the user:
+1. Installs the app.
+2. Picks a folder (any Files provider) that syncs to the computer where the AI runs.
+3. Allows Health access (read only, chosen types) and notifications (one kind only: "Your AI wrote S27", when a plan file appears).
+4. Gives the MCP to the AI: pastes one paragraph, the AI sets itself up from this file.
+
+Every workout, nobody:
+1. The user ends a workout on the Watch.
+2. Next time the phone is unlocked, the app writes `workouts/<date>_<time>_<Activity>_<uuid8>.json`: distance, time, heart rate every few seconds, every interval with its name, every length with stroke and SWOLF. Vitals land once a day.
+3. The folder syncs to the computer.
+4. The AI reads it. No app on that side.
+
+Sometimes, one tap, the user:
+1. Rates the session on the Watch when it asks (effort 1 to 10). Apple exports the score and the app picks it up as `effort_source: apple`. The app itself never asks for a rating.
+2. Taps "Put on Watch" in the app's Import tab when the AI has written a plan, or switched on "Put new plans on my Watch automatically" once, then nothing.
+
+Whenever asked, the AI:
+1. Reads sessions, vitals and trends through the MCP, or reads the JSON directly.
+2. Writes `plans/<id>.json` through `push_plan`. It shows up in the app within about a minute.
+3. Can work without the MCP: the folder holds plain JSON and `briefing.md`.
+
+## 3. Install the server
+
+Nothing to install by hand. The server is published on npm as `healthaccess-mcp` with prebuilt binaries for macOS (Apple silicon and Intel), Linux (x64, arm64) and Windows (x64). It needs Node.js 18 or newer for `npx`:
+
+```sh
+npx -y healthaccess-mcp --check     # downloads the server once, prints the folder it found, exits
+```
+
+The same package carries the command line: `npx -y -p healthaccess-mcp healthaccess doctor`, or `npm install -g healthaccess-mcp` for both `healthaccess-mcp` and `healthaccess` on the PATH. The npm binaries contain no network code.
+
+From source instead (Rust stable 1.99 or newer, repository access): `cargo install --path mcp --locked` and `cargo install --path cli --locked`, then use `healthaccess-mcp` wherever this file says `npx -y healthaccess-mcp`.
+
+## 4. The folder
+
+The server finds the Health Access folder on its own. Resolution order: `--dir` on the command line, the environment variable `HEALTHACCESS_DIR`, `dir` in `~/.config/healthaccess/config.toml`, then a search: iCloud Drive first (`~/Library/Mobile Documents/com~apple~CloudDocs` on a Mac, `%USERPROFILE%\iCloudDrive` on Windows), then the other file providers (`~/Library/CloudStorage/*`, `~/Dropbox`, `~/Google Drive`, `~/OneDrive*`, `~/Box`), then `~/Documents`. A Health Access folder is a directory with an `index.json` of schema `healthaccess.index.v1` and a `workouts/` directory. When several exist, the server does not guess (one could be a folder someone else shared): it lists them and stops, and `--dir`, `HEALTHACCESS_DIR` or `dir` in the config picks one.
+
+`npx -y healthaccess-mcp --check` prints the folder and where it came from ("found on this computer", "--dir", "config.toml"). If it finds nothing, ask the user where the folder is and pass `--dir "<absolute path>"`. The app's setup message names the folder and, for iCloud Drive, its usual Mac path. Check a folder by hand with `ls "<folder>/workouts"`; on iCloud Drive, opening the folder in Finder downloads files that are only in the cloud.
+
+Optional config file:
+
+```toml
+# ~/.config/healthaccess/config.toml
+dir = "/Users/<user>/Library/Mobile Documents/com~apple~CloudDocs/Health Access"   # optional, skips the search
+zone_bounds = [133, 146, 158, 170]   # optional: upper bounds of heart-rate zones 1 to 4, bpm. Without it the bounds are
+                                     # estimated from the age in profile.json (max HR 208 - 0.7 x age; 72/79/86/92 % of max)
+```
+
+## 5. Register the server with the client
+
+Transport: stdio. Command: `npx`. Arguments: `-y`, `healthaccess-mcp`, and optionally `--dir "<folder>"`. No environment variables needed. If a GUI client reports `spawn npx ENOENT`, it does not see the shell PATH: use the absolute path that `which npx` prints as the command.
+
+Claude Code:
+
+```sh
+claude mcp add --scope user healthaccess -- npx -y healthaccess-mcp
+# --scope user = all projects; omit for the current project only
+```
+
+Claude Desktop (`~/Library/Application Support/Claude/claude_desktop_config.json`; Claude menu, Settings, Developer, Edit Config; restart Claude Desktop after saving):
+
+```json
+{
+  "mcpServers": {
+    "healthaccess": {
+      "command": "npx",
+      "args": ["-y", "healthaccess-mcp"]
+    }
+  }
+}
+```
+
+Cursor (`~/.cursor/mcp.json` for all projects, or `.cursor/mcp.json` in a project): the same JSON as Claude Desktop.
+
+LM Studio (0.3.17 or later; Program tab, Install, Edit mcp.json): the same JSON as Claude Desktop.
+
+Goose (`goose configure`, Add Extension, Command-line Extension; or `~/.config/goose/config.yaml`):
+
+```yaml
+extensions:
+  healthaccess:
+    name: Health Access
+    type: stdio
+    cmd: npx
+    args: ["-y", "healthaccess-mcp"]
+    enabled: true
+    timeout: 300
+```
+
+Codex CLI (`codex mcp add healthaccess -- npx -y healthaccess-mcp`, or `~/.codex/config.toml`; the first npx start downloads the server, so allow more than the default 10 s):
+
+```toml
+[mcp_servers.healthaccess]
+command = "npx"
+args = ["-y", "healthaccess-mcp"]
+startup_timeout_sec = 60
+```
+
+Claude Code project file `.mcp.json` (project scope): the same JSON as Claude Desktop.
+
+ChatGPT: cannot launch a local stdio server. It connects to remote HTTPS MCP servers only, on some plans. Use the files instead: upload `briefing.md` or a workout JSON, or paste the output of `npx -y -p healthaccess-mcp healthaccess summary --weeks 4`. Do not expose the server through a public tunnel without authentication.
+
+Verify: `claude mcp list` (Claude Code), `codex mcp list` (Codex CLI), the Connectors menu (Claude Desktop), the MCP settings (Cursor). The server announces itself as `healthaccess-mcp`, title "Health Access MCP". `npx -y -p healthaccess-mcp healthaccess doctor` checks the folder: directories, index health, every JSON file, schema versions; exit code 1 on problems. Once the client has started the server, the Health Access app shows "Connected" with the client's name.
+
+First thing to say after setup: "List my last 5 workouts, one line each. Then open the newest one and explain it in plain words. Ask me how it felt before you judge it."
+
+## 6. The folder
+
+```
+<folder>/
+  index.json                              one row per workout, newest first; rewritten by the app after every export
+  briefing.md                             one page any AI can read
+  workouts/
+    2026-05-14_0712_PoolSwim_7A1C3E90.json   <local yyyy-MM-dd_HHmm>_<Activity>_<first 8 chars of the HealthKit UUID>
+    2026-05-12_0630_IndoorRow_3F8B2D41.json
+  vitals/
+    2026-05-14.json                       one per day, rewritten when values change
+  days/
+    2026-05-14.json                       one per day, every Health group (v0.4; vitals/ stays for one release)
+  catalog.json                            which Health types have data and where they were exported (v0.4)
+  profile.json                            age, birth year, sex, blood type, move mode (v0.4)
+  plans/
+    2026-05-13T19:02:11Z-s12.json         written by the MCP (push_plan) or the CLI, or by the AI directly
+    2026-05-13T19:02:11Z-s12.status.json  written by the app: did it reach the Watch
+  mcp/clients/
+    <id>.json                             presence file written by the MCP: client, machine, counts; never arguments or results
+```
+
+The same layout, filled with synthetic data, is the `examples/` folder of the repository; every excerpt in this file is taken from it.
+
+Who writes what:
+- The app writes `workouts/`, `vitals/` (`days/`, `catalog.json`, `profile.json` from v0.4), `index.json`, `plans/*.status.json`, and `briefing.md`.
+- The MCP and CLI write `plans/<id>.json` and `mcp/clients/<id>.json` (section 8), and may update exactly two keys of a workout file, `effort` and `feel`, through `rate_workout`.
+- Nothing else writes. Nothing deletes. Export never overwrites a workout file; a duplicate (same start within 2 s, same source) stays on disk and is left out of `index.json`.
+- All JSON: UTF-8, sorted keys, ISO 8601 UTC timestamps with `Z`. Local time is in the file name and in `metadata.HKTimeZone`.
+
+## 7. Workout file, schema `healthaccess.workout.v1`
+
+An example file, `workouts/2026-05-14_0712_PoolSwim_7A1C3E90.json`, trimmed. It comes from the synthetic folder `examples/` in the repository (generated, not a real person): a 1,200 m swim from the plan S12. The full file has 24 steps, 24 laps and 431 heart-rate samples; here three steps, two laps and three samples stand in for them. Keys are sorted on disk.
+
+```json
+{
+  "schema": "healthaccess.workout.v1",
+  "healthaccess_version": "0.4.0",
+  "id": "7A1C3E90-5B2D-4F61-9C8E-2A7D40B6E1F3",
+  "activity": "pool_swim",
+  "source": "Apple Watch",
+  "start": "2026-05-14T05:12:04Z",
+  "end": "2026-05-14T05:48:10Z",
+  "duration_s": 2166,
+  "distance_m": 1200,
+  "active_kcal": 338.6,
+  "avg_hr": 129,
+  "max_hr": 162,
+  "pool_length_m": 50,
+  "plan_ref": {"plan_id": "2026-05-13T19:02:11Z-s12", "name": "S12"},
+  "steps": [
+    {"key": "0.0.0", "block": 0, "rep": 0, "step": 0, "kind": "warmup", "label": "FR easy, find your breathing",
+     "start": "2026-05-14T05:12:04Z", "end": "2026-05-14T05:16:43Z", "duration_s": 279,
+     "distance_m": 200, "avg_hr": 100, "pace_s_per_100m": 139.5, "goal_met": true},
+    {"key": "1.0.0", "block": 1, "rep": 0, "step": 0, "kind": "work", "label": "DRILL 6-3-6: 6 kicks side, 3 strokes",
+     "start": "2026-05-14T05:16:43Z", "end": "2026-05-14T05:18:08Z", "duration_s": 85,
+     "distance_m": 50, "avg_hr": 125, "pace_s_per_100m": 170.0, "goal_met": true},
+    {"key": "2.3.0", "block": 2, "rep": 3, "step": 0, "kind": "work", "label": "FR 100 steady, breathe every 3",
+     "start": "2026-05-14T05:34:44Z", "end": "2026-05-14T05:36:56Z", "duration_s": 132,
+     "distance_m": 100, "avg_hr": 151, "pace_s_per_100m": 132.0, "goal_met": true}
+  ],
+  "laps": [
+    {"start": "2026-05-14T05:12:07Z", "end": "2026-05-14T05:13:14Z", "duration_s": 67, "stroke": "freestyle", "swolf": 88.0},
+    {"start": "2026-05-14T05:13:14Z", "end": "2026-05-14T05:14:22Z", "duration_s": 68, "stroke": "freestyle", "swolf": 90.0}
+  ],
+  "hr_series": [["2026-05-14T05:12:05Z", 84], ["2026-05-14T05:12:10Z", 85], ["2026-05-14T05:48:06Z", 115]],
+  "recovery_hr": {"end": 115, "1min": 104, "2min": 96},
+  "effort": 6,
+  "effort_source": "apple",
+  "effort_estimated": 5,
+  "feel": null,
+  "metadata": {"HKAverageMETs": "6.84 kcal/hr·kg", "HKIndoorWorkout": "0", "HKLapLength": "50 m", "HKSwimmingLocationType": "1", "HKTimeZone": "Europe/Berlin"}
+}
+```
+
+Fields:
+- `activity`: `pool_swim` | `open_water_swim` | `indoor_row` | `run` | `walk` | `cycle` | `other:<HealthKit raw type>`.
+- Zones: new files carry no `zones`. Zone seconds are computed by the MCP and the CLI from `hr_series` (each sample's time until the next sample, capped at 60 s, inside the workout) with the bounds from `zone_bounds` in config.toml or, without them, an estimate from the age in `profile.json` (max HR = 208 - 0.7 x age; bounds at 72 / 79 / 86 / 92 % of max). Every zone result states `bounds` and `bounds_source` (`config` or `estimated`). Files from before v0.4 may still carry app-computed `zones`; they are accepted.
+- `steps`: one per interval of a structured workout. `key` is Apple's `block.rep.step`; `0.0.0` is the warm-up, a trailing single-step block the cool-down. `kind`: `warmup` | `work` | `recovery` | `cooldown`. `label` is the step name from the plan the AI wrote (Apple drops names on the way into HealthKit; the app joins them back from the matching plan). `pace_s_per_100m` only for steps of at least 20 m. `goal_met` can be null. A free workout has `steps: []`.
+- `laps`: one per pool length; `stroke`: freestyle | backstroke | breaststroke | butterfly | mixed | kickboard; `swolf`.
+- `hr_series`: `[timestamp, bpm]` about every 5 s. The MCP omits it unless `include_hr_series` is true.
+- `recovery_hr`: heart rate at the end and 1 and 2 minutes after; null right after a background export, filled in on the next run.
+- `effort` (1 to 10 or null) and `feel` (text or null): the athlete's rating. `effort_source` says where it came from: `apple` for the rating made on the Watch (the Watch asks after the workout; the app never asks), `ai` for `rate_workout`, `app` in files written by older builds. `effort_estimated` is Apple's own estimate, never used as `effort`. `rate_workout` writes `effort_source: "ai"` and must only be called with a number the athlete said.
+- `plan_ref`: `{plan_id, name}` of the plan the session was started from (matched by the WorkoutKit id the app recorded, else by sport and scheduled time within 2 h), or null for a workout started by hand.
+- `metadata`: Apple's raw workout metadata as strings.
+
+## 8. Vitals, index, plan status
+
+`vitals/<yyyy-MM-dd>.json`, schema `healthaccess.vitals.v1`, every field nullable (from the example folder):
+
+```json
+{"schema": "healthaccess.vitals.v1", "date": "2026-05-14", "resting_hr": 54, "hrv_sdnn_ms": 58.3, "sleep_s": 26160, "body_mass_kg": 78.4, "steps": 9412, "vo2max": 44.1, "bp": null}
+```
+
+From v0.4 the app writes `days/<yyyy-MM-dd>.json` (schema `healthaccess.day.v1`) with every Health group that has data: `activity` (rings, steps, distances, energy, exercise and stand minutes, daylight), `heart` (resting, walking average, min/avg/max, HRV, VO2max, events), `respiratory`, `sleep` (stages and sessions), `body`, `blood`, `mobility`, `hearing`, `nutrition`, `mind`, `symptoms`, `cycle`, `medications`, `hygiene`, `uv`, `wheelchair`. Inside a present group, absent values are explicit `null`; `vitals/` is kept for one release. Trimmed example (`examples/days/2026-05-14.json`):
+
+```json
+{
+  "schema": "healthaccess.day.v1",
+  "date": "2026-05-14",
+  "activity": {
+    "rings": {
+      "exercise_min": {
+        "actual": 47,
+        "goal": 30
+      },
+      "move_kcal": {
+        "actual": 712.3,
+        "goal": 650
+      },
+      "move_mode": "active_energy",
+      "stand_hours": {
+        "actual": 13,
+        "goal": 12
+      }
+    },
+    "steps": 9412,
+    "distance_walking_running_m": 7180.4,
+    "distance_swimming_m": 1200,
+    "active_energy_kcal": 712.3,
+    "exercise_min": 47,
+    "time_in_daylight_min": 63
+  },
+  "heart": {
+    "resting_hr": 54,
+    "hr": {
+      "avg": 72,
+      "max": 162,
+      "min": 47,
+      "samples": 1184
+    },
+    "hrv_sdnn_ms": 58.3,
+    "vo2max": 44.1
+  },
+  "sleep": {
+    "asleep_s": 26160,
+    "deep_s": 4980,
+    "rem_s": 5760
+  }
+}
+```
+
+`catalog.json` lists every HealthKit type the app knows with `has_data`, `samples_90d`, `first`, `last` and `exported_in` (`workouts`, `days`, `ecg`, `profile` or `none`), so `healthaccess doctor` can report a type with data that was exported nowhere. `profile.json` carries `age`, `birth_year`, `biological_sex`, `blood_type`, `wheelchair_use`, `activity_move_mode`, `fitzpatrick_skin_type`.
+
+`sleep_s` is credited to the morning the sleep ended, from the one source with the most sleep. `hrv_sdnn_ms` is the day's average; `resting_hr`, `body_mass_kg`, `vo2max` and `bp` (`{sys, dia, at}`) are the day's latest; `steps` the day's sum. A day with no values gets no file.
+
+`index.json`, schema `healthaccess.index.v1`: `{"schema", "updated", "workouts": [{"id", "file", "activity", "start", "duration_s", "distance_m", "avg_hr", "effort", "plan_name"}]}`, newest first, `file` relative to the folder (`workouts/<name>.json`). The MCP lists from it and opens files on demand; if the index lags behind the files, ids are also resolved by scanning `workouts/`.
+
+`plans/<id>.status.json`, written by the app (from the example folder):
+
+```json
+{"plan_id": "2026-05-13T19:02:11Z-s12", "state": "scheduled", "at": "2026-05-13T19:04:40Z", "method": "schedule", "workoutkit_id": "D4E7A2C1-6F3B-4E8A-9B5C-1A2F3E4D5C6B", "scheduled_for": "2026-05-14T05:00:00Z", "error": null}
+```
+
+`state`: `scheduled` | `failed` | `cancelled` (no file yet = `pending`). `method`: `schedule` (WorkoutKit scheduled it for a date, verified) or `preview` (installed through Apple's "Add to Watch" sheet, which does not report back; the app asked the user). `workoutkit_id` links the finished workout back to the plan.
+
+`mcp/clients/<id>.json`, written by the MCP server on start and after tool calls (at most once a minute), one file per machine and client: `{"schema": "healthaccess.client.v1", "id": "<stable id per machine+client>", "client": {"name": "Claude Code", "version": "..."}, "machine": "Alex's MacBook Pro", "mcp_version": "0.2.0", "first_seen": "...", "last_seen": "...", "last_tool": "list_workouts", "calls": 123}`. The app shows "Connected · <client> on <machine> · last seen <relative>" when any file is newer than 7 days, else "Not connected yet". Never tool arguments or results.
+
+`briefing.md`: one page of Markdown the app rewrites after every sync. Sections in order: title with the athlete's name and the time written; Last 4 weeks (per ISO week: sessions, distance, time, mean effort); Recent sessions (newest first, max 10, one line each); Vitals (latest resting HR, HRV, sleep, weight with dates and 21-day direction); Next session; Open (unrated sessions, plans waiting for a tap); Limits (the two fixed sentences). No charts, no JSON, under 60 lines.
+
+## 9. Tools
+
+All results are JSON text. Domain errors (unknown id, failed validation) come back as tool errors with the reason. Ids: the full HealthKit UUID, the 8-character short id (the suffix of the file name) or the file name all work; resolved through `index.json` first, then by scanning `workouts/`.
+
+- `list_workouts {since?, sport?, limit?=20}` (read-only). `since`: `YYYY-MM-DD` or RFC 3339. `sport`: `pool_swim`, `indoor_row`, `cycle`, `walk`, `run`, ... (`swim` matches both swim kinds). Returns `total_workouts`, `matched`, `returned`, and `rows`, newest first, each with `id`, `short_id`, `start`, `activity`, `duration_s`, `distance_m`, `avg_hr`, `effort`, `plan_name`, `file` and a one-line `summary` written for an LLM, like `2026-05-14 Pool swim "S12" · 1200 m · 36:06 · avg HR 129 (max 162) · Z1-2 93% · effort 6/10 (apple) · best FR 100 2:12 -> 284 beats/100 m` (the example swim).
+- `get_workout {id, include_hr_series?=false, include_laps?=true}` (read-only). The full workout document plus `summary`, `file` and `cardiac_cost` (`beats_per_100m`, `best_100_pace_s`, `avg_hr`, `basis`).
+- `get_vitals {days?=30}` (read-only). The vitals files of the last N days, oldest first, with `latest` and simple `averages`. Empty with a note until the app has written vitals.
+- `training_summary {weeks?=8}` (read-only). One entry per ISO week ending in the current week, empty weeks included: `sessions`, `duration_s`, `distance_m`, duration-weighted `avg_hr`, `z12_pct` (share of time in zones 1 and 2), `mean_effort` over rated sessions, `rated_sessions`, `cardiac_cost` (mean over swims), `by_sport`. Plus `cardiac_cost_trend` (one point per swim) and `notes` stating the heuristics. Cardiac cost = avg HR x best freestyle 100 m pace (s) / 60 = heart beats per 100 m; lower is better; compare sessions of similar structure.
+- `rate_workout {id, effort, feel?}` (writes). Stores `effort` (1 to 10) and, when given, `feel` in the workout file; only those two keys change (atomic rewrite). Updates the matching `index.json` row if the index lists the workout. Omitting `feel` keeps the previous note. The AI must ask the athlete for the number, never guess it.
+- `push_plan {plan}` (writes). Validates a plan (section 10) and writes `plans/<id>.json` with `id = <RFC 3339 UTC seconds>-<slug(name)>`. Returns `id`, `file`, `path`, `planned_distance_m`, `planned_time_s`, the stored `plan` and a `next` hint. Every validation violation is reported in one message.
+- `get_plan_status {id}` (read-only). `{plan_id, state, at, error}` plus `method`, `workoutkit_id`, `scheduled_for` when present. `state`: `pending` | `scheduled` | `failed` | `cancelled`.
+- `list_plans {}` (read-only). Every plan in `plans/` with its state, planned distance and time, newest first.
+
+Resources: `healthaccess://index` (the deduplicated index), `healthaccess://workout/<id>` (one workout, heart-rate series included; template `healthaccess://workout/{id}`).
+
+Prompts: the server exposes the eleven ideas of section 11 as MCP prompts under the ids given there. They are suggestions, not a step of the setup; the text works pasted as well.
+
+CLI equivalents: `healthaccess list [--since] [--sport] [--limit]`, `healthaccess show <id> [--hr]`, `healthaccess summary [--weeks 8]`, `healthaccess rate <id> <effort> [feel words]`, `healthaccess plan push <plan.json>`, `healthaccess plan status <id>`, `healthaccess plan list`, `healthaccess doctor`. `--dir` and `--json` work on every subcommand.
+
+## 10. Plan format, schema `healthaccess.plan.v1`
+
+What the AI passes to `push_plan` (the server fills `schema`, `id`, `created_at`, `created_by`):
+
+```json
+{
+  "name": "S27",
+  "sport": "pool_swim",
+  "pool_length_m": 50,
+  "warmup": {"goal": {"type": "time_s", "value": 120}, "zone": 1},
+  "blocks": [
+    {"repeat": 4, "steps": [
+      {"kind": "work", "goal": {"type": "distance_m", "value": 50}, "zone": 1, "label": "FR easy, long strokes"},
+      {"kind": "recovery", "goal": {"type": "time_s", "value": 30}}
+    ]}
+  ],
+  "cooldown": {"goal": {"type": "distance_m", "value": 100}, "zone": 1},
+  "notes": "what this session is for, shown in the app",
+  "scheduled_for": "2026-10-27T07:30:00Z"
+}
+```
+
+Rules the server checks:
+- `sport` is one of `run`, `indoor_run`, `walk`, `hike`, `cycle`, `indoor_cycle`, `pool_swim`, `open_water_swim`, `indoor_row`, `hiit` or `elliptical`. `hiit` and `elliptical` take `time_s` goals only. `pool_length_m` is a reminder for pool swims; the Watch keeps its own pool length.
+- `name` not empty, at most 40 characters. Use the next free S-number (S13 after S12 in the example folder).
+- At least one block; `repeat` 1 to 99; each block at least one step.
+- `goal.type` is `time_s` or `distance_m`, with a positive value.
+- `zone`, when given, 1 to 5 (the Watch's own heart-rate zones).
+- `label` at most 40 characters, written as an instruction readable on the wrist: "KICK on back, no board, hips up".
+- `kind` is `work` or `recovery`. Rests are real rests.
+- `warmup` and `cooldown` are optional single steps. A 2 minute time warm-up first lets the athlete start the workout in the shower so the Watch is in swim mode at the pool.
+- `pool_length_m` is a reminder for the athlete only; the Watch keeps its own pool length setting.
+- `scheduled_for` (optional, RFC 3339 UTC) is used to match the finished workout to the plan when the exact WorkoutKit id is missing.
+
+The full plan behind the example swim, `plans/2026-05-13T19:02:11Z-s12.json` in `examples/` (1,200 m in six parts, about 36 minutes), as `push_plan` wrote it:
+
+```json
+{
+  "schema": "healthaccess.plan.v1",
+  "id": "2026-05-13T19:02:11Z-s12",
+  "name": "S12",
+  "sport": "pool_swim",
+  "pool_length_m": 50,
+  "warmup": {"goal": {"type": "distance_m", "value": 200}, "zone": 1, "label": "FR easy, find your breathing"},
+  "blocks": [
+    {"repeat": 3, "steps": [
+      {"kind": "work", "goal": {"type": "distance_m", "value": 50}, "zone": 1, "label": "DRILL 6-3-6: 6 kicks side, 3 strokes"},
+      {"kind": "work", "goal": {"type": "distance_m", "value": 50}, "zone": 1, "label": "FR easy, long strokes"},
+      {"kind": "recovery", "goal": {"type": "time_s", "value": 30}}
+    ]},
+    {"repeat": 4, "steps": [
+      {"kind": "work", "goal": {"type": "distance_m", "value": 100}, "zone": 2, "label": "FR 100 steady, breathe every 3"},
+      {"kind": "recovery", "goal": {"type": "time_s", "value": 40}}
+    ]},
+    {"repeat": 2, "steps": [
+      {"kind": "work", "goal": {"type": "time_s", "value": 120}, "zone": 1, "label": "KICK on back, no board, hips up"},
+      {"kind": "recovery", "goal": {"type": "time_s", "value": 45}}
+    ]},
+    {"repeat": 1, "steps": [
+      {"kind": "work", "goal": {"type": "distance_m", "value": 100}, "zone": 2, "label": "FR 100, carry the drill into it"}
+    ]}
+  ],
+  "cooldown": {"goal": {"type": "distance_m", "value": 100}, "zone": 1, "label": "Easy, any stroke, long exhale"},
+  "notes": "Technique week 2. Short drill reps, then four steady 100s to carry the feel over. Kick on back is for the hips, not for speed. Target effort 5 to 6.",
+  "created_by": "claude-code",
+  "created_at": "2026-05-13T19:02:11Z",
+  "scheduled_for": "2026-05-14T05:00:00Z"
+}
+```
+
+The flow after `push_plan`: the folder syncs to the phone; the app lists the plan in its Import tab as "Your AI wrote S27" (and notifies if it was not in front). WorkoutKit schedules it in the Watch's Workout app for `scheduled_for`; without a time, or once it has passed, for the next morning at 10:00. That happens when the user taps "Put on Watch", or by itself when the user switched on "Put new plans on my Watch automatically" (the next time the app runs or iOS wakes it, usually within hours, not instantly). The app writes the status file (`scheduled`, `failed`, or `cancelled` after "Remove from Watch"); `get_plan_status` reports it. After the session, the exported workout carries `plan_ref` and the step labels. Always ask the athlete when they will train and set `scheduled_for`. Tell the user: "S27 is in the Health Access app under Import, for Wednesday 10:00."
+
+## 11. Ideas for your AI: 11 prompts in two groups, suggestions only
+
+These are ideas, not a step of the setup: use them, change them or ignore them. What you share with an AI, and what it tells you, is between you and that AI. Every prompt asks before it reads data, and reads data before it writes anything. None assumes a sport. Export prompts read and explain; Plans prompts write sessions for the Watch. Voice: plain, short, no consultant words.
+
+Export prompts (understand what your Watch recorded):
+
+### 1. Weekly check-in
+id: `weekly_checkin` · group: export · args: none
+about: Four questions about your week, then one win, one change and one question back.
+
+Ask, one message:
+1. How was the week, in two sentences?
+2. Sleep: roughly how many hours, and how did you wake up?
+3. Stress at work or home, 1 to 10?
+4. Anything hurting?
+
+Then read `training_summary` for 4 weeks and `get_days` for the last 14 days (sleep, resting heart rate, HRV, activity). Compare what was planned with what happened: sessions done, how hard they felt versus what the heart rate says, resting heart rate and HRV trend.
+
+Reply with: what went well (one specific thing with a number), what to change (one thing), and one question for me. Keep it to what fits on a phone screen.
+
+### 2. Explain my last session
+id: `explain_last_session` · group: export · args: `id` (optional)
+about: Your latest session in plain words: the parts, the heart rate, what it means for next time.
+
+One question: what did you want from this session?
+
+Then `get_workout` on the latest session (or the id I gave) with laps. Explain it in plain words: what the parts were, where the heart rate went relative to the plan, where pace or power changed, anything odd (a part done fast that was meant to be easy, a lap the Watch probably miscounted). End with one sentence about what it means for next time. No charts, no jargon without a one-line explanation.
+
+### 3. Am I overdoing it?
+id: `overdoing_it` · group: export · args: none
+about: Resting heart rate, HRV, sleep and load over three weeks, read as a hypothesis, not a verdict.
+
+Ask:
+1. How have you been sleeping the last week?
+2. Motivation to train, 1 to 10?
+3. Any illness, travel, or big life stress right now?
+
+Then `get_days` for 21 days (resting heart rate, HRV, sleep) and `training_summary` for 4 weeks (load, effort). Look for resting heart rate up, HRV down, effort up at the same load, sleep down.
+
+Answer as a hypothesis, not a verdict: what the numbers suggest, how confident you are, and what would change your mind. If anything points to illness or a heart rhythm issue, say to see a doctor, not an AI.
+
+### 4. How am I sleeping and recovering?
+id: `sleep_and_recovery` · group: export · args: `days` (default 28)
+about: Four weeks of sleep, heart and breathing next to your training, with one thing to try.
+
+Ask:
+1. How rested do you feel most mornings, 1 to 10?
+2. Anything that changed lately: bedtime, alcohol, caffeine late in the day, a new baby, shifts, travel?
+
+Then `get_days` for that many days with the sleep, heart and respiratory groups. Look at sleep duration and timing, how regular bedtimes are, resting heart rate, HRV, breathing rate and, if the Watch has it, wrist temperature. Line them up against the training days from `training_summary`.
+
+Tell me in five sentences what the data shows, which one pattern is worth acting on, and one small thing to try for two weeks. Say plainly when a gap in the data means you cannot tell.
+
+### 5. What changed over the last months?
+id: `long_term_trends` · group: export · args: `weeks` (default 12)
+about: The first and the last month of a quarter compared: what moved and what did not.
+
+One question first: what would you like to have improved over this time?
+
+Then read `training_summary` for that many weeks, `get_days` for the same range (resting heart rate, HRV, VO2 max, weight, steps, sleep) and `get_profile`. Compare the first four weeks with the last four.
+
+Reply with: three things that moved, each with the before and after numbers, one thing that did not move although you expected it to, and what you would keep doing. Separate what the numbers show from what you guess.
+
+### 6. Prepare this for my coach or doctor
+id: `coach_summary` · group: export · args: `weeks` (default 4)
+about: A one-page summary of the last weeks for a coach, a doctor or a physio.
+
+Ask: who is this for (a coach, a doctor, a physio), what do they care about most, and how do they like to receive things (email, PDF, printout)?
+
+Then read `training_summary`, the sessions and `get_days` for that period. Write a one-page summary they can use: sessions done, total volume, how hard they felt versus heart rate, resting heart rate, HRV and sleep trends, anything I reported, open questions. Plain language, numbers where they help, nothing invented, no diagnosis. Offer it as text first, then in the format they asked for.
+
+Import prompts (workout plans from your AI onto the Watch):
+
+### 7. Plan my next session
+id: `next_session` · group: plans · args: none
+about: One session for any sport, for the day and time you say, with instructions on the wrist.
+
+Ask me these, one message, numbered, then wait:
+1. Which sport, and where (pool or open water, road or treadmill, outdoors or on a trainer)?
+2. When will you do it: day and time?
+3. How much time do you have?
+4. How did the last session feel, 1 to 10, and anything sore?
+5. What is this phase for: getting back into it, building endurance, getting faster, or just enjoying it?
+6. Anything to avoid (an injury, equipment you do not have, a pool length, a route)?
+
+Then read `training_summary` for the last 4 weeks and `get_workout` for the last 3 sessions of that sport. Note what the effort ratings say versus what the heart rate says; those often disagree, and effort wins.
+
+Write one session that fits the answers: an easy warm-up, the main part, a cool-down. Every step label is an instruction I can read on the wrist, under 40 characters, like "Easy, can talk in full sentences" or "Hard, 8 of 10, steady". Use distance or time goals that make sense for the sport, and heart-rate zones only if my Watch data shows they are believable. Rests are real rests.
+
+Show it as a list with a one-line why. If I say yes, call `push_plan` with that day and time as `scheduled_for`, then tell me: "It is in the Health Access app under Import, for Wednesday 10:00."
+
+### 8. Plan my week
+id: `plan_my_week` · group: plans · args: none
+about: Your training days as a short table, mostly easy, written as plans after your yes.
+
+Ask, one message, numbered:
+1. Which days and times can you train this week, and for how long each?
+2. Which sports?
+3. What is the goal of this week: easy, normal or a harder week?
+4. How did last week feel overall, 1 to 10, and anything sore?
+5. Anything fixed: a group run, a class, a match, a rest day you want?
+
+Then read `training_summary` for 4 weeks and `get_days` for the last 7 days (sleep, resting heart rate, HRV).
+
+Propose the week as a short table: day, time, sport, session in one line, how hard (easy, moderate, hard). Keep most sessions easy and never put two hard days in a row unless I asked for it. If my recovery data looks poor, say so and make the week lighter.
+
+Wait for my yes or my changes. Then call `push_plan` once per session, each with its own `scheduled_for`. Tell me they are in the Import tab and that "Put new plans on my Watch automatically" puts them on the Watch without a tap.
+
+### 9. Change my plan
+id: `adjust_plans` · group: plans · args: none
+about: Missed a day or feel tired: the smallest change to the sessions still ahead.
+
+Ask: what happened (missed a session, feel tired or sore, ill, travelling, more time than expected), and what is still possible this week?
+
+Then `list_plans` and `get_plan_status` for the ones still ahead, the last session from `list_workouts` and `get_days` for the last 3 days.
+
+Suggest the smallest change that works: move, shorten, swap for something easier, or drop a session. Never try to catch up missed work by doubling up. Show the new version next to the old one. If I say yes, write the changed sessions with `push_plan`, each with its new `scheduled_for`, and tell me which old ones to take off the Watch with "Remove from Watch" in the Import tab, because the app does not delete plans on its own.
+
+### 10. Build up to a goal
+id: `build_up_to_goal` · group: plans · args: none
+about: A realistic route to a goal and a date, written one week at a time.
+
+Ask, one message, numbered:
+1. What is the goal, and by when (a distance, an event, a time to beat, just fitter)?
+2. Where are you now: what did a normal week look like over the last month?
+3. How many days a week can you train, and on which days?
+4. Any injury history I should plan around?
+
+Then read `training_summary` for 12 weeks, the sessions closest to the goal and `get_profile`.
+
+Tell me first whether the goal and the date are realistic from where I am, and if not, what is. Then sketch the weeks up to the goal in a short table: week, focus, number of sessions, longest session. Increase slowly, with an easier week every third or fourth week.
+
+Write only the next week as real sessions, after my yes, with `push_plan` and a `scheduled_for` each. Tell me to come back each week with this prompt or "Plan my week", so the next week can use what the Watch recorded.
+
+### 11. Make my workout a Watch workout
+id: `convert_workout` · group: plans · args: none
+about: A workout from a coach, a club or an app, turned into one the Watch can run.
+
+Ask me to paste or describe the workout (from a coach, a club, a training app, a book), which sport it is, and when I will do it.
+
+Turn it into a plan the Watch can run: warm-up, the repeated parts as blocks with repeats, cool-down, every goal as a distance or a time. Labels under 40 characters that say what to do. If something cannot be expressed (a goal by pace only, a drill with no distance or time), say what you changed and why.
+
+Show the parts as a list. If I say yes, call `push_plan` with `scheduled_for`, then tell me it is in the Import tab.
+
+## 12. Limits
+
+- Health data can only be read while the phone is unlocked (Apple). A workout finished with the phone in a bag exports the next time the phone is unlocked, not before. The app says so instead of pretending.
+- The Watch keeps its own pool length setting; a plan cannot set it (WorkoutKit has no parameter for it).
+- Step names on the Watch need iOS 18; on iOS 17 the workout installs without labels. Labels longer than 40 characters are cut.
+- Plans: pool swim and indoor rowing only, today.
+- `recovery_hr` is null right after a background export and filled in on the next run.
+- Rowing distance per step needs iOS 18; on iOS 17 only the workout total is known.
+- Apple's "Add to Watch" sheet does not report back; a plan installed that way is marked `scheduled` with `method: preview` after the user confirms.
+- Times are UTC everywhere in the files and tool results; the local time is in the file name and in `metadata.HKTimeZone`.
+- Effort and heart rate often disagree; effort wins. The AI never rates a session on the athlete's behalf.
+- Health questions that point to illness or a heart rhythm issue belong with a doctor, not an AI.
+
+## 13. Aliases from the "Tide" era, accepted forever
+
+- Schema ids: `tide.workout.v1` and `tide.workout.v0` (for `healthaccess.workout.v1`), `tide.vitals.v1`, `tide.index.v1`, `tide.plan.v1`. The workout key `tide_version` for `healthaccess_version`.
+- Environment: `TIDE_DIR` for `HEALTHACCESS_DIR`; `TIDE_CONFIG`, `TIDE_LOG` for `HEALTHACCESS_CONFIG`, `HEALTHACCESS_LOG`.
+- Config file: `~/.config/tide/config.toml` is read when `~/.config/healthaccess/config.toml` is absent.
+- Resources: `tide://index`, `tide://workout/<id>`.
+- Not aliased: the binaries (`healthaccess-mcp`, `healthaccess`; the old `tide-mcp` and `tide` are gone, re-register the server) and the crate names.
+
+## 14. Telemetry
+
+Off by default on both sides. The app sends nothing unless the user turns on usage statistics; then exactly `app_opened`, `export_completed {workout_count, duration_ms, trigger}`, `export_failed {error_domain, code}`, `plan_scheduled`, `plan_put_on_watch {method}`, `setup_message_copied`, `ai_connected {client}` (once per AI client, the kind from a fixed list), plus app and OS version and a random install id. The server sends nothing unless `telemetry = true` and a PostHog key are set in config.toml (or `--telemetry` is passed); then exactly `mcp_started {version}` and `mcp_tool_called {tool, duration_ms, ok, error_kind?}`. Never tool arguments, results, health values, file names or paths.
+
+## 15. Where to read more
+
+- Tool reference with return shapes and heuristics: https://healthaccessmcp.com/ref/mcp.md
+- Data contract, every field: https://healthaccessmcp.com/ref/schema.md
+- Ideas for your AI (the eleven prompts), source file: https://healthaccessmcp.com/ref/prompts.md
+- Synthetic example folder: https://healthaccessmcp.com/examples/README.md
+- Site: https://healthaccessmcp.com/ (pages: /docs/claude-code, /docs/claude-desktop, /docs/cursor, /docs/chatgpt, /docs/local-models, /docs/files, /docs/plans, /docs/prompts, /docs/privacy, /docs/compare)
+- License: MIT for the server and CLI. Apple, Apple Watch, Apple Health and HealthKit are trademarks of Apple Inc.; the project is not affiliated with Apple.

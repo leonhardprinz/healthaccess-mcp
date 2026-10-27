@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Support for Health Access MCP: when something does not work</title>
+<meta name="description" content="What to check when Health Access MCP does not work: the sync log in the app, the doctor command on your computer, answers to common problems, what to put in a support mail, and refunds through Apple.">
+<link rel="canonical" href="https://healthaccessmcp.com/support">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Health Access MCP">
+<meta property="og:title" content="Support">
+<meta property="og:description" content="Check the sync log, run doctor, read the common problems, then write to support@healthaccessmcp.com.">
+<meta property="og:url" content="https://healthaccessmcp.com/support">
+<meta property="og:image" content="https://healthaccessmcp.com/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body class="doc">
+<div class="wrap">
+<nav class="top">
+  <a class="brand" href="/"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0D366B"/><g fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" transform="translate(9.6 9.6) scale(0.7)"><path d="M6 34 H20 L26 20 L34 48 L40 34 H52"/><path d="M46 26 L56 34 L46 42"/></g></svg>Health Access <span>MCP</span></a>
+  <a href="/docs/claude-code">Install</a>
+  <a href="/docs/files">Files</a>
+  <a href="/docs/plans">Plans</a>
+  <a href="/docs/prompts">Ideas for your AI</a>
+  <a href="/docs/privacy">Privacy</a>
+  <a href="/docs/compare">Compare</a>
+  <a href="/llms.txt">llms.txt</a>
+  <a href="/support">Support</a>
+</nav>
+<p class="crumbs"><a href="/">Health Access MCP</a> / About / Support</p>
+
+<header class="hero">
+  <span class="label">About</span>
+  <h1>Something does not work</h1>
+  <p class="answer">Most problems show up in two places: the sync log in the app, and one command on your computer. Look there first. The common problems below have short answers. If none of them fits, write to <a href="mailto:support@healthaccessmcp.com">support@healthaccessmcp.com</a>.</p>
+</header>
+
+<main>
+<h2 id="check-the-app">Check the app</h2>
+<ul>
+  <li><b>Settings → Trust → Sync log</b> lists every time the app woke and what it wrote. If a session is missing, this is where you see whether the app ran and what it found. Small buttons at the bottom write the last days again.</li>
+  <li><b>Settings → Trust → What left this phone</b> lists every event the app sent in this session, with the host. With usage statistics off it says nothing left.</li>
+  <li><b>Settings → About</b> shows the app version and the build number in brackets.</li>
+</ul>
+
+<h2 id="check-the-computer">Check the computer</h2>
+<pre>npx -y -p healthaccess-mcp healthaccess doctor   <span class="c"># checks the folder: directories, index, every file, schema versions</span>
+npx -y healthaccess-mcp --check                  <span class="c"># prints the folder the server uses and whether usage statistics are on</span>
+npx -y healthaccess-mcp --version                <span class="c"># prints the server version</span></pre>
+<p>Add <code>--dir "&lt;path to the folder&gt;"</code> to any of them to point them at a folder. If you installed with <code>cargo</code>, leave out the <code>npx</code> part: <code>healthaccess doctor</code>, <code>healthaccess-mcp --check</code>, <code>healthaccess-mcp --version</code>. <code>doctor</code> ends with <code>healthy</code> when everything in the folder reads correctly, and with <code>PROBLEMS FOUND</code> and the reasons when it does not.</p>
+
+<h2 id="common-problems">Common problems</h2>
+<div class="faq">
+<h3 id="not-connected">The app says "Not connected yet"</h3>
+<p>Your AI client has not started the MCP server yet. Clients start it when a new chat or session begins, so start one. The server then writes a small file into <code>mcp/clients/</code> in your folder. Once your folder provider has synced that file to the phone, the app shows the connection. It checks again each time it comes to the front, so switch to it after a minute. The app also shows "Not connected yet" again when the AI has not used the server for 7 days.</p>
+
+<h3 id="no-new-sessions">No new sessions in the folder</h3>
+<p>Open the app once after the workout. The iPhone must be unlocked, because Apple Health data cannot be read while the phone is locked; the app writes the files at the next unlock. Then the folder provider has to sync the files to your computer. On a Mac, iCloud Drive shows a cloud icon on files that are not downloaded yet. If the sync log shows a run with nothing new, check that Health Access may read your workouts in Health → Sharing → Apps → Health Access.</p>
+
+<h3 id="plans-not-on-watch">Plans do not reach the Watch</h3>
+<p>Your AI writes the plan into the folder. It reaches the Watch only after you open the app, tap Put on Watch on that plan and confirm. The plan file has to have synced to the phone first. Putting a workout on the Watch uses Apple's WorkoutKit and needs an Apple Watch paired with this iPhone. Settings → Watch sets what Put on Watch does: schedule the session, or open Apple's preview sheet. Apple's preview sheet does not report back, so the app marks those plans as unconfirmed.</p>
+
+<h3 id="folder-not-found">The MCP server cannot find the folder</h3>
+<p>Without <code>--dir</code>, the server looks for the folder in iCloud Drive, then in the other file providers, then in <code>~/Documents</code>. If it finds none, or picks the wrong one, tell it where the folder is with <code>--dir "&lt;path to the folder&gt;"</code>, in the arguments your AI client uses to start the server. On a Mac, a folder in iCloud Drive is at <code>~/Library/Mobile Documents/com~apple~CloudDocs/&lt;folder name&gt;</code>. Dropbox, Google Drive and OneDrive folders usually live under <code>~/Library/CloudStorage/</code>. For example:</p>
+<pre>{
+  "mcpServers": {
+    "healthaccess": {
+      "command": "npx",
+      "args": ["-y", "healthaccess-mcp", "--dir", "/Users/&lt;you&gt;/Library/Mobile Documents/com~apple~CloudDocs/Health Access"]
+    }
+  }
+}</pre>
+<p>Start a new session in the client afterwards. <code>npx -y healthaccess-mcp --check</code> prints the folder the server uses and any other Health Access folders it found. Add <code>--dir "&lt;path&gt;"</code> to it to test a path. The pages under <a href="/docs/claude-code">Connect an AI</a> show where each client keeps these settings.</p>
+</div>
+
+<h2 id="write-to-us">Write to us</h2>
+<p>Write to <a href="mailto:support@healthaccessmcp.com">support@healthaccessmcp.com</a> and include:</p>
+<ul>
+  <li>your iOS version;</li>
+  <li>the app version and build, from Settings → About;</li>
+  <li>which AI client you use, with its version if you know it;</li>
+  <li>what you expected, and what happened instead;</li>
+  <li>the output of <code>npx -y -p healthaccess-mcp healthaccess doctor</code>.</li>
+</ul>
+<p>Never send us health data files from your folder. We do not need them to help you. The doctor output holds no health values, but it shows your folder's path and your computer's name and, where something failed, file names and Health data types. Remove anything you would rather not share. What we do with your mail is in the <a href="/privacy-policy#email">privacy policy</a>.</p>
+
+<h2 id="purchases">Purchases</h2>
+<p>The support card and the coffee are sold by Apple. Refunds go through Apple at <a href="https://reportaproblem.apple.com">reportaproblem.apple.com</a>. We cannot see who bought and cannot refund a purchase ourselves. On a new phone or after a reinstall, Settings → About → Restore purchases brings back a removed support card.</p>
+
+<h2 id="source-code">Source code</h2>
+<p>The source code repository will be public soon. Until then, email is the way to reach us.</p>
+
+<div class="next"><b>Next:</b> <a href="/docs/claude-code">Connect an AI</a> <a href="/docs/files">What is in the folder</a> <a href="/docs/plans">Plans and Put on Watch</a> <a href="/privacy-policy">Privacy policy</a></div>
+</main>
+
+<footer class="site">
+  <div class="cols">
+    <div><h4>Connect an AI</h4><ul><li><a href="/docs/claude-code">Claude Code</a></li><li><a href="/docs/claude-desktop">Claude Desktop</a></li><li><a href="/docs/cursor">Cursor</a></li><li><a href="/docs/chatgpt">ChatGPT</a></li><li><a href="/docs/local-models">Local models</a></li></ul></div>
+    <div><h4>Reference</h4><ul><li><a href="/docs/files">The folder is the API</a></li><li><a href="/docs/plans">Plans and Put on Watch</a></li><li><a href="/docs/prompts">Ideas for your AI</a></li><li><a href="/ref/mcp.md">Tool reference</a></li><li><a href="/ref/schema.md">Data contract</a></li></ul></div>
+    <div><h4>For AIs</h4><ul><li><a href="/llms.txt">llms.txt</a></li><li><a href="/llms-full.txt">llms-full.txt</a></li><li><a href="https://www.npmjs.com/package/healthaccess-mcp">npm package</a></li></ul></div>
+    <div><h4>About</h4><ul><li><a href="/docs/privacy">Privacy in plain words</a></li><li><a href="/privacy-policy">Privacy policy</a></li><li><a href="/support">Support</a></li><li><a href="/docs/compare">Compared with the others</a></li></ul></div>
+  </div>
+  <p class="fine">Health Access MCP is made by Prinz Technology Consultancy, svetovanje na področju informacijskih tehnologij d.o.o. (Prinz Tech Consulting), Dunajska cesta 33, 1000 Ljubljana, Slovenia. Registration number 7326106000, VAT ID SI86067494, contact@prinz-tc.com. The MCP server and the command line are under the MIT licence. Apple, Apple Watch, Apple Health and HealthKit are trademarks of Apple Inc.; this project is not affiliated with Apple.</p>
+</footer>
+</div>
+</body>
+</html>

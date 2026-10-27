@@ -1,0 +1,16 @@
+Health Access exports the Apple Health data the user allows as JSON files into a folder the user picks with the system folder picker (any Files location: On My iPhone, iCloud Drive, Dropbox and so on). There is no account, no login and no server of ours.
+
+HOW TO TEST
+1. Onboarding: pick a folder (On My iPhone is fine), allow Health access (everything is optional), allow notifications or not. The last step, connecting an AI on a computer, can be skipped.
+2. Export tab: pull down or tap Sync. The status tile turns green ("Up to date"). Open the folder in the Files app: workouts/, days/, index.json, catalog.json and briefing.md. A device without Health data writes fewer files, but the folder and index.json still appear.
+3. Import tab: in Safari, open https://healthaccessmcp.com/review/sample-walk-plan.json, Share, Save to Files, and save it into the "plans" folder inside the chosen folder. Back in the app it appears under "Waiting for you". Put on Watch schedules it with WorkoutKit for the next morning at 10:00 and needs a paired Apple Watch. Remove from Watch takes it off again.
+4. The computer part (an MCP server for AI apps such as Claude) is optional and runs on the user's own computer. It reads the same folder. Docs: https://healthaccessmcp.com
+
+HEALTHKIT
+Health data is written only to the location the user chose, at their request, like an export. The app does not store health data in its own iCloud container and never sends health data to us or to any third party. Background mode "fetch" and HealthKit background delivery export new workouts after the Watch syncs.
+
+IN-APP PURCHASES
+Optional, on the last card of the Export tab. "Remove the support card" (non-consumable) hides the card. "Coffee for the dev" (consumable) is a tip and unlocks nothing. Restore Purchases is in Settings.
+
+PRIVACY
+Usage statistics are opt-in, off by default, and never contain health data, file names or folder paths. Settings > "What left this phone" lists every network request.

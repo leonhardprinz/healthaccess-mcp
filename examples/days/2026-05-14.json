@@ -1,0 +1,120 @@
+{
+  "_comment": "format per export-coverage.md v0.4, example",
+  "activity": {
+    "active_energy_kcal": 712.3,
+    "basal_energy_kcal": 1748.9,
+    "distance_cycling_m": null,
+    "distance_swimming_m": 1200,
+    "distance_walking_running_m": 7180.4,
+    "exercise_min": 47,
+    "flights_climbed": 11,
+    "move_min": null,
+    "physical_effort_avg_met": 2.4,
+    "push_count": null,
+    "rings": {
+      "exercise_min": {
+        "actual": 47,
+        "goal": 30
+      },
+      "move_kcal": {
+        "actual": 712.3,
+        "goal": 650
+      },
+      "move_mode": "active_energy",
+      "stand_hours": {
+        "actual": 13,
+        "goal": 12
+      }
+    },
+    "stand_min": 96,
+    "steps": 9412,
+    "time_in_daylight_min": 63
+  },
+  "body": {
+    "basal_body_temperature_c": null,
+    "bmi": 24.2,
+    "fat_pct": null,
+    "height_cm": 180,
+    "lean_kg": null,
+    "mass_kg": 78.4,
+    "temperature_c": null,
+    "waist_cm": null
+  },
+  "date": "2026-05-14",
+  "heart": {
+    "afib_burden_pct": null,
+    "events": {
+      "high_hr": {
+        "count": 0,
+        "times": []
+      },
+      "irregular_rhythm": {
+        "count": 0,
+        "times": []
+      },
+      "low_cardio_fitness": {
+        "count": 0,
+        "times": []
+      },
+      "low_hr": {
+        "count": 0,
+        "times": []
+      }
+    },
+    "hr": {
+      "avg": 72,
+      "max": 162,
+      "min": 47,
+      "samples": 1184
+    },
+    "hrv_rmssd_ms": null,
+    "hrv_sdnn_ms": 58.3,
+    "recovery_1min_bpm": null,
+    "resting_hr": 54,
+    "vo2max": 44.1,
+    "walking_hr_avg": 98
+  },
+  "mobility": {
+    "asymmetry_pct": 1.9,
+    "double_support_pct": 27.4,
+    "falls": null,
+    "six_minute_walk_m": null,
+    "stair_ascent_mps": 0.52,
+    "stair_descent_mps": 0.61,
+    "steadiness_events": [],
+    "steadiness_pct": null,
+    "step_length_m": 0.74,
+    "walking_speed_mps": 1.38
+  },
+  "respiratory": {
+    "breathing_disturbances": 3.1,
+    "fev1": null,
+    "fvc": null,
+    "peak_flow": null,
+    "rate_avg": 14.6,
+    "sleep_apnea_events": 0,
+    "spo2": {
+      "avg": 96.8,
+      "min": 94
+    }
+  },
+  "schema": "healthaccess.day.v1",
+  "sleep": {
+    "asleep_s": 26160,
+    "awake_s": 1977,
+    "core_s": 15420,
+    "deep_s": 4980,
+    "in_bed_s": 28137,
+    "rem_s": 5760,
+    "respiratory_rate_sleep": 14.6,
+    "sessions": [
+      {
+        "end": "2026-05-14T04:47:09Z",
+        "source": "Apple Watch",
+        "start": "2026-05-13T20:58:12Z"
+      }
+    ],
+    "spo2_sleep": 96.8,
+    "wrist_temperature_delta_c": -0.12
+  }
+}

@@ -1,0 +1,1 @@
+ai coach,export,workouts,json,training plan,heart rate,hrv,sleep,swim,running,cycling,llm,vo2max

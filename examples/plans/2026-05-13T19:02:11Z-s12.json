@@ -1,0 +1,115 @@
+{
+  "blocks": [
+    {
+      "repeat": 3,
+      "steps": [
+        {
+          "goal": {
+            "type": "distance_m",
+            "value": 50
+          },
+          "kind": "work",
+          "label": "DRILL 6-3-6: 6 kicks side, 3 strokes",
+          "zone": 1
+        },
+        {
+          "goal": {
+            "type": "distance_m",
+            "value": 50
+          },
+          "kind": "work",
+          "label": "FR easy, long strokes",
+          "zone": 1
+        },
+        {
+          "goal": {
+            "type": "time_s",
+            "value": 30
+          },
+          "kind": "recovery"
+        }
+      ]
+    },
+    {
+      "repeat": 4,
+      "steps": [
+        {
+          "goal": {
+            "type": "distance_m",
+            "value": 100
+          },
+          "kind": "work",
+          "label": "FR 100 steady, breathe every 3",
+          "zone": 2
+        },
+        {
+          "goal": {
+            "type": "time_s",
+            "value": 40
+          },
+          "kind": "recovery"
+        }
+      ]
+    },
+    {
+      "repeat": 2,
+      "steps": [
+        {
+          "goal": {
+            "type": "time_s",
+            "value": 120
+          },
+          "kind": "work",
+          "label": "KICK on back, no board, hips up",
+          "zone": 1
+        },
+        {
+          "goal": {
+            "type": "time_s",
+            "value": 45
+          },
+          "kind": "recovery"
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "steps": [
+        {
+          "goal": {
+            "type": "distance_m",
+            "value": 100
+          },
+          "kind": "work",
+          "label": "FR 100, carry the drill into it",
+          "zone": 2
+        }
+      ]
+    }
+  ],
+  "cooldown": {
+    "goal": {
+      "type": "distance_m",
+      "value": 100
+    },
+    "label": "Easy, any stroke, long exhale",
+    "zone": 1
+  },
+  "created_at": "2026-05-13T19:02:11Z",
+  "created_by": "claude-code",
+  "id": "2026-05-13T19:02:11Z-s12",
+  "name": "S12",
+  "notes": "Technique week 2. Short drill reps, then four steady 100s to carry the feel over. Kick on back is for the hips, not for speed. Target effort 5 to 6.",
+  "pool_length_m": 50,
+  "scheduled_for": "2026-05-14T05:00:00Z",
+  "schema": "healthaccess.plan.v1",
+  "sport": "pool_swim",
+  "warmup": {
+    "goal": {
+      "type": "distance_m",
+      "value": 200
+    },
+    "label": "FR easy, find your breathing",
+    "zone": 1
+  }
+}

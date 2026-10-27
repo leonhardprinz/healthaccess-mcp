@@ -1,0 +1,11 @@
+{
+  "body_mass_kg": 78.4,
+  "bp": null,
+  "date": "2026-05-14",
+  "hrv_sdnn_ms": 58.3,
+  "resting_hr": 54,
+  "schema": "healthaccess.vitals.v1",
+  "sleep_s": 26160,
+  "steps": 9412,
+  "vo2max": 44.1
+}

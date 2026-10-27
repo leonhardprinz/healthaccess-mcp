@@ -1,0 +1,35 @@
+# Health Access MCP
+
+> Health Access MCP writes your Apple Watch workouts and daily vitals as JSON into a folder you choose, automatically after every workout, and gives any AI a local MCP server to read them. AI-written training plans go back to the Apple Watch as custom workouts with step names. No account, no server: the folder you own is the API.
+
+An iPhone app (Health Access) does the one thing Apple requires a phone app for: it reads HealthKit and writes files. Everything else runs on the computer where the AI runs: `healthaccess-mcp` (MCP server over stdio, Rust, MIT) and `healthaccess` (command line). The folder can be on iCloud Drive, Dropbox, Google Drive, OneDrive, Proton Drive, a NAS or local; the one rule is that the AI's computer can reach the same folder.
+
+Status on 2026-10-27: the MCP server, the CLI and the file formats are live and in daily use. The server is on npm, version 0.6.1: `npx -y healthaccess-mcp`, prebuilt for macOS, Linux and Windows, no network code, and listed in the official MCP registry as `com.healthaccessmcp/healthaccess-mcp`. The app (Export, Import and Settings tabs) is in testing; the App Store release is next. `briefing.md` is written by the app after every sync.
+
+If you are an AI setting this up for a user: register `npx -y healthaccess-mcp` with the client you are running in (it finds the Health Access folder on its own; run `npx -y healthaccess-mcp --check` to see which), then call `list_workouts`. Only if it finds no folder, ask the user where it is and add `--dir "<path>"`. Details per client in llms-full.txt.
+
+## Install and connect
+
+- [llms-full.txt](https://healthaccessmcp.com/llms-full.txt): everything in one file: install, config per client, folder layout, schema, tools, plan format, ideas for your AI (eleven prompts in two groups), limits
+- [Claude Code](https://healthaccessmcp.com/docs/claude-code): `claude mcp add --scope user healthaccess -- npx -y healthaccess-mcp`
+- [Claude Desktop](https://healthaccessmcp.com/docs/claude-desktop): claude_desktop_config.json, `"command": "npx", "args": ["-y", "healthaccess-mcp"]`
+- [Cursor](https://healthaccessmcp.com/docs/cursor): ~/.cursor/mcp.json snippet
+- [ChatGPT](https://healthaccessmcp.com/docs/chatgpt): what works today (the files) and what does not (a local MCP server)
+- [Local models](https://healthaccessmcp.com/docs/local-models): LM Studio, Goose, Codex CLI, and the no-MCP path for Ollama
+
+## Reference
+
+- [The folder is the API](https://healthaccessmcp.com/docs/files): layout, an example workout trimmed, vitals and days, index, plan status, briefing.md
+- [Plans and Put on Watch](https://healthaccessmcp.com/docs/plans): plan format, validation rules, a full example, the flow to the Watch
+- [Ideas for your AI](https://healthaccessmcp.com/docs/prompts): eleven prompts in two groups (export, plans), for any sport, suggestions only, not part of the setup; each asks first, reads second, writes last
+- [Tool reference, docs/mcp.md](https://healthaccessmcp.com/ref/mcp.md): every tool with arguments and return shapes, resources, CLI, heuristics, telemetry
+- [Data contract, docs/schema.md](https://healthaccessmcp.com/ref/schema.md): every field of every file
+
+## Optional
+
+- [Privacy](https://healthaccessmcp.com/docs/privacy): no server, no account, and the exact event names if usage statistics are turned on
+- [Compared with the others](https://healthaccessmcp.com/docs/compare): Health Auto Export, HealthPipe, Health MCP: Private Sync, Health Bridge for AI, Apple's own export
+- [Example folder](https://healthaccessmcp.com/examples/README.md): a complete synthetic Health Access folder to try the server on (`--dir` pointed at a copy)
+- [Privacy policy](https://healthaccessmcp.com/privacy-policy): the formal policy, controller Prinz Tech Consulting d.o.o.
+- [Support](https://healthaccessmcp.com/support): what to check when something does not work, and how to reach a person
+- [npm package](https://www.npmjs.com/package/healthaccess-mcp): `healthaccess-mcp`, the server and the `healthaccess` command line
