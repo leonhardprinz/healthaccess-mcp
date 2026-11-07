@@ -2,7 +2,7 @@
   "mcpServers": {
     "healthaccess": {
       "command": "npx",
-      "args": ["-y", "healthaccess-mcp@1.0.0"]
+      "args": ["-y", "healthaccess-mcp@0.6.2"]
     }
   }
 }
