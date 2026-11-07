@@ -6,7 +6,7 @@ Versions are one number for everything: the app's `MARKETING_VERSION`, the Rust 
 
 - **Signed by PTC's team** (72995T7U66); App ID `com.healthaccessmcp.app` with HealthKit and background delivery.
 - `NSHealthUpdateUsageDescription` added: App Store upload requires it for HealthKit apps; the text says the app never writes to Health.
-- **App Store Connect:** app record "Health Access MCP" (Apple ID 6831916470), listing text, five screenshots, privacy labels (data not linked to you: usage data, diagnostics), age rating, free with two in-app purchases (card €4.99, coffee €2.99), available in 175 countries. Build 1.0.0 (22) uploaded and in internal TestFlight.
+- **App Store Connect:** app record "Health Access MCP" (Apple ID 6831916470), listing text, five screenshots, privacy labels (data not linked to you: usage data, diagnostics), age rating, free with two in-app purchases (card €9.99, coffee €2.99), available in 175 countries. Build 1.0.0 (22) uploaded and in internal TestFlight.
 - `scripts/archive-upload.sh` signs and uploads with the Xcode account (an App Manager API key may not use cloud-managed distribution certificates).
 - The MCP server and CLI carry the version number only; npm stays at 0.6.2 until the next server change.
 

@@ -33,7 +33,7 @@ Matches `app/HealthAccess/Resources/PrivacyInfo.xcprivacy` and both privacy page
 |---|---|---|
 | Product ID | `com.healthaccessmcp.app.support.card` | `com.healthaccessmcp.app.support.coffee` |
 | Type | Non-Consumable | Consumable |
-| Price | €4.99 | €2.99 |
+| Price | €9.99 (US $8.99, UK £8.99 by Apple) | €2.99 |
 | Display name | Remove the support card | Coffee for the dev |
 | Description | Hides the support card for good. Thank you. | A tip. The card stays, nothing else changes. |
 
