@@ -214,6 +214,32 @@ final class AppModel {
                           detail: "\(sessionCount) workout\(sessionCount == 1 ? "" : "s") · synced \(settings.lastSync.map { Format.ago($0) } ?? "never")")
     }
 
+    /// One plain paragraph under the status tile: what happens on its own from here, and what needs you.
+    var statusExplainer: String {
+        if folder == nil || folderStale {
+            return "Nothing is written until you pick a folder. Pick one your computer can reach too, like iCloud Drive, so your AI can read it."
+        }
+        if healthStatus == .notRequested {
+            return "Nothing is read until you allow Health access. You choose the types, and the app only reads; it never writes to Health."
+        }
+        if healthStatus == .unavailable {
+            return "This device has no Health app, so there is nothing to export."
+        }
+        if notificationStatus == .notDetermined || notificationStatus == .denied {
+            return "Exports work without notifications. They only tell you when your AI wrote a workout plan."
+        }
+        if isSyncing {
+            return "Writing files now. You can leave the app; it finishes in the background."
+        }
+        if settings.deferredSync {
+            return "Your phone is locked, and iOS keeps Health data locked with it. The new files are written as soon as you unlock."
+        }
+        if syncError != nil {
+            return "Nothing new was written. Tap Try again. If it keeps failing, the sync log in Settings says why."
+        }
+        return "Nothing to do. After every workout, iOS wakes the app and it writes the new files into your folder, even when it is closed. It pauses while the phone is locked, and after you swipe the app away, until you open it again."
+    }
+
     private var lastCheckLine: String {
         settings.lastSync.map { "last check \(Format.ago($0))" } ?? "no check yet"
     }

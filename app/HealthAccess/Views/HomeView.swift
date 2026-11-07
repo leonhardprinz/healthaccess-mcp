@@ -24,6 +24,8 @@ struct HomeView: View {
                     exportTile
                 } header: {
                     TabHeader(title: "Export your Apple Health data", line: "Workouts and daily data, as files for your AI.")
+                } footer: {
+                    Text(model.statusExplainer)
                 }
 
                 Section {

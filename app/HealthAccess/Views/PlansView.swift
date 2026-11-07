@@ -13,6 +13,8 @@ struct PlansView: View {
                     plansTile
                 } header: {
                     TabHeader(title: "Import workout plans", line: "AI-written plans, scheduled on your Watch.")
+                } footer: {
+                    Text(plansExplainer)
                 }
 
                 Section {
@@ -121,6 +123,22 @@ struct PlansView: View {
                 if case .success(let url) = result { model.requestFolder(url) }
             }
         }
+    }
+
+    /// One plain paragraph under the tile: what happens to plans on their own, and what needs a tap.
+    private var plansExplainer: String {
+        if model.folder == nil || model.folderStale {
+            return "Your AI writes workout plans into a plans folder inside your Health Access folder. Pick that folder so the app can see them."
+        }
+        let waiting = model.needsYou.filter { model.results["plan:\($0.id)"] == nil }.count
+        if model.settings.autoPutOnWatch {
+            return waiting > 0
+                ? "Automatic is on: these go onto your Watch by themselves the next time iOS wakes the app, usually within hours. Tap Put on Watch to do it now."
+                : "Automatic is on. New plans from your AI go onto your Watch by themselves, usually within hours, whenever iOS wakes the app or you open it."
+        }
+        return waiting > 0
+            ? "Each plan goes onto your Watch for the day and time it names, ready in the Workout app. With Automatic on, new plans get there without a tap."
+            : "Nothing waiting. When your AI writes a plan, you get a notification; tap Put on Watch here. With Automatic on, plans go onto your Watch without a tap."
     }
 
     /// Where plans stand: a green check when nothing waits, the count when plans wait for you, Pick folder when the

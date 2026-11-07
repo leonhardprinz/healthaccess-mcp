@@ -2,6 +2,10 @@
 
 Versions are one number for everything: the app's `MARKETING_VERSION`, the Rust crates and the npm packages (`scripts/bump-version.sh`). The app's build number counts up on its own. Dates are Europe/Ljubljana.
 
+## 1.0.0 (app build 23), 2026-11-07
+
+- **A plain explainer under each status tile**, on Export and Import: what happens on its own from here and what needs you. For example, that exports run after every workout even with the app closed, pause while the phone is locked or after the app is swiped away, and that plans go onto the Watch by a tap or, with Automatic, by themselves within hours.
+
 ## 1.0.0 (app build 22), 2026-11-07: first App Store build
 
 - **Signed by PTC's team** (72995T7U66); App ID `com.healthaccessmcp.app` with HealthKit and background delivery.
