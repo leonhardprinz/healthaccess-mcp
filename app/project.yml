@@ -33,6 +33,7 @@ targets:
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         UIAppFonts: [IBMPlexSansCondensed-SemiBold.ttf, IBMPlexSansCondensed-Bold.ttf]
         NSHealthShareUsageDescription: Health Access writes the Health data you allow into a folder you choose, as files for your AI or coach. Everything is optional, and nothing is sent to us.
+        NSHealthUpdateUsageDescription: Health Access never writes to Health. It only reads the data you allow; workout plans go to your Apple Watch through WorkoutKit.
         UIBackgroundModes: [fetch]
         BGTaskSchedulerPermittedIdentifiers: [com.healthaccessmcp.app.export]
     entitlements:
@@ -50,8 +51,8 @@ targets:
         TARGETED_DEVICE_FAMILY: "1"
         CODE_SIGN_STYLE: Automatic
         DEVELOPMENT_TEAM: 72995T7U66
-        MARKETING_VERSION: "0.6.2"
-        CURRENT_PROJECT_VERSION: "21"
+        MARKETING_VERSION: "1.0.0"
+        CURRENT_PROJECT_VERSION: "22"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         SWIFT_STRICT_CONCURRENCY: targeted

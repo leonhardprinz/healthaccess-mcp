@@ -1,13 +1,11 @@
 #!/usr/bin/env bash
 # Archive the iOS app in Release and upload it to App Store Connect.
-# Needs PTC's team in app/project.yml and an App Store Connect API key:
-#   ASC_KEY_ID, ASC_ISSUER_ID, and the .p8 at ~/.config/healthaccessmcp/AuthKey_<ASC_KEY_ID>.p8
+# Signs and uploads with the Apple account signed in to Xcode (Account Holder or Admin of
+# PTC's team 72995T7U66): an App Manager API key may not use cloud-managed distribution
+# certificates. The API key (~/.config/healthaccessmcp/asc.env) is for the API scripts.
 set -euo pipefail
 cd "$(dirname "$0")/../app"
-: "${ASC_KEY_ID:?set ASC_KEY_ID}"; : "${ASC_ISSUER_ID:?set ASC_ISSUER_ID}"
-KEY="$HOME/.config/healthaccessmcp/AuthKey_${ASC_KEY_ID}.p8"
-[ -f "$KEY" ] || { echo "missing $KEY"; exit 1; }
-AUTH=(-allowProvisioningUpdates -authenticationKeyPath "$KEY" -authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID")
+AUTH=(-allowProvisioningUpdates)
 xcodegen generate
 ARCHIVE="build/HealthAccess-$(date +%Y%m%d-%H%M).xcarchive"
 xcodebuild -project HealthAccess.xcodeproj -scheme HealthAccess -configuration Release \

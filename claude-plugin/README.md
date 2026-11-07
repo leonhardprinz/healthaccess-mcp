@@ -10,7 +10,7 @@ Apple Health and Apple Watch workouts for Claude, from files on your own compute
 
 ## What it adds
 
-- The `healthaccess` MCP server, started on your computer with `npx -y healthaccess-mcp@0.6.2`. It finds the Health Access folder on its own: iCloud Drive first, then Dropbox, Google Drive, OneDrive and Box, then `~/Documents`. Thirteen tools read workouts, days, vitals and trends, and write plans and effort ratings.
+- The `healthaccess` MCP server, started on your computer with `npx -y healthaccess-mcp@1.0.0`. It finds the Health Access folder on its own: iCloud Drive first, then Dropbox, Google Drive, OneDrive and Box, then `~/Documents`. Thirteen tools read workouts, days, vitals and trends, and write plans and effort ratings.
 - Eleven skills, the same prompts the app and the site show. Each one asks you first, reads your data second and writes only after your yes.
 
 Read and explain: `weekly-checkin`, `explain-last-session`, `overdoing-it`, `sleep-and-recovery`, `long-term-trends`, `coach-summary`.

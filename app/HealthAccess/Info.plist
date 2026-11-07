@@ -28,6 +28,8 @@
 	<false/>
 	<key>NSHealthShareUsageDescription</key>
 	<string>Health Access writes the Health data you allow into a folder you choose, as files for your AI or coach. Everything is optional, and nothing is sent to us.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>Health Access never writes to Health. It only reads the data you allow; workout plans go to your Apple Watch through WorkoutKit.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>IBMPlexSansCondensed-SemiBold.ttf</string>
