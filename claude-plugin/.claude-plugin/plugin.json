@@ -10,5 +10,13 @@
   },
   "homepage": "https://healthaccessmcp.com",
   "license": "MIT",
-  "keywords": ["apple-health", "apple-watch", "healthkit", "workouts", "training", "sleep"]
+  "keywords": [
+    "apple-health",
+    "apple-watch",
+    "healthkit",
+    "workouts",
+    "training",
+    "sleep"
+  ],
+  "icon": "./.claude-plugin/icon.png"
 }
