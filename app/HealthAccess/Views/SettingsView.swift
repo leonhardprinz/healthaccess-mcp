@@ -66,6 +66,13 @@ struct SettingsView: View {
                         Text("The raw ECG trace. Large files.").font(.footnote).foregroundStyle(.secondary)
                     }
                 }
+                NavigationLink { HistoryView() } label: {
+                    let _ = model.backlog.revision
+                    VStack(alignment: .leading, spacing: 2) {
+                        row("Older data", historyText)
+                        Text("Import the years before you set the app up.").font(.footnote).foregroundStyle(.secondary)
+                    }
+                }
             } header: {
                 SectionTitle("What gets exported")
             } footer: {
@@ -128,6 +135,16 @@ struct SettingsView: View {
             Spacer()
             Text(value).foregroundStyle(.secondary).multilineTextAlignment(.trailing).font(.subheadline)
         }
+    }
+
+    private var historyText: String {
+        let settings = model.settings
+        if model.historyUnderWay {
+            if model.backlog.running { return "Importing" }
+            return settings.historyPaused ? "Paused" : "Waiting"
+        }
+        if settings.historyFinishedAt != nil, let start = settings.historyStart { return "Since \(Format.date(start))" }
+        return "Last \(settings.backfillDays) days"
     }
 
     private var healthText: String {

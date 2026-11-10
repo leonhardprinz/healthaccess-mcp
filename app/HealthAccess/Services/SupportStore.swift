@@ -44,6 +44,16 @@ final class SupportStore {
         }
     }
 
+    /// The App Store did not answer at launch (no network, a slow sandbox): ask again when the app comes to the front.
+    func retryIfUnavailable() {
+        guard availability == .unavailable else { return }
+        availability = .loading
+        Task {
+            await load()
+            await refreshEntitlements()
+        }
+    }
+
     func load() async {
         do {
             let products = try await Product.products(for: [Self.cardProductID, Self.coffeeProductID])

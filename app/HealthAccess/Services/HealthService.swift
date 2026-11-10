@@ -82,6 +82,15 @@ final class HealthService: @unchecked Sendable {
         store.execute(query)
     }
 
+    /// Ends the observer query so `startObserving` can register a fresh one. HealthKit ends a query that was started
+    /// before Health access was asked for ("authorization not determined") and never calls it again.
+    func stopObserving() {
+        lock.lock()
+        defer { lock.unlock() }
+        if let observer { store.stop(observer) }
+        observer = nil
+    }
+
     func enableBackgroundDelivery() async throws {
         try await store.enableBackgroundDelivery(for: .workoutType(), frequency: .immediate)
     }

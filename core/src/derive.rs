@@ -277,7 +277,7 @@ pub fn parts_text(w: &Workout) -> Vec<String> {
 /// known), effort.
 pub fn summary_line(w: &Workout, zones: Option<&Zones>) -> String {
     let mut parts: Vec<String> = Vec::with_capacity(8);
-    let date = w.start.format("%Y-%m-%d").to_string();
+    let date = crate::util::local_day(w.start).format("%Y-%m-%d").to_string();
     let name = match w.plan_ref.as_ref().and_then(|p| p.name.as_deref()) {
         Some(n) => format!("{} \"{}\"", activity_label(&w.activity), n),
         None => activity_label(&w.activity),
@@ -416,7 +416,7 @@ pub fn weekly_summaries(
     // accumulators per week: (hr_weight_sum, hr_dur, z12, ztotal, effort_sum, cc_sum, cc_n)
     let mut acc = vec![(0.0f64, 0.0f64, 0u64, 0u64, 0.0f64, 0.0f64, 0u32); weeks as usize];
     for w in workouts {
-        let Some(i) = index_of(w.start.date_naive()) else {
+        let Some(i) = index_of(crate::util::local_day(w.start)) else {
             continue;
         };
         let week = &mut out[i];

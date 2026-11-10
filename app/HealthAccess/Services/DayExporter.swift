@@ -12,26 +12,46 @@ struct DayExporter: Sendable {
 
     static let schema = "healthaccess.day.v1"
 
+    enum Outcome: Sendable { case written, unchanged, empty }
+
+    /// The keys every day file has; anything else is a group with values.
+    static let headerKeys: Set<String> = ["schema", "date", "time_zone", "updated"]
+
     /// Writes the files for `days`, only when the content changed. Returns the number written.
     func export(days: [Date], folder: FolderStore, log: @Sendable (String) async -> Void) async -> Int {
         var written = 0
         for day in days {
             do {
-                let object = try await document(for: day)
-                let path = "days/\(object["date"] as? String ?? HealthAccessJSON.dayString(day)).json"
-                var comparable = object
-                comparable["updated"] = nil
-                if let existing = try folder.read(path), var old = try? JSONBuilder.object(existing) {
-                    old["updated"] = nil
-                    if NSDictionary(dictionary: old).isEqual(to: comparable) { continue }
-                }
-                try folder.write(try JSONBuilder.data(object), to: path)
-                written += 1
+                if try await exportDay(day, folder: folder) == .written { written += 1 }
             } catch {
                 await log("day \(HealthAccessJSON.dayString(day)) failed: \(error.localizedDescription)")
             }
         }
         return written
+    }
+
+    /// Builds and writes one day. Throws when Health is locked, so a day read while the phone was locking is not
+    /// written half empty (the group queries answer a locked Health with nothing instead of an error).
+    func exportDay(_ day: Date, folder: FolderStore) async throws -> Outcome {
+        let object = try await document(for: day)
+        try await health.probe()
+        try Task.checkCancellation()   // a cancelled read answers with nothing too
+        return try Self.write(object, day: day, folder: folder)
+    }
+
+    /// A day without any group gets no file and never replaces one that has groups; a file is rewritten only when a
+    /// value changed.
+    static func write(_ object: JSONObject, day: Date, folder: FolderStore) throws -> Outcome {
+        guard object.keys.contains(where: { !headerKeys.contains($0) }) else { return .empty }
+        let path = "days/\(object["date"] as? String ?? HealthAccessJSON.dayString(day)).json"
+        var comparable = object
+        comparable["updated"] = nil
+        if let existing = try folder.read(path), var old = try? JSONBuilder.object(existing) {
+            old["updated"] = nil
+            if NSDictionary(dictionary: old).isEqual(to: comparable) { return .unchanged }
+        }
+        try folder.write(try JSONBuilder.data(object), to: path)
+        return .written
     }
 
     func document(for day: Date, timeZone: TimeZone = .current) async throws -> JSONObject {
@@ -163,18 +183,20 @@ struct DayContext: Sendable {
     func activity() async -> JSONObject? {
         var g: JSONObject = [:]
         if let summary = try? await health.activitySummary(for: start, calendar: calendar) {
+            // Each ring as {goal, actual}: the shape of the contract (docs/schema.md) and the one the MCP server reads.
+            // Builds up to 23 wrote them flat ("move_kcal": 655, "move_kcal_goal": 600), which server 1.0.0 could not
+            // parse, so it dropped the whole day.
+            func ring(_ actual: HKQuantity, _ goal: HKQuantity, _ unit: HKUnit) -> JSONObject {
+                ["goal": JSONBuilder.round(goal.doubleValue(for: unit), 0), "actual": JSONBuilder.round(actual.doubleValue(for: unit), 0)]
+            }
             var rings: JSONObject = [
-                "move_kcal": JSONBuilder.round(summary.activeEnergyBurned.doubleValue(for: .kilocalorie()), 0),
-                "move_kcal_goal": JSONBuilder.round(summary.activeEnergyBurnedGoal.doubleValue(for: .kilocalorie()), 0),
-                "exercise_min": JSONBuilder.round(summary.appleExerciseTime.doubleValue(for: .minute()), 0),
-                "exercise_min_goal": JSONBuilder.round(summary.appleExerciseTimeGoal.doubleValue(for: .minute()), 0),
-                "stand_hours": JSONBuilder.round(summary.appleStandHours.doubleValue(for: .count()), 0),
-                "stand_hours_goal": JSONBuilder.round(summary.appleStandHoursGoal.doubleValue(for: .count()), 0),
-                "move_mode": summary.activityMoveMode == .appleMoveTime ? "apple_move_time" : "active_energy",
+                "move_kcal": ring(summary.activeEnergyBurned, summary.activeEnergyBurnedGoal, .kilocalorie()),
+                "exercise_min": ring(summary.appleExerciseTime, summary.appleExerciseTimeGoal, .minute()),
+                "stand_hours": ring(summary.appleStandHours, summary.appleStandHoursGoal, .count()),
+                "move_mode": summary.activityMoveMode == .appleMoveTime ? "move_time" : "active_energy",
             ]
             if summary.activityMoveMode == .appleMoveTime {
-                rings["move_min"] = JSONBuilder.round(summary.appleMoveTime.doubleValue(for: .minute()), 0)
-                rings["move_min_goal"] = JSONBuilder.round(summary.appleMoveTimeGoal.doubleValue(for: .minute()), 0)
+                rings["move_min"] = ring(summary.appleMoveTime, summary.appleMoveTimeGoal, .minute())
             }
             if #available(iOS 18.0, *) { rings["paused"] = summary.isPaused }
             g["rings"] = rings

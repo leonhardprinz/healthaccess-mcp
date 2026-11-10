@@ -10,6 +10,7 @@
 		09DF264DD0B28DD66FD4078C /* HealthUnits.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2624D220B0357EFD46631762 /* HealthUnits.swift */; };
 		0D848165DFEB465C0FC7CC1D /* ClientStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBD61154A9AE1AD1060EFB0C /* ClientStore.swift */; };
 		0FA42C354932B7B2CF79A96C /* TelemetryConfig.plist in Resources */ = {isa = PBXBuildFile; fileRef = EFE5E2A46E6E94DA39767AB3 /* TelemetryConfig.plist */; };
+		0FDD936AFAFD571A03AF70CD /* DayRanges.swift in Sources */ = {isa = PBXBuildFile; fileRef = BABBACAB24D4BECE18F938DC /* DayRanges.swift */; };
 		10D4D2B24F088E9244E46468 /* HealthQueries.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98067AB607CFA4AD967C455D /* HealthQueries.swift */; };
 		172A82E666A17CC83429F614 /* Format.swift in Sources */ = {isa = PBXBuildFile; fileRef = E12470BD4471936EF2BD93CD /* Format.swift */; };
 		1A439A151C66B326C2462A99 /* FolderStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B12BDA95DC1262C04DD88346 /* FolderStore.swift */; };
@@ -20,6 +21,7 @@
 		273652F0405E8F93267332D6 /* WorkoutExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02DC843588CCE468C743E0A0 /* WorkoutExporter.swift */; };
 		27A6534BFBA5353211D44670 /* ECGExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B73E64CD95ACD0BCBB2C39FB /* ECGExporter.swift */; };
 		28CAC10D65976C2FAF7CA9D5 /* Notifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C252A8E4884E613137F3765 /* Notifier.swift */; };
+		29350BB008D9E14CE32FCACE /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 584BE2DE17279CCEB0F2C30B /* HistoryView.swift */; };
 		2995474659D6D8B60DD5DF70 /* HealthTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ABC5EEE3AEC153D4CDA63D2 /* HealthTypes.swift */; };
 		29A1035DD5031459522B3021 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 16072767D3F04FDE5980F137 /* Assets.xcassets */; };
 		34CE13636EB0CD3462017F89 /* Prompts.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFB0F2AFDAB1786DECD038A6 /* Prompts.swift */; };
@@ -52,6 +54,7 @@
 		B219F810ED99E90821962011 /* Layout.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA6248329A197DEBEE7659C1 /* Layout.swift */; };
 		BA61623AC1952AD1387C443C /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = B5B81722A2CEB2A40A4E8F52 /* PrivacyInfo.xcprivacy */; };
 		C06030FED37674949A1D7005 /* ProfileExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = EABD884B92E7F1125A7E7420 /* ProfileExporter.swift */; };
+		CA436D6278B9E0D04CFE1383 /* AppModel+Backlog.swift in Sources */ = {isa = PBXBuildFile; fileRef = A07BBDE31D98E2854A983A50 /* AppModel+Backlog.swift */; };
 		CC9230B40A57E7C030AA9A89 /* CatalogBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD4F70D172FCFD51FEA0DB6 /* CatalogBuilder.swift */; };
 		CD39179E34A721F69F41F48E /* ActivityMapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8878247CB4260BBCB3E1139A /* ActivityMapping.swift */; };
 		CFE47AF657E54A4A7074D01E /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D1AFDDE5C4CFCEE4971A85 /* AppSettings.swift */; };
@@ -93,6 +96,7 @@
 		4D33D661BDE9DDBCBF700E6F /* Brand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Brand.swift; sourceTree = "<group>"; };
 		53586F4E7CC80B8A8E069CF4 /* Briefing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Briefing.swift; sourceTree = "<group>"; };
 		559AA54A15A2CB226CDBFB5D /* DayExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayExporter.swift; sourceTree = "<group>"; };
+		584BE2DE17279CCEB0F2C30B /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
 		5A7AE8B881B3E04BC26236B3 /* PlanInstaller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanInstaller.swift; sourceTree = "<group>"; };
 		5C762F3F3DFF74ECA993B49C /* VitalsExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VitalsExporter.swift; sourceTree = "<group>"; };
 		6A6FF770CB1E2A77AF93EC16 /* DaysView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaysView.swift; sourceTree = "<group>"; };
@@ -102,6 +106,7 @@
 		8878247CB4260BBCB3E1139A /* ActivityMapping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityMapping.swift; sourceTree = "<group>"; };
 		9078C2ADF7E65EDD8A5FF963 /* SetupMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupMessage.swift; sourceTree = "<group>"; };
 		98067AB607CFA4AD967C455D /* HealthQueries.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthQueries.swift; sourceTree = "<group>"; };
+		A07BBDE31D98E2854A983A50 /* AppModel+Backlog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppModel+Backlog.swift"; sourceTree = "<group>"; };
 		A24CDE279777926B5B0FE222 /* IndexBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndexBuilder.swift; sourceTree = "<group>"; };
 		AD25E2A91DF039308CF4D5FC /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
 		B12BDA95DC1262C04DD88346 /* FolderStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderStore.swift; sourceTree = "<group>"; };
@@ -109,6 +114,7 @@
 		B5B81722A2CEB2A40A4E8F52 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		B6151D0892BEC1350FCA5634 /* IBMPlexSansCondensed-SemiBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "IBMPlexSansCondensed-SemiBold.ttf"; sourceTree = "<group>"; };
 		B73E64CD95ACD0BCBB2C39FB /* ECGExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ECGExporter.swift; sourceTree = "<group>"; };
+		BABBACAB24D4BECE18F938DC /* DayRanges.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayRanges.swift; sourceTree = "<group>"; };
 		BFB0F2AFDAB1786DECD038A6 /* Prompts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Prompts.swift; sourceTree = "<group>"; };
 		C0CDE67D1E67403E3F816C32 /* Telemetry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Telemetry.swift; sourceTree = "<group>"; };
 		CC2254EB77240D9CA6EE19A0 /* JSONBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONBuilder.swift; sourceTree = "<group>"; };
@@ -142,6 +148,7 @@
 				4D33D661BDE9DDBCBF700E6F /* Brand.swift */,
 				AD25E2A91DF039308CF4D5FC /* Components.swift */,
 				6A6FF770CB1E2A77AF93EC16 /* DaysView.swift */,
+				584BE2DE17279CCEB0F2C30B /* HistoryView.swift */,
 				3307063233B5342305E7DC25 /* HomeView.swift */,
 				EA6248329A197DEBEE7659C1 /* Layout.swift */,
 				21F8CB0223D3F1AB9F5AD3E7 /* Mark.swift */,
@@ -246,6 +253,7 @@
 			children = (
 				01689E10BCA57A82091A1696 /* AppDelegate.swift */,
 				1DDA6BDF2A467D7BC16182DA /* AppModel.swift */,
+				A07BBDE31D98E2854A983A50 /* AppModel+Backlog.swift */,
 				4935D77648F1C36B4FAB5A17 /* HealthAccessApp.swift */,
 			);
 			path = App;
@@ -255,6 +263,7 @@
 			isa = PBXGroup;
 			children = (
 				8878247CB4260BBCB3E1139A /* ActivityMapping.swift */,
+				BABBACAB24D4BECE18F938DC /* DayRanges.swift */,
 				E12470BD4471936EF2BD93CD /* Format.swift */,
 				089D976D6BD2679DD399DD2A /* HealthAccessJSON.swift */,
 				0F772E6365ADA0972142BC96 /* PlanEstimate.swift */,
@@ -346,6 +355,7 @@
 			files = (
 				CD39179E34A721F69F41F48E /* ActivityMapping.swift in Sources */,
 				2243BA5A8CD99EDB080384F2 /* AppDelegate.swift in Sources */,
+				CA436D6278B9E0D04CFE1383 /* AppModel+Backlog.swift in Sources */,
 				A832B8D18516BE53AC131EC7 /* AppModel.swift in Sources */,
 				CFE47AF657E54A4A7074D01E /* AppSettings.swift in Sources */,
 				D86C3ED9FE63E2C39E9F2F04 /* BackgroundRefresh.swift in Sources */,
@@ -355,6 +365,7 @@
 				0D848165DFEB465C0FC7CC1D /* ClientStore.swift in Sources */,
 				F22C0A151E6F77683D2BAF19 /* Components.swift in Sources */,
 				7C1474816ED3AAEEE7831310 /* DayExporter.swift in Sources */,
+				0FDD936AFAFD571A03AF70CD /* DayRanges.swift in Sources */,
 				4EA39878F0F9751D10A94204 /* DaysView.swift in Sources */,
 				4086662DE49686FB73B72311 /* DiskLog.swift in Sources */,
 				27A6534BFBA5353211D44670 /* ECGExporter.swift in Sources */,
@@ -366,6 +377,7 @@
 				3749C24E0415FF829E26B282 /* HealthService.swift in Sources */,
 				2995474659D6D8B60DD5DF70 /* HealthTypes.swift in Sources */,
 				09DF264DD0B28DD66FD4078C /* HealthUnits.swift in Sources */,
+				29350BB008D9E14CE32FCACE /* HistoryView.swift in Sources */,
 				9FADC8A2B13FF7C4F54B332B /* HomeView.swift in Sources */,
 				612333C00697169250D7037B /* IndexBuilder.swift in Sources */,
 				82D34F5E32EDCF1308613D90 /* JSONBuilder.swift in Sources */,
@@ -406,7 +418,7 @@
 				CODE_SIGN_ENTITLEMENTS = HealthAccess/HealthAccess.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 23;
+				CURRENT_PROJECT_VERSION = 24;
 				DEVELOPMENT_TEAM = 72995T7U66;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				INFOPLIST_FILE = HealthAccess/Info.plist;
@@ -414,7 +426,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.healthaccessmcp.app;
 				PRODUCT_MODULE_NAME = HealthAccess;
 				PRODUCT_NAME = "Health Access";
@@ -489,7 +501,7 @@
 				CODE_SIGN_ENTITLEMENTS = HealthAccess/HealthAccess.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 23;
+				CURRENT_PROJECT_VERSION = 24;
 				DEVELOPMENT_TEAM = 72995T7U66;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				INFOPLIST_FILE = HealthAccess/Info.plist;
@@ -497,7 +509,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.healthaccessmcp.app;
 				PRODUCT_MODULE_NAME = HealthAccess;
 				PRODUCT_NAME = "Health Access";

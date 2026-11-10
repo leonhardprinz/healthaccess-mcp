@@ -250,9 +250,7 @@ fn parse_since(s: &str) -> Result<DateTime<Utc>, Error> {
         return Ok(dt.with_timezone(&Utc));
     }
     if let Ok(d) = NaiveDate::parse_from_str(s, "%Y-%m-%d") {
-        if let Some(t) = d.and_hms_opt(0, 0, 0) {
-            return Ok(t.and_utc());
-        }
+        return Ok(healthaccess_core::util::local_midnight(d));
     }
     Err(Error::Validation(vec![format!(
         "since must be YYYY-MM-DD or RFC 3339, got {s:?}"
@@ -360,7 +358,12 @@ impl HealthAccessServer {
         body: impl FnOnce() -> Result<T, Error>,
     ) -> Result<CallToolResult, ErrorData> {
         let t0 = Instant::now();
-        let outcome = body();
+        // A panic on a corrupt file must still answer the request; without this the client waits for its timeout.
+        let outcome = std::panic::catch_unwind(std::panic::AssertUnwindSafe(body)).unwrap_or_else(|_| {
+            Err(Error::Schema(format!(
+                "{tool} hit an internal error on a file in the folder; `healthaccess doctor` lists unreadable files"
+            )))
+        });
         let (ok, kind) = match &outcome {
             Ok(_) => (true, None),
             Err(e) => (false, Some(e.kind())),
@@ -951,7 +954,7 @@ impl ServerHandler for HealthAccessServer {
         for e in index.workouts.iter().take(200) {
             let desc = format!(
                 "{} {} {}{}",
-                e.start.format("%Y-%m-%d"),
+                healthaccess_core::util::local_day(e.start).format("%Y-%m-%d"),
                 e.activity,
                 healthaccess_core::util::fmt_duration(e.duration_s),
                 e.distance_m

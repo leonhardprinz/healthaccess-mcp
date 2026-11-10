@@ -93,7 +93,7 @@ struct SessionDetailView: View {
                 Text(recoveryLine(r)).font(.subheadline).foregroundStyle(.secondary).monospacedDigit()
             }
             if let route = doc.routeSummary {
-                Text("Route: \(route.points) points\(route.distanceM.map { " · \(Format.distance($0))" } ?? "")\(route.ascentM.map { " · \(Int($0)) m up" } ?? "")")
+                Text("Route: \(route.points) points\(route.distanceM.map { " · \(Format.distance($0))" } ?? "")\(route.ascentM.flatMap(safeInt).map { " · \($0) m up" } ?? "")")
                     .font(.subheadline).foregroundStyle(.secondary).monospacedDigit()
             }
             Text(effortText(doc)).font(.subheadline)
@@ -135,8 +135,8 @@ struct SessionDetailView: View {
 
     private func secondLine(_ doc: WorkoutDoc) -> String {
         var parts: [String] = []
-        if let pool = doc.poolLengthM { parts.append("\(Int(pool)) m pool") }
-        if let d = doc.distanceM, d > 0 { parts.append(Format.pace(Double(doc.durationS) / d * 100)) }
+        if let pool = doc.poolLengthM.flatMap(safeInt) { parts.append("\(pool) m pool") }
+        if let d = doc.distanceM, d >= 1 { parts.append(Format.pace(Double(doc.durationS) / d * 100)) }
         parts.append(doc.source)
         return parts.joined(separator: " · ")
     }
@@ -179,7 +179,7 @@ struct SessionDetailView: View {
             parts.append(strokes.sorted { $0.value > $1.value }.map { "\($0.key) \($0.value)" }.joined(separator: ", "))
         }
         let swolf = laps.compactMap(\.swolf)
-        if !swolf.isEmpty { parts.append("avg SWOLF \(Int((swolf.reduce(0, +) / Double(swolf.count)).rounded()))") }
+        if !swolf.isEmpty, let avg = safeInt((swolf.reduce(0, +) / Double(swolf.count)).rounded()) { parts.append("avg SWOLF \(avg)") }
         parts.append("avg lap \(Format.duration(laps.map(\.durationS).reduce(0, +) / max(laps.count, 1)))")
         return parts.joined(separator: " · ")
     }

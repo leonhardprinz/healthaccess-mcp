@@ -113,8 +113,54 @@ extension HealthService {
         return Count(count: samples.count, capped: capped, first: first.startDate, last: last)
     }
 
+    // MARK: all-time ranges (history import)
+
+    /// Nothing older than this is imported: samples dated before it are almost always a wrong clock or a bad import.
+    static let historyFloor = Date(timeIntervalSince1970: 946_684_800)  // 2000-01-01
+
+    /// First and last sample of every sample type this build reads, over all of Health (not just the catalog's
+    /// 90 days). Two one-row queries per type, run side by side. Types without samples are left out.
+    /// Used to decide which types an old day can have, so years of days are not queried for types that started later.
+    func lifetimeRanges(includeReproductive: Bool) async -> [String: ClosedRange<Date>] {
+        var types: [(String, HKSampleType)] = []
+        for spec in HealthTypes.all {
+            if !includeReproductive && Self.reproductiveNames.contains(spec.name) { continue }
+            if let type = Self.sampleType(spec) { types.append((spec.identifier, type)) }
+        }
+        for special in Self.specialTypes {
+            if let type = special.type as? HKSampleType { types.append((special.name, type)) }
+        }
+        let predicate = HKQuery.predicateForSamples(withStart: Self.historyFloor, end: nil, options: [.strictStartDate])
+        return await withTaskGroup(of: (String, ClosedRange<Date>)?.self) { group in
+            for (name, type) in types {
+                group.addTask {
+                    guard let first = try? await self.sorted(type, predicate: predicate, limit: 1, ascending: true).first else { return nil }
+                    let last = (try? await self.sorted(type, predicate: predicate, limit: 1, ascending: false).first) ?? first
+                    return (name, first.startDate...max(first.startDate, last.endDate))
+                }
+            }
+            var out: [String: ClosedRange<Date>] = [:]
+            for await item in group {
+                if let item { out[item.0] = item.1 }
+            }
+            return out
+        }
+    }
+
+    /// Throws when Health is locked (iOS locks it with the phone). One one-row query.
+    func probe() async throws {
+        _ = try await sorted(HKQuantityType(.stepCount), predicate: nil, limit: 1, ascending: false)
+    }
+
+    /// Workouts that started in `from ..< to`, newest first. The history import walks them back from the sync's window.
+    func workouts(from: Date, before to: Date) async throws -> [HKWorkout] {
+        let predicate = HKQuery.predicateForSamples(withStart: from, end: to, options: [.strictStartDate])
+        let descriptor = HKSampleQueryDescriptor(predicates: [.workout(predicate)], sortDescriptors: [])
+        return try await descriptor.result(for: store).filter { $0.startDate >= from && $0.startDate < to }.sorted { $0.startDate > $1.startDate }
+    }
+
     /// The classic query, because it sorts by start date without a key-path sort descriptor.
-    private func sorted(_ type: HKSampleType, predicate: NSPredicate, limit: Int, ascending: Bool) async throws -> [HKSample] {
+    private func sorted(_ type: HKSampleType, predicate: NSPredicate?, limit: Int, ascending: Bool) async throws -> [HKSample] {
         try await withCheckedThrowingContinuation { continuation in
             let sort = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: ascending)
             let query = HKSampleQuery(sampleType: type, predicate: predicate, limit: limit, sortDescriptors: [sort]) { _, samples, error in

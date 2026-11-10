@@ -287,6 +287,15 @@ impl Plan {
         if self.id.trim().is_empty() {
             self.id = Plan::make_id(&self.name, now);
         }
+        // "default work": written out, because a reader that sees no kind has to guess (the app took a time goal
+        // without one for a rest).
+        for block in &mut self.blocks {
+            for step in &mut block.steps {
+                if step.kind.as_deref().map(str::is_empty).unwrap_or(true) {
+                    step.kind = Some("work".to_string());
+                }
+            }
+        }
         if self.created_at.is_none() {
             self.created_at = Some(now);
         }

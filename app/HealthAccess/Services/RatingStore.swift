@@ -40,12 +40,15 @@ enum RatingStore {
 
     /// Apple's Effort samples arrived (at export time or on a later run). Per the contract, Apple's rating overwrites an
     /// `ai` or missing effort but never one the athlete entered in the app. Returns true when the file changed.
+    /// `lastApple` is the Apple rating the app last copied for this workout: an `ai` rating the athlete asked for
+    /// afterwards stays until Apple's own number changes (a rating that "arrives later"), instead of being reverted on
+    /// the next sync.
     @discardableResult
-    static func applyAppleEffort(effort: Int?, estimated: Int?, file: String, folder: FolderStore) throws -> Bool {
+    static func applyAppleEffort(effort: Int?, estimated: Int?, lastApple: Int? = nil, file: String, folder: FolderStore) throws -> Bool {
         let before = try readEffort(file: file, folder: folder)
         var after = before
         if let estimated { after.estimated = estimated }
-        if let effort, before.source != "app" {
+        if let effort, before.source != "app", !(before.source == "ai" && lastApple == effort) {
             after.effort = effort
             after.source = "apple"
         }

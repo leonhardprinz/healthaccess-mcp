@@ -638,12 +638,12 @@ fn briefing_is_generated_when_the_app_has_not_written_one() {
     );
     assert!(
         text.contains(
-            "- 2026-05-14 Pool swim \"S12\": 1200 m, 36:06, avg HR 129, effort 6/10 (apple)"
+            " Pool swim \"S12\": 1200 m, 36:06, avg HR 129, effort 6/10 (apple)"
         ),
         "{text}"
     );
     assert!(
-        text.contains("- 2026-05-12 Indoor row \"R4\": 28:00, avg HR 137, effort 7/10 (apple)"),
+        text.contains(" Indoor row \"R4\": 28:00, avg HR 137, effort 7/10 (apple)"),
         "{text}"
     );
     assert!(

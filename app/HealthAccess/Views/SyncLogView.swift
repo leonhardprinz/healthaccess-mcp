@@ -75,7 +75,7 @@ struct SyncLogView: View {
                     .font(.footnote)
                     .disabled(model.folder == nil || model.isSyncing)
             } footer: {
-                Text("Session files that already exist are never overwritten, so the Watch's ratings survive. Day files are rewritten only when a value changed.")
+                Text("Session files that already exist are never overwritten, so the Watch's ratings survive. Day files are rewritten only when a value changed. Days the app missed while it was closed are filled in on their own; for the years before, see Settings → Older data.")
             }
         }
         .listStyle(.insetGrouped)

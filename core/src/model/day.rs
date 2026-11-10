@@ -38,7 +38,11 @@ impl Ring {
 }
 
 /// The three rings of `HKActivitySummary`.
-#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
+///
+/// Read from either shape: `{"move_kcal": {"goal": 600, "actual": 655}, …}` (the contract) or the flat one app builds
+/// up to 23 wrote, `{"move_kcal": 655, "move_kcal_goal": 600, …}`. A day file with flat rings used to fail to parse,
+/// and the whole day was dropped.
+#[derive(Debug, Clone, Default, Serialize, PartialEq)]
 pub struct Rings {
     #[serde(default)]
     pub move_kcal: Option<Ring>,
@@ -51,6 +55,40 @@ pub struct Rings {
     pub move_mode: Option<String>,
     #[serde(flatten)]
     pub extra: BTreeMap<String, Value>,
+}
+
+impl<'de> Deserialize<'de> for Rings {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        let mut map = BTreeMap::<String, Value>::deserialize(deserializer)?;
+        let mut ring = |name: &str| -> Option<Ring> {
+            let goal_key = format!("{name}_goal");
+            match map.remove(name) {
+                Some(Value::Object(o)) => Some(Ring {
+                    goal: o.get("goal").and_then(Value::as_f64),
+                    actual: o.get("actual").and_then(Value::as_f64),
+                }),
+                Some(v) => {
+                    let goal = map.remove(&goal_key).and_then(|g| g.as_f64());
+                    match (v.as_f64(), goal) {
+                        (None, None) => None,
+                        (actual, goal) => Some(Ring { goal, actual }),
+                    }
+                }
+                None => map
+                    .remove(&goal_key)
+                    .and_then(|g| g.as_f64())
+                    .map(|goal| Ring { goal: Some(goal), actual: None }),
+            }
+        };
+        let move_kcal = ring("move_kcal");
+        let exercise_min = ring("exercise_min");
+        let stand_hours = ring("stand_hours");
+        let move_mode = match map.remove("move_mode") {
+            Some(Value::String(s)) => Some(s),
+            _ => None,
+        };
+        Ok(Rings { move_kcal, exercise_min, stand_hours, move_mode, extra: map })
+    }
 }
 
 /// `activity` group.
@@ -365,5 +403,38 @@ mod tests {
         let day: Day = serde_json::from_str(r#"{"date": "2026-10-25"}"#).unwrap();
         assert!(day.groups().is_empty());
         assert_eq!(day.vitals().resting_hr, None);
+    }
+}
+
+#[cfg(test)]
+mod rings_shape_tests {
+    use super::*;
+
+    #[test]
+    fn rings_parse_from_the_flat_shape_and_from_goal_actual() {
+        let flat: Rings = serde_json::from_str(
+            r#"{"move_kcal":655,"move_kcal_goal":600,"exercise_min":41,"exercise_min_goal":30,
+                "stand_hours":9,"stand_hours_goal":12,"move_mode":"active_energy","paused":false}"#,
+        )
+        .unwrap();
+        let nested: Rings = serde_json::from_str(
+            r#"{"move_kcal":{"goal":600,"actual":655},"exercise_min":{"goal":30,"actual":41},
+                "stand_hours":{"goal":12,"actual":9},"move_mode":"active_energy","paused":false}"#,
+        )
+        .unwrap();
+        assert_eq!(flat, nested);
+        assert_eq!(flat.move_kcal.as_ref().and_then(Ring::hit), Some(true));
+        assert_eq!(flat.stand_hours.as_ref().and_then(Ring::hit), Some(false));
+        assert!(flat.extra.contains_key("paused") && !flat.extra.contains_key("move_kcal_goal"));
+    }
+
+    #[test]
+    fn a_day_with_flat_rings_is_not_dropped() {
+        let day: Day = serde_json::from_str(
+            r#"{"schema":"healthaccess.day.v1","date":"2026-11-08","time_zone":"Europe/Ljubljana",
+                "activity":{"steps":4180,"rings":{"move_kcal":655,"move_kcal_goal":600}}}"#,
+        )
+        .unwrap();
+        assert_eq!(day.activity.unwrap().rings.unwrap().move_kcal.unwrap().actual, Some(655.0));
     }
 }

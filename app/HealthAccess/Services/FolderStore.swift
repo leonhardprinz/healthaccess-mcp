@@ -18,6 +18,8 @@ struct FolderStore: Sendable {
         guard let bookmark = UserDefaults.standard.data(forKey: bookmarkKey) else { return nil }
         var stale = false
         guard let url = try? URL(resolvingBookmarkData: bookmark, options: [], relativeTo: nil, bookmarkDataIsStale: &stale) else { return nil }
+        // Stale means the bookmark still resolved but should be made again (the folder moved, iOS was updated).
+        if stale, (try? save(url)) != nil { stale = false }
         return (FolderStore(root: url), stale)
     }
 
@@ -104,6 +106,22 @@ struct FolderStore: Sendable {
             }
             return names.sorted()
         }
+    }
+
+    /// Modification date per file name in a sub-directory, in one pass. Names without a readable date are left out
+    /// (an iCloud placeholder, for one).
+    func modificationDates(_ relativeDirectory: String) -> [String: Date] {
+        (try? withAccess { root in
+            let dir = try Self.inside(root, relativeDirectory)
+            let urls = try FileManager.default.contentsOfDirectory(at: dir, includingPropertiesForKeys: [.contentModificationDateKey], options: [])
+            var out: [String: Date] = [:]
+            for url in urls {
+                if let date = try? url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate {
+                    out[url.lastPathComponent] = date
+                }
+            }
+            return out
+        }) ?? [:]
     }
 
     func modificationDate(_ relativePath: String) -> Date? {

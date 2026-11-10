@@ -297,9 +297,11 @@ fn v1_examples_carry_plan_labels_and_apple_effort() {
     assert_eq!(cc.best_100_pace_s, 132.0);
     assert_eq!(cc.beats_per_100m, 283.8);
     assert_eq!(cc.basis, "step 2.3.0 100 m in 2:12");
+    // The date is the local day of the session, so it depends on where the test runs.
+    let day = healthaccess_core::util::local_day(w.start).format("%Y-%m-%d");
     assert_eq!(
         derive::summary_line(&w, derive::zones_for(&w, &V0_EXPORTER_ZONE_BOUNDS).as_ref()),
-        "2026-05-14 Pool swim \"S12\" · 1200 m · 36:06 · avg HR 129 (max 162) · Z1–2 93% · effort 6/10 (apple) · best FR 100 2:12 → 284 beats/100 m"
+        format!("{day} Pool swim \"S12\" · 1200 m · 36:06 · avg HR 129 (max 162) · Z1–2 93% · effort 6/10 (apple) · best FR 100 2:12 → 284 beats/100 m")
     );
     let row = parse_workout(&fixture(ROW)).unwrap();
     assert_eq!(row.activity, "indoor_row");

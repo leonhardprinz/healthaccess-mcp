@@ -175,7 +175,7 @@ struct WorkoutExporter: Sendable {
         guard let sample = samples.first else { return nil }
         let meta = sample.metadata ?? [:]
         let activityType = Self.metaInt(meta[HKMetadataKeyHeartRateRecoveryActivityType])
-            .flatMap { HKWorkoutActivityType(rawValue: UInt($0)) }?.humanName.lowercased()
+            .flatMap { UInt(exactly: $0) }.flatMap { HKWorkoutActivityType(rawValue: $0) }?.humanName.lowercased()
         let duration = (meta[HKMetadataKeyHeartRateRecoveryActivityDuration] as? HKQuantity)?.doubleValue(for: .second())
         let maxObserved = (meta[HKMetadataKeyHeartRateRecoveryMaxObservedRecoveryHeartRate] as? HKQuantity)?.doubleValue(for: HealthService.bpm)
         let testType = Self.metaInt(meta[HKMetadataKeyHeartRateRecoveryTestType]).map { $0 == 1 ? "max_exercise" : ($0 == 2 ? "predicted_max" : "value_\($0)") }
@@ -283,7 +283,7 @@ struct WorkoutExporter: Sendable {
         var points: [[Double]] = []
         for route in try await health.routes(for: workout) {
             for location in try await health.locations(of: route) {
-                points.append([
+                let point = [
                     location.timestamp.timeIntervalSince1970.rounded(),
                     Self.round5(location.coordinate.latitude),
                     Self.round5(location.coordinate.longitude),
@@ -291,7 +291,9 @@ struct WorkoutExporter: Sendable {
                     Self.round1(location.horizontalAccuracy),
                     location.speed >= 0 ? Self.round1(location.speed) : -1,
                     location.course >= 0 ? Self.round1(location.course) : -1,
-                ])
+                ]
+                // JSON has no NaN or infinity, and writing one raises an exception that would end every later sync.
+                if point.allSatisfy(\.isFinite) { points.append(point) }
             }
         }
         return points

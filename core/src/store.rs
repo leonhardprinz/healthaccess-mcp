@@ -216,9 +216,11 @@ fn json_files(dir: &Path) -> Result<Vec<PathBuf>> {
         .map_err(|e| Error::io(dir, e))?
         .filter_map(|e| e.ok().map(|e| e.path()))
         .filter(|p| {
+            // `*.route.json` are the GPS sidecars of workouts, not documents of their own
             p.is_file()
                 && p.extension().map(|x| x == "json").unwrap_or(false)
                 && !file_name(p).starts_with('.')
+                && !file_name(p).ends_with(".route.json")
         })
         .collect();
     files.sort();
@@ -464,8 +466,14 @@ impl Store {
             .workouts
             .iter()
             .filter(|e| {
-                e.id.to_ascii_uppercase().starts_with(&upper)
-                    || e.file.to_ascii_uppercase().contains(&format!("_{upper}"))
+                // The full id, a prefix of at least four characters, or the id token that ends the file name.
+                // Shorter or looser matches ("3", "pool", a time of day) picked workouts nobody asked for.
+                e.id.eq_ignore_ascii_case(q)
+                    || (upper.len() >= 4
+                        && (e.id.to_ascii_uppercase().starts_with(&upper)
+                            || e.file
+                                .to_ascii_uppercase()
+                                .ends_with(&format!("_{upper}.JSON"))))
             })
             .collect();
         let pick = |e: &IndexEntry| Resolved {
@@ -530,17 +538,17 @@ impl Store {
     /// Match the workout to a plan (by `plan_ref.plan_id`, else by `scheduled_for`
     /// within ±2 h and the same sport) and fill step labels and kinds from it.
     pub fn enrich_with_plan(&self, w: &mut Workout) {
+        let sport = match w.activity.as_str() {
+            "pool_swim" | "open_water_swim" => "pool_swim",
+            "indoor_row" => "indoor_row",
+            _ => return,
+        };
         let Ok(plans) = self.list_plans_full() else {
             return;
         };
         if plans.is_empty() {
             return;
         }
-        let sport = match w.activity.as_str() {
-            "pool_swim" | "open_water_swim" => "pool_swim",
-            "indoor_row" => "indoor_row",
-            _ => return,
-        };
         let by_id = w
             .plan_ref
             .as_ref()
@@ -662,7 +670,9 @@ impl Store {
         };
         atomic_write(path, out.as_bytes())?;
 
-        let index_updated = self.update_index_effort(&resolved.entry.id, effort)?;
+        let index_updated = self
+            .update_index_effort(&resolved.entry.id, effort)
+            .unwrap_or(false);
         let w = self.load_workout_file(path)?;
         Ok(RateOutcome {
             id: w.id.clone(),
@@ -728,7 +738,7 @@ impl Store {
     /// file, kept readable as an alias). When both exist for a date the day file wins
     /// and the old file only fills values the day file lacks.
     pub fn vitals(&self, days: u32) -> Result<Vec<Vitals>> {
-        self.vitals_at(days, Utc::now().date_naive())
+        self.vitals_at(days, crate::util::local_today())
     }
 
     /// [`Store::vitals`] with an explicit "today" (the last day of the window).
@@ -868,17 +878,14 @@ impl Store {
 
     /// Weekly volume for the last `weeks` ISO weeks plus the cardiac-cost trend.
     pub fn training_summary(&self, weeks: u32) -> Result<TrainingSummary> {
-        self.training_summary_at(weeks, Utc::now().date_naive())
+        self.training_summary_at(weeks, crate::util::local_today())
     }
 
     /// [`Store::training_summary`] with an explicit "today" (the last week shown).
     pub fn training_summary_at(&self, weeks: u32, today: NaiveDate) -> Result<TrainingSummary> {
         let weeks = weeks.clamp(1, 104);
         let first = derive::week_start(today) - Duration::weeks(i64::from(weeks) - 1);
-        let since = first
-            .and_hms_opt(0, 0, 0)
-            .map(|d| d.and_utc())
-            .unwrap_or_else(Utc::now);
+        let since = crate::util::local_midnight(first);
         let mut notes = Vec::new();
         let workouts = self.load_workouts_since(since, &mut notes)?;
         let to = derive::week_start(today) + Duration::days(6);
@@ -890,7 +897,7 @@ impl Store {
             .iter()
             .filter_map(|w| {
                 derive::cardiac_cost(w).map(|cost| CardiacTrendPoint {
-                    date: w.start.date_naive(),
+                    date: crate::util::local_day(w.start),
                     id: w.id.clone(),
                     name: w.display_name(),
                     activity: w.activity.clone(),

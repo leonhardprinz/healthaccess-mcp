@@ -642,7 +642,7 @@ struct PlanDoc: Codable, Sendable, Hashable {
             let steps = blocks[block - 1].steps
             guard step >= 0 && step < steps.count else { return nil }
             let s = steps[step]
-            return Resolved(step: s, kind: s.kind ?? (s.goal.type == "distance_m" ? "work" : "recovery"))
+            return Resolved(step: s, kind: s.kind ?? "work")
         }
         if block == blocks.count + 1 { return cooldown.map { Resolved(step: $0, kind: "cooldown") } }
         return nil

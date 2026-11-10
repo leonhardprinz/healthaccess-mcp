@@ -1,3 +1,4 @@
+import CryptoKit
 import Foundation
 import HealthKit
 import WorkoutKit
@@ -32,6 +33,11 @@ enum PlanInstaller {
     /// Current schema tag plus the pre-rename alias, accepted forever.
     static let acceptedSchemas = ["healthaccess.plan.v1", "tide.plan.v1"]
 
+    /// A plan is a handful of steps; anything bigger is not one.
+    static let maxPlanBytes = 256 * 1024
+    static let maxBlocks = 50
+    static let maxStepsPerBlock = 50
+
     static func scan(folder: FolderStore) throws -> [PlanItem] {
         let names = try folder.list("plans", suffix: ".json").filter { !$0.hasSuffix(".status.json") }
         let items = names.map { name -> PlanItem in
@@ -42,6 +48,7 @@ enum PlanInstaller {
             var parseError: String?
             do {
                 guard let data = try folder.read(file) else { throw HealthAccessError("file not readable") }
+                guard data.count <= maxPlanBytes else { throw HealthAccessError("plan file is larger than \(maxPlanBytes / 1024) KB") }
                 let decoded = try HealthAccessJSON.decode(PlanDoc.self, from: data)
                 try validate(decoded)
                 doc = decoded
@@ -69,9 +76,11 @@ enum PlanInstaller {
             if steps.contains(where: { $0.goal.type != "time_s" }) { throw HealthAccessError("\(plan.sport) takes time goals only") }
         }
         guard !plan.blocks.isEmpty else { throw HealthAccessError("plan has no blocks") }
+        guard plan.blocks.count <= maxBlocks else { throw HealthAccessError("plan has more than \(maxBlocks) blocks") }
         for (i, block) in plan.blocks.enumerated() {
             guard (1...99).contains(block.repeatCount) else { throw HealthAccessError("block \(i + 1): repeat must be 1 to 99") }
             guard !block.steps.isEmpty else { throw HealthAccessError("block \(i + 1) has no steps") }
+            guard block.steps.count <= maxStepsPerBlock else { throw HealthAccessError("block \(i + 1) has more than \(maxStepsPerBlock) steps") }
             for (j, step) in block.steps.enumerated() {
                 try validate(step: step, context: "block \(i + 1) step \(j + 1)")
                 if let kind = step.kind, !["work", "recovery"].contains(kind) {
@@ -135,14 +144,25 @@ enum PlanInstaller {
             var steps: [IntervalStep] = []
             for (j, step) in block.steps.enumerated() {
                 let ws = try workoutStep(step, type: type, location: location, context: "block \(i + 1) step \(j + 1)", warnings: &warnings)
-                let kind = step.kind ?? (step.goal.type == "distance_m" ? "work" : "recovery")
+                // No kind means work, as the plan tool promises ("default work"). A rest says so.
+                let kind = step.kind ?? "work"
                 steps.append(IntervalStep(kind == "recovery" ? .recovery : .work, step: ws))
             }
             blocks.append(IntervalBlock(steps: steps, iterations: block.repeatCount))
         }
         let cooldown = try plan.cooldown.map { try workoutStep($0, type: type, location: location, context: "cooldown", warnings: &warnings) }
         let custom = CustomWorkout(activity: type, location: location, displayName: plan.name, warmup: warmup, blocks: blocks, cooldown: cooldown)
-        return Built(plan: WorkoutPlan(.custom(custom), id: UUID()), warnings: warnings)
+        return Built(plan: WorkoutPlan(.custom(custom), id: stableID(plan.id)), warnings: warnings)
+    }
+
+    /// The same plan always gets the same WorkoutKit id, so "is it on the Watch already" has a real answer and a plan
+    /// whose status file was lost or unreadable is not scheduled a second time.
+    static func stableID(_ planID: String) -> UUID {
+        let digest = Array(SHA256.hash(data: Data("healthaccess.plan:\(planID)".utf8)))
+        var b = Array(digest.prefix(16))
+        b[6] = (b[6] & 0x0F) | 0x50   // version 5 layout: a name-based id
+        b[8] = (b[8] & 0x3F) | 0x80
+        return UUID(uuid: (b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11], b[12], b[13], b[14], b[15]))
     }
 
     private static func workoutStep(_ step: PlanStep, type: HKWorkoutActivityType, location: HKWorkoutSessionLocationType,

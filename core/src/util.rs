@@ -271,3 +271,26 @@ mod tests {
         assert_eq!(fmt_duration(48.0), "0:48");
     }
 }
+
+/// The calendar day a moment falls on where this computer is. Day files are named by the athlete's local day, so
+/// sessions are put into days and weeks the same way; in UTC an evening session west of Greenwich landed on the
+/// next day, and "today" turned over hours early.
+pub fn local_day(at: chrono::DateTime<chrono::Utc>) -> chrono::NaiveDate {
+    at.with_timezone(&chrono::Local).date_naive()
+}
+
+/// Today, where this computer is.
+pub fn local_today() -> chrono::NaiveDate {
+    chrono::Local::now().date_naive()
+}
+
+/// Local midnight at the start of `day`, as a UTC moment.
+pub fn local_midnight(day: chrono::NaiveDate) -> chrono::DateTime<chrono::Utc> {
+    use chrono::TimeZone;
+    let naive = day.and_hms_opt(0, 0, 0).unwrap_or_default();
+    chrono::Local
+        .from_local_datetime(&naive)
+        .earliest()
+        .map(|d| d.with_timezone(&chrono::Utc))
+        .unwrap_or_else(|| naive.and_utc())
+}

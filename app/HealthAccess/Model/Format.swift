@@ -44,13 +44,16 @@ enum Format {
     }
 
     static func pace(_ secondsPer100m: Double) -> String {
-        let total = Int(secondsPer100m.rounded())
+        guard let total = safeInt(secondsPer100m.rounded()), total >= 0 else { return "no pace" }
         return String(format: "%d:%02d /100 m", total / 60, total % 60)
     }
 
-    /// "Thu 23 Oct"
+    /// "Thu 23 Oct", and "23 Oct 2023" for a date in another year: a folder can hold years of sessions and days.
     static func date(_ date: Date) -> String {
-        date.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated))
+        if Calendar.current.component(.year, from: date) != Calendar.current.component(.year, from: Date()) {
+            return date.formatted(.dateTime.day().month(.abbreviated).year())
+        }
+        return date.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated))
     }
 
     /// "23 Oct 10:39"
@@ -58,9 +61,12 @@ enum Format {
         date.formatted(.dateTime.day().month(.abbreviated).hour().minute())
     }
 
-    /// "Sat 26 Oct 10:00"
+    /// "Sat 26 Oct 10:00", and "26 Oct 2023 10:00" for a date in another year.
     static func dayTime(_ date: Date) -> String {
-        date.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated).hour().minute())
+        if Calendar.current.component(.year, from: date) != Calendar.current.component(.year, from: Date()) {
+            return date.formatted(.dateTime.day().month(.abbreviated).year().hour().minute())
+        }
+        return date.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated).hour().minute())
     }
 
     /// "09:41"

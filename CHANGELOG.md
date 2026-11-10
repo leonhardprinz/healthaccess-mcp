@@ -2,6 +2,44 @@
 
 Versions are one number for everything: the app's `MARKETING_VERSION`, the Rust crates and the npm packages (`scripts/bump-version.sh`). The app's build number counts up on its own. Dates are Europe/Ljubljana.
 
+## 1.0.1 (app build 24), 2026-11-10: your whole history, and the fixes from a review before 1.0
+
+### New
+- **Older data.** Settings → Older data imports the years before the app was set up: the last 12 months, the last 3 years, or everything Health has. It says how many workouts and days that is before anything is written, goes newest first, can be paused, and carries on where it stopped. It runs while the app is open and the phone unlocked (iOS locks Health with the phone). Days long ago are read by what Health had back then, not by the catalog's last 90 days, so a type you stopped using is still exported.
+- **No more gaps.** Every sync queues the days since the last one and writes them. A new install gets its 60 days of day files (it got two), and a week with the app swiped away is filled in when you open it.
+- A folder with years of sessions is listed without opening every file on every sync: the app remembers what it read and looks again only at files that changed.
+- Dates in another year show the year.
+
+### Fixed in the app
+- **Day files: activity rings are written as `{goal, actual}`**, the shape of the contract. Builds up to 23 wrote them flat, which server 1.0.0 could not parse: it dropped the whole day.
+- **A rating changed through your AI stays.** The app copied Apple's older rating back over it on the next sync; it now does that only when Apple's own number changes.
+- **Workouts wake the app from the first launch.** On a fresh install the observer started before Health access was asked for, ended with an error, and stayed dead until the app was restarted.
+- A wake that arrives while a sync runs waits for it and runs after, inside its own background time, and a sync asks iOS for time to finish when you leave. Before, the wake was answered "done" at once and the work could be suspended.
+- **A plan is put on the Watch once.** Its WorkoutKit id comes from the plan id, so a lost or unreadable status file no longer schedules it again.
+- **Plan steps without a kind are work**, as the plan tool says. The app took a time goal without one for a rest, so the hard intervals of a HIIT plan went onto the Watch as recoveries.
+- Picking a different folder writes the last 60 days there (it stayed empty), also when a sync was running at that moment.
+- A phone that locks in the middle of a read no longer leaves a half-empty session or day file, and the catalog is not saved from a locked Health (day files would have lost values for a day).
+- A day file is only written when the day has values, and never replaces a fuller one with nothing.
+- A queued day that cannot be written (storage full, a server that is away) stays queued instead of being dropped.
+- Route sidecars are not counted as unreadable sessions; an orphan sidecar no longer hides its session from the import.
+- Crash guards: a GPS point that is not a number, a negative activity code, and durations or distances from files that do not fit a number.
+- The support card asks the App Store for prices again when the first try got no answer; a stale folder bookmark is renewed; plan files have upper bounds (256 KB, 50 blocks, 50 steps a block).
+
+### Fixed in the MCP server and CLI
+- **Day files with flat rings parse** (both shapes are read), so days written by builds up to 23 are no longer dropped.
+- **Days and weeks are local.** Sessions were put into days and weeks by UTC while day files are local: west of Greenwich an evening session landed on the next day and "today" turned over hours early. `list_workouts since=<date>` means local midnight.
+- **`push_plan` writes `kind: "work"`** on block steps that have none.
+- **`rate_workout` no longer reports a failure after it has written the rating** (when `index.json` was half synced).
+- **Ids match exactly, by a prefix of four characters or more, or by the id at the end of the file name.** "3", "pool" or a time of day used to pick a workout.
+- Route sidecars (`*.route.json`) are not read as workouts: `doctor` reported every GPS workout as broken, and a scan read each sidecar in full.
+- A panic on a corrupt file answers the request with an error instead of leaving it open.
+- Plans are only read for the sports they are joined onto (a long `training_summary` on a folder with many plans took seconds).
+
+### Known, not in this release
+- Plan file names contain colons, which Windows does not allow: `push_plan` fails there.
+- Tool results have no size cap (ten years of `get_vitals` is about 1 MB), and values in day files are rounded to one decimal on the way out.
+- Folder discovery stops at the first place that has a folder; a shared folder in iCloud Drive can win over your own elsewhere. Set `--dir` when you have more than one.
+
 ## 1.0.0 (app build 23), 2026-11-07
 
 - **A plain explainer under each status tile**, on Export and Import: what happens on its own from here and what needs you. For example, that exports run after every workout even with the app closed, pause while the phone is locked or after the app is swiped away, and that plans go onto the Watch by a tap or, with Automatic, by themselves within hours.

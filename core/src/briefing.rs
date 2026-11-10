@@ -136,7 +136,7 @@ impl Store {
     /// weeks, recent sessions, vitals, next session, open items, limits. The first
     /// line says that the MCP generated it, not the app.
     pub fn generate_briefing(&self, now: DateTime<Utc>) -> Result<String> {
-        let today = now.date_naive();
+        let today = crate::util::local_day(now);
         let mut out: Vec<String> = Vec::with_capacity(48);
         out.push(format!(
             "# Health Access briefing for the athlete, written {} by healthaccess-mcp \
@@ -223,7 +223,7 @@ impl Store {
             parts.push(effort);
             out.push(format!(
                 "- {} {name}: {}",
-                entry.start.format("%Y-%m-%d"),
+                crate::util::local_day(entry.start).format("%Y-%m-%d"),
                 parts.join(", ")
             ));
         }

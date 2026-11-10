@@ -18,7 +18,7 @@ final class AppModel {
     let settings = AppSettings.shared
     /// The support card on the Export tab and Restore purchases in Settings.
     let support = SupportStore(settings: AppSettings.shared)
-    @ObservationIgnored private let health = HealthService.shared
+    @ObservationIgnored let health = HealthService.shared
 
     // MARK: folder and files
     var folder: FolderStore?
@@ -41,6 +41,8 @@ final class AppModel {
     var workoutKitStatus = "unknown"
     /// Set after a setup-message copy; shows "Waiting for your AI to connect…" until a client file appears.
     var waitingForClient = false
+    /// Older days and workouts still being written: the gap after a pause, and "Import older data".
+    var backlog = Backlog()
 
     // MARK: presentation
     enum Tab: Hashable { case export, plans, settings }
@@ -55,11 +57,15 @@ final class AppModel {
     var undo: UndoToken?
 
     @ObservationIgnored private var launched = false
-    @ObservationIgnored private var rerunRequested: Trigger?
+    /// A sync that is waiting for the running one to end before it runs itself.
+    @ObservationIgnored private var syncQueued = false
     @ObservationIgnored private var followUp: (@MainActor () -> Void)?
     @ObservationIgnored private var undoTimer: Task<Void, Never>?
     @ObservationIgnored private var unlockObserver: NSObjectProtocol?
     @ObservationIgnored private var autoRunning = false
+    @ObservationIgnored var backlogTask: Task<Void, Never>?
+    /// First and last sample per Health type over all time, read once per import run (see `lifetimeTypes()`).
+    @ObservationIgnored var lifetimeRanges: (at: Date, ranges: [String: ClosedRange<Date>])?
     /// When plans/ was last read.
     var lastPlanCheck: Date?
 
@@ -204,6 +210,9 @@ final class AppModel {
                               title: settings.lastSync == nil ? "Writing your last \(settings.backfillDays) days" : "Syncing",
                               detail: "Reading Health, writing files.")
         }
+        if backlog.running {
+            return StatusLine(kind: .working, title: historyUnderWay ? "Importing older data" : "Filling in missing days", detail: backlogLine)
+        }
         if settings.deferredSync {
             return StatusLine(kind: .waiting, title: "Waiting for unlock", detail: "Health is locked. Files are written when you unlock.")
         }
@@ -229,7 +238,10 @@ final class AppModel {
             return "Exports work without notifications. They only tell you when your AI wrote a workout plan."
         }
         if isSyncing {
-            return "Writing files now. You can leave the app; it finishes in the background."
+            return "Writing files now. If you leave before it is done, it carries on the next time the app runs."
+        }
+        if backlog.running {
+            return "Keep the app open and the phone unlocked while it writes the older files. If you leave, it carries on where it stopped the next time you open the app. New workouts are still written on their own."
         }
         if settings.deferredSync {
             return "Your phone is locked, and iOS keeps Health data locked with it. The new files are written as soon as you unlock."
@@ -258,7 +270,14 @@ final class AppModel {
                 await model.runSync(trigger: .observer)
             }
         }
+        // Before Health access was asked for, the observer would end with "authorization not determined" and stay dead
+        // for this launch: it is started by `requestHealthAccess` instead.
+        if settings.healthAuthRequested { startObserver() }
+    }
+
+    private func startObserver() {
         guard HealthService.isAvailable else { return }
+        health.stopObserving()
         health.startObserving { [weak self] error in
             await self?.observerFired(error)
         }
@@ -281,18 +300,22 @@ final class AppModel {
         await refreshStatuses()
         await autoPutOnWatchIfOn()
         await syncIfDue(trigger: .foreground)
+        kickBacklog()
     }
 
     func scenePhaseChanged(_ phase: ScenePhase) async {
         switch phase {
         case .active:
             guard launched else { return }
+            if folder == nil { restoreFolder() }   // a bookmark that did not resolve at a launch while locked
+            support.retryIfUnavailable()
             reloadIndex()
             rescanPlans()
             rescanClients()
             await refreshStatuses()
             await autoPutOnWatchIfOn()
             await syncIfDue(trigger: .foreground)
+            kickBacklog()
         case .background:
             results = [:]
             undo = nil
@@ -363,6 +386,7 @@ final class AppModel {
     @discardableResult
     private func setFolder(_ url: URL) -> Bool {
         do {
+            let previous = folder?.root.standardizedFileURL.path
             let store = try FolderStore.save(url)
             folder = store
             folderStale = false
@@ -370,6 +394,18 @@ final class AppModel {
             syncError = nil
             settings.lastCatalogAt = nil
             log("folder set: \(store.displayPath)", .folder)
+            if let previous, previous != store.root.standardizedFileURL.path {
+                // A different folder starts empty: write the sync window again and forget the day and history queues.
+                backlogTask?.cancel()
+                settings.resetAnchor()
+                settings.resetDayState()
+                settings.lastSync = nil
+                backlog = Backlog()
+                log("different folder: the last \(settings.backfillDays) days are written again there", .folder)
+                if settings.onboardingDone, settings.healthAuthRequested {
+                    Task { await self.runSync(trigger: .manual) }
+                }
+            }
             reloadIndex()
             rescanPlans()
             rescanClients()
@@ -411,6 +447,7 @@ final class AppModel {
         do {
             try await health.requestAuthorization(includeReproductive: settings.includeReproductive)
             settings.healthAuthRequested = true
+            startObserver()
             log("health access requested for \(health.readTypes(includeReproductive: settings.includeReproductive).count) types", .health)
             await enableBackgroundDelivery()
         } catch {
@@ -457,13 +494,27 @@ final class AppModel {
     @discardableResult
     func runSync(trigger: Trigger) async -> Bool {
         let tag = trigger.tag
+        // A wake that comes in while a sync runs waits for it and then runs itself, inside the caller's own background
+        // time. Answering "done" at once let iOS suspend the app with the work unfinished.
         if isSyncing {
-            rerunRequested = trigger
-            log("sync already running, queued another run", tag)
-            return true
+            if syncQueued {
+                while isSyncing || syncQueued { try? await Task.sleep(for: .milliseconds(200)) }
+                return syncError == nil
+            }
+            syncQueued = true
+            log("sync already running, this one runs right after", tag)
+            while isSyncing { try? await Task.sleep(for: .milliseconds(200)) }
+            syncQueued = false
         }
         isSyncing = true
         defer { isSyncing = false }
+        // Ask iOS for the time to finish when the app leaves the screen mid-sync.
+        var background = UIBackgroundTaskIdentifier.invalid
+        background = UIApplication.shared.beginBackgroundTask(withName: "sync") {
+            UIApplication.shared.endBackgroundTask(background)
+            background = .invalid
+        }
+        defer { if background != .invalid { UIApplication.shared.endBackgroundTask(background) } }
         let started = Date()
         if trigger == .bgtask { settings.lastBGTaskRun = started }
         guard let folder else {
@@ -472,6 +523,7 @@ final class AppModel {
         }
         log("sync start (\(trigger.label))", tag)
         var newCount = 0
+        var exportedEfforts: [String: Int] = [:]
         do {
             let anchor = settings.workoutAnchor.flatMap(HealthService.unarchive)
             if anchor == nil && settings.anchorStart == nil {
@@ -491,17 +543,10 @@ final class AppModel {
                 let uuid8 = String(workout.uuid.uuidString.prefix(8))
                 if existing.contains(where: { $0.hasSuffix("_\(uuid8).json") }) { continue } // never overwrite: ratings live there
                 let built = try await exporter.build(for: workout, plans: lookup)
-                var doc = built.doc
-                let name = WorkoutExporter.fileName(for: doc)
-                if let route = built.route {
-                    let routeFile = "workouts/\(WorkoutExporter.routeFileName(for: name))"
-                    var out = try JSONSerialization.data(withJSONObject: route, options: [.withoutEscapingSlashes])
-                    out.append(0x0A)
-                    try folder.write(out, to: routeFile)
-                    doc.routeFile = routeFile
-                }
-                try folder.write(try HealthAccessJSON.encode(doc), to: "workouts/\(name)")
+                try await health.probe()   // locked while reading: stop before a half-empty session file is kept for good
+                let (name, doc) = try Self.writeWorkout(built, folder: folder)
                 newCount += 1
+                if let effort = doc.effort { exportedEfforts[doc.id] = effort }
                 log("wrote \(name)\(doc.effort.map { ", Apple effort \($0)" } ?? "")\(built.route == nil ? "" : " + route")", tag)
                 if started.timeIntervalSince(workout.endDate) < WorkoutExporter.recoveryWindow {
                     var pending = settings.recoveryPending
@@ -509,7 +554,14 @@ final class AppModel {
                     settings.recoveryPending = pending
                 }
             }
+            // The folder was changed while this ran: those files went into the old one. Keep nothing of this run, so
+            // the sync that follows starts clean in the new folder.
+            guard self.folder?.root.path == folder.root.path else {
+                log("folder changed during the sync; starting again in the new one", tag)
+                return false
+            }
             settings.workoutAnchor = HealthService.archive(delta.anchor)
+            for (id, effort) in exportedEfforts { rememberAppleEffort(effort, for: id) }
 
             await patchLateHeartRate(exporter: exporter, folder: folder, tag: tag)
             await recheckAppleEffort(folder: folder, tag: tag)
@@ -518,12 +570,33 @@ final class AppModel {
             if settings.lastCatalogAt.map({ started.timeIntervalSince($0) > 24 * 3600 }) ?? true {
                 await writeCatalog(folder: folder, tag: tag)
             }
+            // Today and yesterday on every run; the days since the last run (or the first run's window) go on the queue.
+            let today = DayRanges.number(of: started)
+            queueDaysSinceLastSync(today: today)
             let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: started) ?? started
             let vitalsWritten = await VitalsExporter(health: health).export(days: [yesterday, started], folder: folder) { [weak self] message in
                 await self?.log(message, .vitals)
             }
-            let daysWritten = await dayExporter(folder: folder).export(days: [yesterday, started], folder: folder) { [weak self] message in
-                await self?.log(message, .vitals)
+            var daysWritten = 0
+            var daysFailed = false
+            let exporter2 = dayExporter(folder: folder)
+            for day in [yesterday, started] {
+                do {
+                    if try await exporter2.exportDay(day, folder: folder) == .written { daysWritten += 1 }
+                } catch {
+                    daysFailed = true
+                    log("day \(HealthAccessJSON.dayString(day)) failed: \(error.localizedDescription)", .vitals)
+                }
+            }
+            guard self.folder?.root.path == folder.root.path else {
+                log("folder changed during the sync; starting again in the new one", tag)
+                return false
+            }
+            // A day that failed is queued again by the next run, because the mark stays where it was.
+            if !daysFailed { settings.lastDaySync = today }
+            if UIApplication.shared.applicationState == .background, !settings.pendingDays.isEmpty {
+                // Woken while closed: a few seconds of the queue now, the rest when the app is opened.
+                daysWritten += await drainDays(.pending, folder: folder, deadline: Date().addingTimeInterval(5), insideSync: true) { true }
             }
             if (try? ProfileExporter.export(health: health, folder: folder)) == true { log("profile.json written", tag) }
             let ecg = await ECGExporter(health: health).export(folder: folder, includeVoltage: settings.includeECGVoltage) { [weak self] message in
@@ -545,10 +618,7 @@ final class AppModel {
             rescanPlans()
             writeBriefing()
             BackgroundRefresh.schedule()
-            if let queued = rerunRequested {
-                rerunRequested = nil
-                Task { await self.runSync(trigger: queued) }
-            }
+            kickBacklog()
             return true
         } catch {
             let ns = error as NSError
@@ -564,7 +634,23 @@ final class AppModel {
         }
     }
 
-    private func dayExporter(folder: FolderStore) -> DayExporter {
+    /// Writes a built session (and its route file) into `workouts/`. Callers check first that the file is not there:
+    /// a session file is never overwritten, because ratings live in it.
+    static func writeWorkout(_ built: WorkoutExporter.Built, folder: FolderStore) throws -> (name: String, doc: WorkoutDoc) {
+        var doc = built.doc
+        let name = WorkoutExporter.fileName(for: doc)
+        if let route = built.route {
+            let routeFile = "workouts/\(WorkoutExporter.routeFileName(for: name))"
+            var out = try JSONSerialization.data(withJSONObject: route, options: [.withoutEscapingSlashes])
+            out.append(0x0A)
+            try folder.write(out, to: routeFile)
+            doc.routeFile = routeFile
+        }
+        try folder.write(try HealthAccessJSON.encode(doc), to: "workouts/\(name)")
+        return (name, doc)
+    }
+
+    func dayExporter(folder: FolderStore) -> DayExporter {
         DayExporter(health: health, typesWithData: CatalogBuilder.typesWithData(folder: folder), includeReproductive: settings.includeReproductive)
     }
 
@@ -572,6 +658,12 @@ final class AppModel {
     private func writeCatalog(folder: FolderStore, tag: LogTag) async {
         let started = Date()
         let catalog = await CatalogBuilder(health: health).build(includeReproductive: settings.includeReproductive, appVersion: HealthAccessJSON.appVersion)
+        // A locked Health answers every count with an error, which the catalog records as "no data"; day files written
+        // from such a catalog would lose those values. Keep the previous catalog instead.
+        guard (try? await health.probe()) != nil else {
+            log("catalog skipped: Health locked while it was counted", tag)
+            return
+        }
         do {
             try folder.write(try JSONBuilder.data(catalog), to: CatalogBuilder.file)
             settings.lastCatalogAt = Date()
@@ -613,6 +705,15 @@ final class AppModel {
 
     /// The athlete rates on the Watch, often minutes after the session ends and after the observer already woke us.
     /// Re-read Apple's Effort samples for the sessions of the last 3 days and patch the files when they changed.
+    /// Keeps the last Apple rating per workout for the days ratings are re-checked (at most a few dozen entries).
+    private func rememberAppleEffort(_ effort: Int, for id: String) {
+        var seen = settings.appleEffortSeen
+        guard seen[id] != effort else { return }
+        if seen.count > 200 { seen.removeAll() }
+        seen[id] = effort
+        settings.appleEffortSeen = seen
+    }
+
     private func recheckAppleEffort(folder: FolderStore, tag: LogTag) async {
         guard #available(iOS 18.0, *), let entries = index?.workouts else { return }
         let cutoff = Date().addingTimeInterval(-3 * 86_400)
@@ -624,7 +725,11 @@ final class AppModel {
                 guard let entry = recent.first(where: { $0.id == workout.uuid.uuidString }) else { continue }
                 let scores = try await health.effortScores(for: workout)
                 guard scores.effort != nil || scores.estimated != nil else { continue }
-                if try RatingStore.applyAppleEffort(effort: scores.effort, estimated: scores.estimated, file: entry.file, folder: folder) {
+                let seen = settings.appleEffortSeen[entry.id]
+                let changed = try RatingStore.applyAppleEffort(effort: scores.effort, estimated: scores.estimated, lastApple: seen,
+                                                               file: entry.file, folder: folder)
+                if let effort = scores.effort { rememberAppleEffort(effort, for: entry.id) }
+                if changed {
                     log("Apple effort \(scores.effort.map(String.init) ?? "estimate") for \(fileName(entry.file))", tag)
                 }
             }
@@ -710,7 +815,7 @@ final class AppModel {
         return days > 0 ? days : ((try? folder.list("vitals").count) ?? 0)
     }
 
-    private func rebuildIndex(_ folder: FolderStore, tag: LogTag = .sync) {
+    func rebuildIndex(_ folder: FolderStore, tag: LogTag = .sync) {
         do {
             let rebuilt = try IndexBuilder.rebuild(folder: folder)
             index = rebuilt.doc
@@ -747,11 +852,12 @@ final class AppModel {
         }
     }
 
-    /// The day files as text, newest first; the vitals files of the last release when there are no day files yet.
-    func loadDays() -> [DaySummary] {
+    /// The newest day files as text, newest first (a folder can hold years of them; the screen shows the last 120);
+    /// the vitals files of the last release when there are no day files yet.
+    func loadDays(limit: Int = 120) -> [DaySummary] {
         guard let folder else { return [] }
         if let names = try? folder.list("days"), !names.isEmpty {
-            return names.sorted(by: >).compactMap { name -> DaySummary? in
+            return names.sorted(by: >).prefix(limit).compactMap { name -> DaySummary? in
                 guard let data = try? folder.read("days/\(name)"), let object = try? JSONBuilder.object(data) else { return nil }
                 return Self.summary(of: object, date: String(name.dropLast(".json".count)))
             }
@@ -1179,6 +1285,7 @@ final class AppModel {
     func setIncludeReproductive(_ on: Bool) {
         settings.includeReproductive = on
         settings.lastCatalogAt = nil
+        lifetimeRanges = nil
         log("reproductive health data \(on ? "included" : "left out")", .health)
         if on, settings.healthAuthRequested {
             Task { await requestHealthAccess() }
@@ -1229,7 +1336,7 @@ final class AppModel {
         Task { logLines = await DiskLog.shared.append(line) }
     }
 
-    private func fail(_ text: String) {
+    func fail(_ text: String) {
         lastError = text
         log(text, .error)
     }

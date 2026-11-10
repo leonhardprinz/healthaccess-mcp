@@ -168,8 +168,100 @@ final class AppSettings {
         set { d.set(Array(newValue).sorted(), forKey: Self.key("announcedClientIDs")) }
     }
 
+    /// The Apple effort rating last copied per workout id (kept for the days the app re-checks ratings).
+    var appleEffortSeen: [String: Int] {
+        get { (d.dictionary(forKey: Self.key("appleEffortSeen")) as? [String: Int]) ?? [:] }
+        set { d.set(newValue, forKey: Self.key("appleEffortSeen")) }
+    }
+
+    /// Runs in which a queued day could not be written, per day number; after three the day is given up.
+    var dayFailures: [String: Int] {
+        get { (d.dictionary(forKey: Self.key("dayFailures")) as? [String: Int]) ?? [:] }
+        set { d.set(newValue, forKey: Self.key("dayFailures")) }
+    }
+
     func resetAnchor() {
         workoutAnchor = nil
         anchorStart = nil
+    }
+
+    // MARK: day queue and history (not observed; AppModel.backlog is what the UI watches)
+
+    private func dayRanges(_ name: String) -> DayRanges {
+        guard let data = d.data(forKey: Self.key(name)), let stored = try? JSONDecoder().decode([[Int]].self, from: data) else { return DayRanges() }
+        return DayRanges(stored: stored)
+    }
+
+    private func setDayRanges(_ ranges: DayRanges, _ name: String) {
+        if ranges.isEmpty {
+            d.removeObject(forKey: Self.key(name))
+        } else {
+            d.set(try? JSONEncoder().encode(ranges.stored), forKey: Self.key(name))
+        }
+    }
+
+    /// Day files still to write since the last sync (a gap after the app was closed, or the first run's window).
+    var pendingDays: DayRanges {
+        get { dayRanges("pendingDays") }
+        set { setDayRanges(newValue, "pendingDays") }
+    }
+
+    /// Older day files the user asked for with "Import older data".
+    var historyDays: DayRanges {
+        get { dayRanges("historyDays") }
+        set { setDayRanges(newValue, "historyDays") }
+    }
+
+    /// The local day (day number) of the last sync that wrote day files. Days since then are queued on the next sync.
+    var lastDaySync: Int? {
+        get { d.object(forKey: Self.key("lastDaySync")) as? Int }
+        set { d.set(newValue, forKey: Self.key("lastDaySync")) }
+    }
+
+    /// The earliest day ever queued. A history request extends it backwards.
+    var dayCoverageStart: Int? {
+        get { d.object(forKey: Self.key("dayCoverageStart")) as? Int }
+        set { d.set(newValue, forKey: Self.key("dayCoverageStart")) }
+    }
+
+    /// How far back the user asked to import (nil: never asked).
+    var historyStart: Date? {
+        get { d.object(forKey: Self.key("historyStart")) as? Date }
+        set { d.set(newValue, forKey: Self.key("historyStart")) }
+    }
+
+    /// Every workout that started at or after this moment is written. Moves backwards while the import runs.
+    var historyWorkoutCursor: Date? {
+        get { d.object(forKey: Self.key("historyWorkoutCursor")) as? Date }
+        set { d.set(newValue, forKey: Self.key("historyWorkoutCursor")) }
+    }
+
+    var historyPaused: Bool {
+        get { d.bool(forKey: Self.key("historyPaused")) }
+        set { d.set(newValue, forKey: Self.key("historyPaused")) }
+    }
+
+    var historyFinishedAt: Date? {
+        get { d.object(forKey: Self.key("historyFinishedAt")) as? Date }
+        set { d.set(newValue, forKey: Self.key("historyFinishedAt")) }
+    }
+
+    /// Session and day files the history import has written so far (for the History screen).
+    var historyWorkoutsWritten: Int {
+        get { d.integer(forKey: Self.key("historyWorkoutsWritten")) }
+        set { d.set(newValue, forKey: Self.key("historyWorkoutsWritten")) }
+    }
+
+    var historyDaysWritten: Int {
+        get { d.integer(forKey: Self.key("historyDaysWritten")) }
+        set { d.set(newValue, forKey: Self.key("historyDaysWritten")) }
+    }
+
+    /// A different folder starts empty: forget which days and which older workouts were written.
+    func resetDayState() {
+        for name in ["pendingDays", "historyDays", "lastDaySync", "dayCoverageStart", "historyStart", "historyWorkoutCursor",
+                     "historyPaused", "historyFinishedAt", "historyWorkoutsWritten", "historyDaysWritten", "dayFailures"] {
+            d.removeObject(forKey: Self.key(name))
+        }
     }
 }

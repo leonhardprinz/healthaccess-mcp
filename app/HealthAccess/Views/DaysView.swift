@@ -12,7 +12,7 @@ struct DaysView: View {
                 Section { ProgressView() }
             } else if days.isEmpty {
                 Section {
-                    Text("No day files yet. Today and yesterday are written on every check; Settings → Sync log can write the last 30 days.")
+                    Text("No day files yet. They are written on every check, for every day Health has values. Settings → Older data imports the years before.")
                         .foregroundStyle(.secondary)
                 }
             } else {
@@ -24,7 +24,7 @@ struct DaysView: View {
                         }
                     }
                 } footer: {
-                    Text("One file per day in days/, with a group per kind of data that has values: activity, heart, respiratory, sleep, body, blood, mobility, hearing, nutrition, mind, symptoms, cycle, medications, hygiene, uv, wheelchair, audiogram, vision.")
+                    Text((model.dayFiles > days.count ? "The newest \(days.count) of \(model.dayFiles.formatted()) day files. " : "") + "One file per day in days/, with a group per kind of data that has values: activity, heart, respiratory, sleep, body, blood, mobility, hearing, nutrition, mind, symptoms, cycle, medications, hygiene, uv, wheelchair, audiogram, vision.")
                 }
             }
         }
