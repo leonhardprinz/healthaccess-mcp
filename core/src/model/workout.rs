@@ -103,6 +103,10 @@ pub struct Workout {
     /// The plan this workout executed, when matched.
     #[serde(default)]
     pub plan_ref: Option<PlanRef>,
+    /// UUID of the WorkoutKit plan the Watch ran, when Health knows it. Equal to a plan
+    /// status's `workoutkit_id` when the workout came from one of the folder's plans.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub workout_plan_id: Option<String>,
     /// One step per HKWorkoutActivity, in order.
     #[serde(default)]
     pub steps: Vec<Step>,

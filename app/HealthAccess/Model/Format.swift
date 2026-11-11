@@ -56,6 +56,13 @@ enum Format {
         return date.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated))
     }
 
+    /// "Today", "Yesterday", else "Thu 23 Oct".
+    static func relativeDay(_ date: Date) -> String {
+        if Calendar.current.isDateInToday(date) { return "Today" }
+        if Calendar.current.isDateInYesterday(date) { return "Yesterday" }
+        return Self.date(date)
+    }
+
     /// "23 Oct 10:39"
     static func dateTime(_ date: Date) -> String {
         date.formatted(.dateTime.day().month(.abbreviated).hour().minute())

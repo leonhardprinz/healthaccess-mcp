@@ -23,6 +23,22 @@ enum PutOnWatchMode: String, CaseIterable, Identifiable {
     }
 }
 
+/// The newest workout the last sync wrote: what the Export tab shows as "synced".
+struct SyncedWorkout: Codable, Equatable, Sendable {
+    var id: String
+    var activity: String
+    var source: String
+    var start: Date
+    var end: Date
+    var distanceM: Double?
+    var durationS: Int
+    var writtenAt: Date
+    /// `AppModel.Trigger` raw value: what started the sync that wrote it.
+    var trigger: String
+    /// Workouts that sync wrote, this one included.
+    var count: Int
+}
+
 /// UserDefaults-backed settings. Observable so SwiftUI updates; blobs (anchors, pending lists) are plain computed properties.
 /// Keys are `healthaccess.<name>`; values stored under the pre-rename alias keys `tide.<name>` are moved once by `migrateLegacyKeys()`.
 @MainActor
@@ -84,6 +100,10 @@ final class AppSettings {
     var supportCardRemoved: Bool { didSet { d.set(supportCardRemoved, forKey: Self.key("supportCardRemoved")) } }
     /// Plans tab: new plans go onto the Watch without a tap, at the plan's time. Off by default; turned on with a confirmation.
     var autoPutOnWatch: Bool { didSet { d.set(autoPutOnWatch, forKey: Self.key("autoPutOnWatch")) } }
+    /// Set by the sync that wrote a fresh workout; the Export tab shows it for a day.
+    var lastSyncedWorkout: SyncedWorkout? {
+        didSet { d.set(lastSyncedWorkout.flatMap { try? JSONEncoder().encode($0) }, forKey: Self.key("lastSyncedWorkout")) }
+    }
     /// Anonymous, per-install id used as the usage-statistics distinct id. Never tied to a person.
     let installID: String
 
@@ -120,6 +140,7 @@ final class AppSettings {
         folderSetAt = d.object(forKey: Self.key("folderSetAt")) as? Date
         supportCardRemoved = d.bool(forKey: Self.key("supportCardRemoved"))
         autoPutOnWatch = d.bool(forKey: Self.key("autoPutOnWatch"))
+        lastSyncedWorkout = d.data(forKey: Self.key("lastSyncedWorkout")).flatMap { try? JSONDecoder().decode(SyncedWorkout.self, from: $0) }
         if let id = d.string(forKey: Self.key("installID")) {
             installID = id
         } else {

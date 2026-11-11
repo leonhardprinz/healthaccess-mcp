@@ -397,6 +397,28 @@ fn plans_are_written_listed_and_joined_onto_workouts() {
         StepKind::Recovery
     );
 
+    // the Watch says it ran a WorkoutKit plan none of the folder's plans has: another
+    // workout was started, so the plan scheduled next to it is not attached
+    doc["workout_plan_id"] = json!("5DB59FD3-CF52-455E-A3A3-196625F7554E");
+    fs::write(&row_path, doc.to_string()).unwrap();
+    let other = store.load_workout("3f8b2d41").unwrap();
+    assert!(other.plan_ref.is_none());
+
+    // the same UUID in a plan's status: that plan is the one, without a time match
+    let r4 = store
+        .list_plans()
+        .unwrap()
+        .into_iter()
+        .find(|p| p.name == "R4")
+        .unwrap();
+    fs::write(
+        store.plan_status_path(&r4.id),
+        json!({"plan_id": r4.id, "state": "scheduled", "workoutkit_id": "5db59fd3-cf52-455e-a3a3-196625f7554e"}).to_string(),
+    )
+    .unwrap();
+    let ran = store.load_workout("3f8b2d41").unwrap();
+    assert_eq!(ran.plan_ref.as_ref().unwrap().name.as_deref(), Some("R4"));
+
     // validation errors are reported together
     let mut bad = s26_plan();
     bad.sport = "skiing".into();
@@ -405,8 +427,8 @@ fn plans_are_written_listed_and_joined_onto_workouts() {
         Error::Validation(p) => assert_eq!(p.len(), 2, "{p:?}"),
         other => panic!("{other:?}"),
     }
-    // S26 plus its status file, and the two copied example plans
-    assert_eq!(fs::read_dir(tmp.path().join("plans")).unwrap().count(), 4);
+    // S26 plus its status file, the two copied example plans, and R4's status file
+    assert_eq!(fs::read_dir(tmp.path().join("plans")).unwrap().count(), 5);
 }
 
 #[test]

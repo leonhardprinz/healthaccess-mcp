@@ -15,9 +15,11 @@ struct InstalledPlan: Sendable {
 struct PlanLookup: Sendable {
     var plans: [InstalledPlan] = []
 
-    /// Exact match on the WorkoutKit plan UUID first, then the contract's fallback: same sport, scheduled within ±2 h of the start.
+    /// Exact match on the WorkoutKit plan UUID. A workout that carries a UUID none of our plans has was started from
+    /// another workout on the Watch, so it gets no plan, however close a plan's time is. Only a workout without any
+    /// UUID falls back to the contract's rule: same sport, scheduled within ±2 h of the start.
     func match(workoutPlanID: UUID?, start: Date, activity: String) -> InstalledPlan? {
-        if let id = workoutPlanID, let exact = plans.first(where: { $0.workoutkitId == id }) { return exact }
+        if let id = workoutPlanID { return plans.first { $0.workoutkitId == id } }
         let candidates = plans.compactMap { plan -> (InstalledPlan, TimeInterval)? in
             guard PlanInstaller.exportActivity(for: plan.sport) == activity, let at = plan.scheduledFor else { return nil }
             let distance = abs(at.timeIntervalSince(start))

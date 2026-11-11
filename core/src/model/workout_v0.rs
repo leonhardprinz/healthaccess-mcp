@@ -268,6 +268,7 @@ impl WorkoutV0 {
             pool_length_m,
             zones,
             plan_ref: None,
+            workout_plan_id: None,
             steps,
             laps,
             hr_series: self.hr_series,

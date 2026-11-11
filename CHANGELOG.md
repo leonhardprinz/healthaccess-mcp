@@ -2,6 +2,14 @@
 
 Versions are one number for everything: the app's `MARKETING_VERSION`, the Rust crates and the npm packages (`scripts/bump-version.sh`). The app's build number counts up on its own. Dates are Europe/Ljubljana.
 
+## 1.0.2 (app build 25), 2026-11-11: a workout that synced says so
+
+### New
+- **"Pool swim synced" on the Export tab.** After a sync wrote a fresh workout, the status tile shows it for a day in place of "Up to date": what it was, when and by what it was recorded, when it was written to the folder and what started that sync (automatically, when you opened the app, or when you synced), with a button to the workout. The line under it says the one thing left: the folder has to reach your computer.
+
+### Fixed
+- **A workout started from another workout on the Watch no longer gets a plan's name and step labels.** The app and the server attached the plan scheduled closest to the start (same sport, within two hours). Health says which WorkoutKit plan a workout ran; when that id belongs to none of the folder's plans, no plan is attached. The time rule is left for workouts that carry no such id. The server also reads `workout_plan_id` and joins a plan on it when the file has no `plan_ref`.
+
 ## 1.0.1 (app build 24), 2026-11-10: your whole history, and the fixes from a review before 1.0
 
 ### New

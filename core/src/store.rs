@@ -535,8 +535,12 @@ impl Store {
         Ok(out)
     }
 
-    /// Match the workout to a plan (by `plan_ref.plan_id`, else by `scheduled_for`
-    /// within ±2 h and the same sport) and fill step labels and kinds from it.
+    /// Match the workout to a plan and fill step labels and kinds from it: by
+    /// `plan_ref.plan_id`; else by the WorkoutKit plan UUID the Watch ran
+    /// (`workout_plan_id` against each plan status's `workoutkit_id`); else, only for
+    /// a workout without such a UUID, by `scheduled_for` within ±2 h and the same
+    /// sport. A workout whose UUID belongs to none of the folder's plans was started
+    /// from another workout on the Watch and gets no plan, however close the time.
     pub fn enrich_with_plan(&self, w: &mut Workout) {
         let sport = match w.activity.as_str() {
             "pool_swim" | "open_water_swim" => "pool_swim",
@@ -556,6 +560,19 @@ impl Store {
             .and_then(|id| plans.iter().find(|(p, _)| p.id == id));
         let plan = match by_id {
             Some((p, _)) => p,
+            None if w.workout_plan_id.is_some() => {
+                let ran = w.workout_plan_id.as_deref().unwrap_or_default();
+                let Some((p, _)) = plans.iter().find(|(p, _)| {
+                    self.plan_status(&p.id)
+                        .ok()
+                        .flatten()
+                        .and_then(|s| s.workoutkit_id)
+                        .is_some_and(|id| id.eq_ignore_ascii_case(ran))
+                }) else {
+                    return;
+                };
+                p
+            }
             None => {
                 let window = Duration::hours(PLAN_MATCH_WINDOW_H);
                 let max_block = w.steps.iter().map(|s| s.block).max().unwrap_or(0);

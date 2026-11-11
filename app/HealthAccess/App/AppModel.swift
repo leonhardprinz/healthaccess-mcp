@@ -223,6 +223,17 @@ final class AppModel {
                           detail: "\(sessionCount) workout\(sessionCount == 1 ? "" : "s") · synced \(settings.lastSync.map { Format.ago($0) } ?? "never")")
     }
 
+    /// The workout a sync wrote within the last day, while its file is still listed: the Export tab shows it in place
+    /// of "Up to date".
+    var syncedWorkout: (info: SyncedWorkout, entry: IndexEntry)? {
+        guard status.kind == .done, let info = settings.lastSyncedWorkout,
+              Date().timeIntervalSince(info.writtenAt) < 24 * 3600,
+              let entry = index?.workouts.first(where: { $0.id == info.id }) else { return nil }
+        return (info, entry)
+    }
+
+    static let syncedExplainer = "Nothing to do. Your AI can read it as soon as the folder has synced to your computer; with iCloud Drive that is usually a minute or two."
+
     /// One plain paragraph under the status tile: what happens on its own from here, and what needs you.
     var statusExplainer: String {
         if folder == nil || folderStale {
@@ -400,6 +411,7 @@ final class AppModel {
                 settings.resetAnchor()
                 settings.resetDayState()
                 settings.lastSync = nil
+                settings.lastSyncedWorkout = nil
                 backlog = Backlog()
                 log("different folder: the last \(settings.backfillDays) days are written again there", .folder)
                 if settings.onboardingDone, settings.healthAuthRequested {
@@ -523,6 +535,8 @@ final class AppModel {
         }
         log("sync start (\(trigger.label))", tag)
         var newCount = 0
+        var freshest: WorkoutDoc?   // the newest workout of this run that ended within two days: the one worth announcing
+        var freshCount = 0
         var exportedEfforts: [String: Int] = [:]
         do {
             let anchor = settings.workoutAnchor.flatMap(HealthService.unarchive)
@@ -546,6 +560,10 @@ final class AppModel {
                 try await health.probe()   // locked while reading: stop before a half-empty session file is kept for good
                 let (name, doc) = try Self.writeWorkout(built, folder: folder)
                 newCount += 1
+                if started.timeIntervalSince(workout.endDate) < 48 * 3600 {
+                    freshCount += 1
+                    freshest = doc   // sorted by start, so the last one is the newest
+                }
                 if let effort = doc.effort { exportedEfforts[doc.id] = effort }
                 log("wrote \(name)\(doc.effort.map { ", Apple effort \($0)" } ?? "")\(built.route == nil ? "" : " + route")", tag)
                 if started.timeIntervalSince(workout.endDate) < WorkoutExporter.recoveryWindow {
@@ -608,6 +626,11 @@ final class AppModel {
             rescanClients()
 
             settings.exportedTotal += newCount
+            if let doc = freshest {
+                settings.lastSyncedWorkout = SyncedWorkout(id: doc.id, activity: doc.activity, source: doc.source, start: doc.start, end: doc.end,
+                                                           distanceM: doc.distanceM, durationS: doc.durationS, writtenAt: Date(),
+                                                           trigger: trigger.rawValue, count: freshCount)
+            }
             let ms = Int(started.distance(to: Date()) * 1000)
             settings.lastSync = Date()
             settings.deferredSync = false

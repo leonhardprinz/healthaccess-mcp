@@ -148,6 +148,104 @@ struct StatusTile: View {
     }
 }
 
+/// Export, after a workout: what was recorded, and that it is in the folder now. Takes the place of "Up to date" for a
+/// day, so it is plain that the workout was both recorded and written.
+struct SyncedTile: View {
+    let info: SyncedWorkout
+    let open: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .top, spacing: 14) {
+                Image(systemName: "checkmark.circle.fill")
+                    .symbolRenderingMode(.palette)
+                    .foregroundStyle(.white, Color.green)
+                    .font(.system(size: 30))
+                    .symbolEffect(.bounce, value: info.writtenAt)
+                    .frame(width: 34, height: 34)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title)
+                        .font(.brand(22, relativeTo: .title3))
+                        .foregroundStyle(.white)
+                    Text(facts)
+                        .font(.subheadline)
+                        .foregroundStyle(.white.opacity(0.85))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+            }
+            VStack(alignment: .leading, spacing: 10) {
+                step(symbol: "applewatch", title: "Recorded", line: recordedLine)
+                step(symbol: "folder.fill", title: "Written to your folder", line: writtenLine)
+            }
+            .padding(12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(.white.opacity(0.14)))
+            Button("See the workout", action: open)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Color.markBlue)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 7)
+                .background(Capsule().fill(.white))
+                .buttonStyle(.plain)
+        }
+        .padding(.vertical, 8)
+        .listRowBackground(Color.markBlue)
+    }
+
+    private func step(symbol: String, title: String, line: String) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: symbol)
+                .font(.subheadline)
+                .foregroundStyle(.white)
+                .frame(width: 22)
+            VStack(alignment: .leading, spacing: 1) {
+                HStack(spacing: 6) {
+                    Text(title).font(.subheadline.weight(.semibold)).foregroundStyle(.white)
+                    Image(systemName: "checkmark").font(.caption.weight(.bold)).foregroundStyle(Color.green)
+                }
+                Text(line)
+                    .font(.footnote)
+                    .foregroundStyle(.white.opacity(0.85))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .accessibilityElement(children: .combine)
+    }
+
+    private var name: String { ActivityMapping.title(info.activity) }
+
+    private var title: String {
+        info.count > 1 ? "\(info.count) workouts synced" : "\(name) synced"
+    }
+
+    /// "1,200 m · 34:46", led by the name when the title counts several.
+    private var facts: String {
+        var parts: [String] = []
+        if let d = info.distanceM, d > 0 { parts.append(Format.distance(d)) }
+        parts.append(Format.duration(info.durationS))
+        let line = parts.joined(separator: " · ")
+        return info.count > 1 ? "Newest: \(name), \(line)" : line
+    }
+
+    /// "Today 11:06 to 11:41 · Apple Watch"
+    private var recordedLine: String {
+        "\(Format.relativeDay(info.start)) \(Format.clock(info.start)) to \(Format.clock(info.end)) · \(oneLine(info.source, max: 40))"
+    }
+
+    /// "Just now, automatically"
+    private var writtenLine: String {
+        let how: String
+        switch info.trigger {
+        case "manual": how = "when you synced"
+        case "foreground": how = "when you opened the app"
+        default: how = "automatically"
+        }
+        let when = Format.ago(info.writtenAt)
+        return "\(when.prefix(1).uppercased())\(when.dropFirst()), \(how)"
+    }
+}
+
 /// The folder both tabs use: its name, where it lives, whether it is connected. Tap opens it in Files.
 struct FolderRow: View {
     @Environment(AppModel.self) private var model

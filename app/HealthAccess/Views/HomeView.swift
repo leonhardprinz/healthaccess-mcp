@@ -21,11 +21,15 @@ struct HomeView: View {
         NavigationStack(path: $path) {
             List {
                 Section {
-                    exportTile
+                    if let synced = model.syncedWorkout {
+                        SyncedTile(info: synced.info) { path.append(HomeRoute.session(synced.entry)) }
+                    } else {
+                        exportTile
+                    }
                 } header: {
                     TabHeader(title: "Export your Apple Health data", line: "Workouts and daily data, as files for your AI.")
                 } footer: {
-                    Text(model.statusExplainer)
+                    Text(model.syncedWorkout == nil ? model.statusExplainer : AppModel.syncedExplainer)
                 }
 
                 Section {
