@@ -26,6 +26,10 @@
   "license": "MIT",
   "author": "Prinz Tech Consulting d.o.o. <support@healthaccessmcp.com>",
   "homepage": "https://healthaccessmcp.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leonhardprinz/healthaccess-mcp.git"
+  },
   "bugs": {
     "email": "support@healthaccessmcp.com",
     "url": "https://healthaccessmcp.com/support"

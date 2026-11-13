@@ -39,14 +39,19 @@ cargo install --path cli --locked     # ~/.cargo/bin/healthaccess
 ```
 
 Releasing: `scripts/bump-version.sh <version>` sets one version in Cargo, npm, the
-registry manifest `npm/server.json`, the Claude plugin, the Homebrew formula and the app;
-`scripts/build-npm.sh` cross-compiles the five platforms (zig and cargo-zigbuild for Linux
-and Windows) and packs every npm package into `dist/npm/`; `npm/test/local-registry.sh`
-publishes them to a throwaway local registry and runs them through `npx`;
-`scripts/publish-npm.sh` publishes the platform packages first, then the launcher;
+registry manifest `npm/server.json`, the Claude plugin, the Homebrew formula and the app.
+Commit, push `main`, then start the GitHub workflow `publish-npm`
+(`gh workflow run publish-npm.yml -f dry_run=false`). It runs the same scripts as a release
+by hand: `scripts/build-npm.sh` cross-compiles the five platforms (zig and cargo-zigbuild
+for Linux and Windows) and packs every npm package into `dist/npm/`;
+`npm/test/local-registry.sh` publishes them to a throwaway local registry and runs them
+through `npx`; `scripts/publish-npm.sh` publishes the platform packages first, then the
+launcher. npm trusts that workflow, so no token and no passkey is needed; see
+[npm releases from GitHub Actions](#npm-releases-from-github-actions).
 `scripts/publish-registry.sh` then publishes `npm/server.json` to the official MCP registry
 (`com.healthaccessmcp/healthaccess-mcp`, DNS auth with the key in
-`~/.config/healthaccessmcp/`) and checks the listing.
+`~/.config/healthaccessmcp/`) and checks the listing; that step stays on the maintainer's
+machine, because its key is not on GitHub.
 Homebrew (`packaging/homebrew/healthaccess-mcp.rb`) and crates.io (`cargo publish
 --dry-run --workspace` passes) are prepared and wait for the public repository. See
 [Distribution](#distribution).
@@ -699,9 +704,9 @@ as the runtime reports them.
   `scripts/build-npm.sh` builds the platform packages (macOS natively, Linux musl and
   Windows GNU through `cargo zigbuild`), `npm/test/local-registry.sh` tests the result
   end to end against a local registry, `scripts/publish-npm.sh` publishes.
-  Live since 2026-10-26 (0.5.0), current 0.6.2, published by the npm user `pt-consultancy`
-  with passkey 2FA: run `scripts/publish-npm.sh` in a terminal, press Enter at the prompt,
-  tick "do not challenge for 5 minutes" and approve once for all six packages.
+  Live since 2026-10-26 (0.5.0), current 0.6.2, owned by the npm user `pt-consultancy`.
+  Releases are published by the GitHub workflow `publish-npm`, see
+  [npm releases from GitHub Actions](#npm-releases-from-github-actions).
 - **Official MCP registry.** Listed as `com.healthaccessmcp/healthaccess-mcp` (0.6.2,
   active) since 2026-10-27, pointing at the npm package. `package.json` carries
   `mcpName`; `npm/server.json` is the entry; the namespace is verified by a TXT record on
@@ -716,6 +721,64 @@ as the runtime reports them.
   `/ref/`, `examples/` under `/examples/`) and deploys it with `wrangler deploy` to
   Cloudflare Workers static assets (`wrangler.jsonc`, `site-worker/worker.js` redirects
   www and sets headers).
+
+### npm releases from GitHub Actions
+
+`.github/workflows/publish-npm.yml` publishes the six npm packages through
+[npm trusted publishing](https://docs.npmjs.com/trusted-publishers/): npm trusts that
+workflow file in this repository (OIDC), so a release needs no npm token, no secret and no
+passkey approval. Every package gets a provenance statement that links it to the commit.
+
+The workflow starts by hand only and has two jobs. `build` (macOS runner, no publish
+rights) installs Rust, zig and cargo-zigbuild, runs `scripts/build-npm.sh`, checks that no
+build-machine path is in the binaries, runs `cargo test --workspace --locked` and
+`npm/test/local-registry.sh`, and hands the six `.tgz` files to `publish`. `publish`
+(`id-token: write`, runs nothing but npm) asks npm whether it trusts the workflow for
+every package, then runs `scripts/publish-npm.sh`. Versions already on npm are skipped, so
+a run can be repeated.
+
+A release, after `scripts/bump-version.sh`, the commit and the push to `main`:
+
+```sh
+gh workflow run publish-npm.yml                    # dry run: builds, tests, checks, publishes nothing
+gh workflow run publish-npm.yml -f dry_run=false   # publishes the six packages
+gh run watch                                       # follow it
+scripts/publish-registry.sh                        # MCP registry, by hand, after npm
+```
+
+Set up once per package, on npmjs.com under Settings → Trusted publishing → GitHub
+Actions: organization or user `leonhardprinz`, repository `healthaccess-mcp`, workflow
+filename `publish-npm.yml`, no environment, allowed action `npm publish`. Or from a
+terminal that is logged in as the package owner (npm 11.15 or newer; one approval in the
+browser covers all six when "do not challenge for 5 minutes" is ticked):
+
+```sh
+for p in healthaccess-mcp healthaccess-mcp-darwin-arm64 healthaccess-mcp-darwin-x64 \
+         healthaccess-mcp-linux-x64 healthaccess-mcp-linux-arm64 healthaccess-mcp-win32-x64; do
+  npx -y npm@11.21.2 trust github "$p" --file publish-npm.yml \
+    --repo leonhardprinz/healthaccess-mcp --allow-publish --yes
+  sleep 2
+done
+npx -y npm@11.21.2 trust list healthaccess-mcp     # shows the entry
+```
+
+What npm checks, and what breaks it:
+
+- A new entry must publish once within 2 days, or npm lets it expire. Create the entries
+  right before the first release that uses them. After that first publish they stay.
+- The workflow filename is part of the entry. Renaming the file or the repository means
+  deleting the entries and adding them again (`npm trust revoke`, entries cannot be edited).
+- `repository.url` in every `package.json` must name this repository; the launcher's
+  `package.json` and `scripts/build-npm.sh` set it.
+- Node 22.14.0 and npm 11.5.1 are the minimum, and only GitHub-hosted runners work. The
+  workflow checks the versions.
+- A new platform package has to be published once by hand before it can get an entry.
+
+By hand, when GitHub or the trust setup is down: `scripts/build-npm.sh`,
+`npm/test/local-registry.sh`, `npm login --auth-type=web`, then
+`scripts/publish-npm.sh --auth-type=web` in a terminal; open each printed link, approve
+with the passkey and tick "do not challenge for 5 minutes" (a link times out after about
+two minutes; the script can be run again). A release by hand has no provenance statement.
 
 Prepared, not published:
 

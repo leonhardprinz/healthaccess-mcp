@@ -1,0 +1,173 @@
+# Builds the six npm packages (the launcher healthaccess-mcp and five platform packages)
+# and publishes them through npm trusted publishing: npm trusts this workflow file in this
+# repository (OIDC), so there is no npm token, no secret and no passkey prompt.
+# https://docs.npmjs.com/trusted-publishers/
+#
+# Started by hand only: Actions -> publish-npm -> Run workflow, or
+#   gh workflow run publish-npm.yml                      (dry run, the default)
+#   gh workflow run publish-npm.yml -f dry_run=false     (publishes)
+# A dry run builds, tests, asks npm whether it trusts this workflow for every package and
+# runs `npm publish --dry-run`. Versions already on npm are skipped, so a second run is safe.
+#
+# The MCP registry step (scripts/publish-registry.sh) stays manual: its key is not here.
+# Do not rename this file: its name is part of what npm trusts.
+name: publish-npm
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run: build, test and check, publish nothing"
+        type: boolean
+        default: true
+
+# No pull_request trigger, so forks never run this. Third-party actions are pinned to
+# commit hashes. The build job cannot publish; the publish job runs nothing but npm.
+permissions: {}
+
+concurrency:
+  group: publish-npm
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: macos-26
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1   # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1   # v7.1.0
+        with:
+          node-version: "24"
+          package-manager-cache: false   # no caches in a release build
+
+      - name: Install Rust (stable) with the five targets
+        run: |
+          set -euo pipefail
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+          rustup target add \
+            aarch64-apple-darwin x86_64-apple-darwin \
+            x86_64-unknown-linux-musl aarch64-unknown-linux-musl \
+            x86_64-pc-windows-gnu
+
+      - name: Install zig and cargo-zigbuild (Linux and Windows builds)
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: "1"
+          HOMEBREW_NO_INSTALL_CLEANUP: "1"
+        run: |
+          set -euo pipefail
+          brew install zig
+          cargo install --locked cargo-zigbuild@0.24.0
+          zig version
+
+      - name: Build and pack the six npm packages
+        run: scripts/build-npm.sh
+
+      - name: Check that no build-machine path is in the binaries
+        run: |
+          set -euo pipefail
+          if grep -l -a -e "$HOME" -e "$GITHUB_WORKSPACE" dist/npm/*/bin/*; then
+            echo "::error::a binary contains a path of the build machine (see the files above)"
+            exit 1
+          fi
+
+      - name: Rust tests
+        run: cargo test --workspace --locked
+
+      - name: Run the packages through npx against a local registry
+        run: npm/test/local-registry.sh
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9   # v7.0.2
+        with:
+          name: npm-packages
+          path: dist/npm/*.tgz
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      id-token: write   # the OIDC token npm exchanges for a short-lived publish token
+      contents: read
+    env:
+      DRY_RUN: ${{ inputs.dry_run }}
+    steps:
+      - name: Publish only from main
+        if: ${{ !inputs.dry_run && github.ref != 'refs/heads/main' }}
+        run: |
+          echo "::error::run this workflow on main to publish (this is $GITHUB_REF)"
+          exit 1
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1   # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1   # v7.1.0
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+          package-manager-cache: false
+
+      - name: Check Node and npm (trusted publishing needs Node 22.14.0 and npm 11.5.1)
+        run: |
+          node -e '
+            const older = (have, min) => {
+              const a = have.split(".").map(Number), b = min.split(".").map(Number);
+              for (let i = 0; i < 3; i++) if (a[i] !== b[i]) return a[i] < b[i];
+              return false;
+            };
+            const npm = require("child_process").execSync("npm -v").toString().trim();
+            console.log("node " + process.versions.node + ", npm " + npm);
+            if (older(process.versions.node, "22.14.0") || older(npm, "11.5.1")) process.exit(1);
+          '
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333   # v8.0.2
+        with:
+          name: npm-packages
+          path: dist/npm
+
+      # npm does not check a trusted publisher entry when it is saved; a typo shows only at
+      # publish time. This asks npm for a publish token for every package, the same call
+      # `npm publish` makes, and throws the token away. It fails before anything is published.
+      - name: Check that npm trusts this workflow for every package
+        run: |
+          set -euo pipefail
+          id_token=$(curl -fsS -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=npm:registry.npmjs.org" \
+            | node -p 'JSON.parse(require("fs").readFileSync(0)).value')
+          echo "::add-mask::$id_token"
+          failed=0
+          for tgz in dist/npm/*.tgz; do
+            name=$(tar -xzOf "$tgz" package/package.json | node -p 'JSON.parse(require("fs").readFileSync(0)).name')
+            answer=$(curl -sS -X POST -d '' -H "Authorization: Bearer $id_token" -H "Accept: application/json" \
+              "https://registry.npmjs.org/-/npm/v1/oidc/token/exchange/package/$name" \
+              | node -e 'let d = ""; process.stdin.on("data", c => d += c).on("end", () => {
+                  let j = {}; try { j = JSON.parse(d) } catch {}
+                  console.log(j.token ? "trusted" : "NOT trusted: " + (j.message || j.error || "no token in the answer"));
+                })')
+            echo "$name: $answer"
+            echo "- \`$name\`: $answer" >> "$GITHUB_STEP_SUMMARY"
+            [ "$answer" = trusted ] || failed=1
+          done
+          if [ "$failed" = 1 ]; then
+            echo "::error::add this workflow as trusted publisher for the packages above (npmjs.com -> package -> Settings -> Trusted publishing), see docs/mcp.md"
+            exit 1
+          fi
+
+      - name: Publish the platform packages, then the launcher
+        run: |
+          set -euo pipefail
+          if [ "$DRY_RUN" = true ]; then
+            scripts/publish-npm.sh --dry-run
+            echo "Dry run: nothing was published." >> "$GITHUB_STEP_SUMMARY"
+          else
+            scripts/publish-npm.sh
+            echo "Published. Next, by hand: \`scripts/publish-registry.sh\` (MCP registry)." >> "$GITHUB_STEP_SUMMARY"
+          fi

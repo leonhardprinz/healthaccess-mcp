@@ -6,6 +6,8 @@
 #   scripts/publish-npm.sh --otp=123456
 # With a passkey or security key, run it bare and approve in the browser when asked.
 # Pass --dry-run to see what would go out.
+# In GitHub Actions (.github/workflows/publish-npm.yml) it runs bare: npm trusted
+# publishing signs in for the workflow, no token, no code, no passkey.
 set -euo pipefail
 cd "$(dirname "$0")/../dist/npm"
 args=(--access public "$@")

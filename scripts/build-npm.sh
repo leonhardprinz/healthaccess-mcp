@@ -50,6 +50,7 @@ while read -r key target builder exe; do
   "license": "MIT",
   "author": "Prinz Tech Consulting d.o.o. <support@healthaccessmcp.com>",
   "homepage": "https://healthaccessmcp.com",
+  "repository": { "type": "git", "url": "git+https://github.com/leonhardprinz/healthaccess-mcp.git" },
   "preferUnplugged": true
 }
 JSON
