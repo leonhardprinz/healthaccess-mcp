@@ -21,7 +21,7 @@ Site: [healthaccessmcp.com](https://healthaccessmcp.com) (built from `site/`). F
 1. Install the app: [Health Access MCP on the App Store](https://apps.apple.com/app/id6831916470), free. Or build it from this repository with Xcode.
 2. Pick a folder. Anything the iOS Files app can see: iCloud Drive, Dropbox, Google Drive, OneDrive, Proton Drive, a NAS, local. The one rule: your AI has to be able to reach the same folder, so pick one that syncs to the computer where the AI runs.
 3. Allow Health access (read only, you choose the types) and notifications (one kind only: "Your AI wrote S27", when a plan arrives).
-4. Give the MCP to your AI. Paste the setup message the app copies; the AI registers `npx -y healthaccess-mcp`, which finds your folder on its own.
+4. Give it to your AI. Paste the message the app copies; Claude or Cursor register `npx -y healthaccess-mcp`, which finds your folder on its own. An AI that cannot run a program, such as ChatGPT, works from the summary in the same message.
 
 **Every workout, nobody**
 1. You end a workout on the Watch.

@@ -1226,19 +1226,25 @@ final class AppModel {
 
     // MARK: - your AI
 
+    /// One message for any AI: the setup for those that can run the server, the summary for those that cannot.
     func requestSetupCopy(key: String = "setup") {
-        let message = SetupMessage.text(for: folder)
-        let name = folder?.displayName ?? "your folder"
+        let summary = folder.flatMap {
+            Briefing.summary(folder: $0, entries: index?.workouts ?? [], effortSources: effortSources, plans: plans)
+        }
+        let message = SetupMessage.text(for: folder, summary: summary)
+        let carries = summary == nil
+            ? "There is no health data in it yet; after the first sync it also carries your summary, for ChatGPT and phone AIs."
+            : "ChatGPT and phone AIs cannot do that, so it also carries your summary for them: the last four weeks, recent workouts, vitals and the next planned workout."
         confirmation = Confirmation(
-            title: "Copy the setup message",
-            detail: "It asks your AI to register the Health Access MCP (\(SetupMessage.command)), which finds your folder on its own; the folder's name (\(name)) is in it as a hint. No health data. Copy puts it on the clipboard and then opens the share sheet, in case AirDrop to your computer is easier than pasting.",
+            title: "Copy the message for your AI",
+            detail: "One message for any AI. Claude or Cursor on your computer set up the connection from it (\(SetupMessage.command)) and read your folder from then on. \(carries) Copy puts it on the clipboard and then opens the share sheet.",
             confirmTitle: "Copy") { [weak self] in
                 guard let self else { return }
                 UIPasteboard.general.string = message
-                self.results[key] = ActionResult(kind: .done, text: "Setup message copied. Paste it to your AI on your computer.", at: Date())
+                self.results[key] = ActionResult(kind: .done, text: "Message copied. Paste it to your AI: on your computer, or ChatGPT on your phone.", at: Date())
                 self.waitingForClient = true
                 Telemetry.shared.capture(.setupMessageCopied)
-                self.log("setup message copied", .ui)
+                self.log("message for the AI copied (\(summary == nil ? "no summary yet" : "with summary"))", .ui)
                 self.followUp = { [weak self] in self?.shareItems = ShareItems(items: [message]) }
             }
     }

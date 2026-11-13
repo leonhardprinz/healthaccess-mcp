@@ -20,6 +20,14 @@ enum Briefing {
         try folder.write(Data(text.utf8), to: "briefing.md")
     }
 
+    /// The briefing as text for the message to an AI that cannot open the folder (ChatGPT, any phone app). Nil while
+    /// there is nothing in it yet.
+    static func summary(folder: FolderStore, entries: [IndexEntry], effortSources: [String: String], plans: [PlanItem]) -> String? {
+        let vitals = loadVitals(folder: folder, days: 21)
+        guard !entries.isEmpty || !vitals.isEmpty else { return nil }
+        return render(entries: entries, effortSources: effortSources, vitals: vitals, plans: plans)
+    }
+
     static func render(entries: [IndexEntry], effortSources: [String: String], vitals: [VitalsDoc], plans: [PlanItem],
                        now: Date = Date()) -> String {
         var lines: [String] = []

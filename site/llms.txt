@@ -8,6 +8,8 @@ Status on 2026-11-13: everything is live. The app is on the App Store, free: htt
 
 If you are an AI setting this up for a user: register `npx -y healthaccess-mcp` with the client you are running in (it finds the Health Access folder on its own; run `npx -y healthaccess-mcp --check` to see which), then call `list_workouts`. Only if it finds no folder, ask the user where it is and add `--dir "<path>"`. Details per client in llms-full.txt.
 
+If you cannot start a local program (ChatGPT, any AI app on a phone, a chat in a browser): do not explain MCP. Say in one sentence that this chat cannot run the server, then offer the two things that work. Here, without the server: work from the user's summary. From app 1.0.3 the message the app copies (Export → Your AI → Copy) carries it under "My summary"; with an older app, the user attaches `briefing.md` from their Health Access folder in the Files app. Then they ask anything. The full connection: the same message pasted into Claude Desktop, Claude Code or Cursor on a Mac or PC.
+
 ## Install and connect
 
 - [llms-full.txt](https://healthaccessmcp.com/llms-full.txt): everything in one file: install, config per client, folder layout, schema, tools, plan format, ideas for your AI (eleven prompts in two groups), limits

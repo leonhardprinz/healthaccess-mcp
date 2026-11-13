@@ -120,7 +120,7 @@ startup_timeout_sec = 60
 
 Claude Code project file `.mcp.json` (project scope): the same JSON as Claude Desktop.
 
-ChatGPT: cannot launch a local stdio server. It connects to remote HTTPS MCP servers only, on some plans. Use the files instead: upload `briefing.md` or a workout JSON, or paste the output of `npx -y -p healthaccess-mcp healthaccess summary --weeks 4`. Do not expose the server through a public tunnel without authentication.
+ChatGPT: cannot launch a local stdio server. It connects to remote HTTPS MCP servers only, on some plans. Use the files instead: from app 1.0.3 the message the app copies (Export → Your AI → Copy) carries the briefing under "My summary", so pasting it into a chat is enough; or upload `briefing.md` or a workout JSON, or paste the output of `npx -y -p healthaccess-mcp healthaccess summary --weeks 4`. Do not expose the server through a public tunnel without authentication.
 
 Verify: `claude mcp list` (Claude Code), `codex mcp list` (Codex CLI), the Connectors menu (Claude Desktop), the MCP settings (Cursor). The server announces itself as `healthaccess-mcp`, title "Health Access MCP". `npx -y -p healthaccess-mcp healthaccess doctor` checks the folder: directories, index health, every JSON file, schema versions; exit code 1 on problems. Once the client has started the server, the Health Access app shows "Connected" with the client's name.
 

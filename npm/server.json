@@ -4,12 +4,12 @@
   "title": "Health Access MCP",
   "description": "Apple Health and Apple Watch workouts for your AI, from local files. Plans go back to the Watch.",
   "websiteUrl": "https://healthaccessmcp.com",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "healthaccess-mcp",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "transport": {
         "type": "stdio"
       },

@@ -2,6 +2,18 @@
 
 Versions are one number for everything: the app's `MARKETING_VERSION`, the Rust crates and the npm packages (`scripts/bump-version.sh`). The app's build number counts up on its own. Dates are Europe/Ljubljana.
 
+## 1.0.3 (app build 27), 2026-11-13: one message for any AI
+
+### New
+- **One message, and the AI picks what it can do.** Export → Your AI → Copy now gives one message for every AI. An AI that can run a program on the computer (Claude Desktop, Claude Code, Cursor) registers the server from it and reads the folder from then on. One that cannot (ChatGPT, any AI app on a phone, a chat in a browser) is told not to explain the setup and to work from the summary the message carries: the last four weeks, recent workouts, vitals and the next planned workout. Nobody has to know which kind of AI they have. For ChatGPT it is a snapshot; copy a new one after new workouts.
+- The message therefore contains health data once there is some, and the confirmation says so. Before the first sync it carries none and tells the AI to ask for a fresh copy.
+
+### Fixed
+- **The onboarding no longer sends ChatGPT users into a dead end.** It named ChatGPT next to Claude and Cursor for a message that only asked for a local server; ChatGPT answered, rightly, that it cannot launch one.
+
+### Server
+- Unchanged; 1.0.3 only keeps the one version number.
+
 ## 1.0.2 (app build 25), 2026-11-11: a workout that synced says so
 
 ### New

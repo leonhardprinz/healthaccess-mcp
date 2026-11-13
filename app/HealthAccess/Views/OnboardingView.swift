@@ -86,7 +86,7 @@ struct OnboardingView: View {
 
     private var connect: some View {
         screen("Now connect your AI.",
-               "This app only writes the files. Your AI reads them on your computer. Copy the setup message, paste it to Claude, ChatGPT or Cursor, and it installs the rest itself.") {
+               "This app only writes the files. Copy the message and paste it to your AI. Claude or Cursor on your computer connect to the folder; ChatGPT works from the summary in the message.") {
             Text(PlansText.whereFrom)
                 .font(.footnote).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -95,7 +95,7 @@ struct OnboardingView: View {
                 ResultLine(result: result, undoKey: "setup-onboarding").padding(.bottom, 4)
                 primary("Done") { finish() }
             } else {
-                primary("Copy setup message") { model.requestSetupCopy(key: "setup-onboarding") }
+                primary("Copy the message") { model.requestSetupCopy(key: "setup-onboarding") }
                 secondary("I'll do it later") { finish() }
             }
         }

@@ -276,7 +276,7 @@ struct ConnectRow: View {
                     Image(systemName: "circle.dashed").foregroundStyle(Color.signal).font(.title3)
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Not connected")
-                        Text("Copy the setup message, paste it to Claude or Cursor on your computer.")
+                        Text("Copy the message, paste it to your AI. It tells Claude, Cursor or ChatGPT what to do.")
                             .font(.footnote).foregroundStyle(.secondary)
                     }
                     Spacer(minLength: 0)
@@ -287,7 +287,7 @@ struct ConnectRow: View {
                 if model.waitingForClient {
                     HStack(spacing: 8) {
                         ProgressView().controlSize(.small)
-                        Text("Waiting for your AI to connect…").font(.footnote).foregroundStyle(.secondary)
+                        Text("Waiting for Claude or Cursor to connect. ChatGPT does not show here.").font(.footnote).foregroundStyle(.secondary)
                     }
                 }
             }
