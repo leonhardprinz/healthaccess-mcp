@@ -6,6 +6,7 @@
 <title>Health Access MCP: Apple Health for your AI, as files you own</title>
 <meta name="description" content="Health Access MCP writes your Apple Watch workouts and vitals as JSON into a folder you pick. A local MCP server lets Claude, Cursor or any AI read them, and AI-written plans go back to the Watch. No account, no server.">
 <link rel="canonical" href="https://healthaccessmcp.com/">
+<meta name="apple-itunes-app" content="app-id=6831916470">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Health Access MCP">
 <meta property="og:title" content="Apple won't let your AI read your Watch. This does.">
@@ -31,7 +32,9 @@
       "applicationCategory": "HealthApplication",
       "applicationSubCategory": "MCP server",
       "operatingSystem": "iOS 17 or later (app); macOS, Linux (MCP server and CLI)",
-      "softwareVersion": "0.2.0",
+      "softwareVersion": "1.0.2",
+      "downloadUrl": "https://apps.apple.com/app/id6831916470",
+      "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"},
       "license": "https://opensource.org/license/mit",
       "description": "Health Access MCP writes Apple Watch workouts and daily vitals as JSON into a folder the user chooses, automatically after every workout. A local MCP server lets Claude, Cursor or any AI read the folder, and AI-written training plans are put back onto the Apple Watch. No account, no server.",
       "featureList": [
@@ -115,7 +118,7 @@
   <div class="flow">
     <div class="step"><div class="who you">Once, about five minutes, you</div>
       <ol>
-        <li>Install the app. <span class="tag plan">App Store soon</span> It is in testing now.</li>
+        <li>Install the app: <a href="https://apps.apple.com/app/id6831916470">Health Access MCP on the App Store</a>. <span class="tag live">Free</span></li>
         <li>Pick a folder. Anything the iOS Files app can see: iCloud Drive, Dropbox, Google Drive, OneDrive, Proton Drive, a NAS, local. The one rule: your AI has to be able to reach the same folder, so pick one that syncs to the computer where the AI runs.</li>
         <li>Allow Health access (read only, you choose the types) and notifications (one kind only: "Your AI wrote S27", when a plan arrives).</li>
         <li>Give the MCP to your AI. Paste one paragraph, it sets itself up from these docs. Details below.</li>

@@ -18,7 +18,7 @@ Site: [healthaccessmcp.com](https://healthaccessmcp.com) (built from `site/`). F
 ## The order of things
 
 **Once, about five minutes, you**
-1. Install the app (App Store submission is next; today it is built from this repository with Xcode).
+1. Install the app: [Health Access MCP on the App Store](https://apps.apple.com/app/id6831916470), free. Or build it from this repository with Xcode.
 2. Pick a folder. Anything the iOS Files app can see: iCloud Drive, Dropbox, Google Drive, OneDrive, Proton Drive, a NAS, local. The one rule: your AI has to be able to reach the same folder, so pick one that syncs to the computer where the AI runs.
 3. Allow Health access (read only, you choose the types) and notifications (one kind only: "Your AI wrote S27", when a plan arrives).
 4. Give the MCP to your AI. Paste the setup message the app copies; the AI registers `npx -y healthaccess-mcp`, which finds your folder on its own.

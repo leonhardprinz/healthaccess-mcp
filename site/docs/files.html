@@ -65,7 +65,7 @@
   <thead><tr><th>Path</th><th>Written by</th><th>Read by</th></tr></thead>
   <tbody>
     <tr><td class="mono">workouts/*.json</td><td>The app, once per workout. Never overwritten by export. The MCP or CLI may update exactly two keys, <code>effort</code> and <code>feel</code>, through <code>rate_workout</code>.</td><td>MCP, CLI, your AI, you</td></tr>
-    <tr><td class="mono">vitals/*.json</td><td>The app, today and yesterday on every run; 30-day backfill from Settings.</td><td>MCP, CLI, your AI</td></tr>
+    <tr><td class="mono">vitals/*.json</td><td>The app, today and yesterday on every run. Days missed since the last sync are filled in on their own; the years before the app was set up come from Settings → Older data.</td><td>MCP, CLI, your AI</td></tr>
     <tr><td class="mono">days/*.json, catalog.json, profile.json</td><td>The app, from v0.4: every Health group per day, the list of types with data and where each was exported, the athlete's characteristics.</td><td>MCP, CLI (<code>healthaccess day</code>, <code>catalog</code>, <code>profile</code>; <code>doctor</code> checks the coverage), your AI</td></tr>
     <tr><td class="mono">index.json</td><td>The app, after every export and every rating. The MCP updates a row's effort after <code>rate_workout</code>, never adds rows.</td><td>MCP (for listing), CLI</td></tr>
     <tr><td class="mono">plans/&lt;id&gt;.json</td><td>The MCP (<code>push_plan</code>) or the CLI (<code>healthaccess plan push</code>). Your AI can also write it directly.</td><td>The app</td></tr>
