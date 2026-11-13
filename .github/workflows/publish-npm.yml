@@ -6,8 +6,9 @@
 # Started by hand only: Actions -> publish-npm -> Run workflow, or
 #   gh workflow run publish-npm.yml                      (dry run, the default)
 #   gh workflow run publish-npm.yml -f dry_run=false     (publishes)
-# A dry run builds, tests, asks npm whether it trusts this workflow for every package and
-# runs `npm publish --dry-run`. Versions already on npm are skipped, so a second run is safe.
+# A dry run builds, tests, asks npm whether it trusts this workflow for every package (a
+# missing entry is a warning there, an error in a real run) and runs `npm publish --dry-run`.
+# Versions already on npm are skipped, so a second run is safe.
 #
 # The MCP registry step (scripts/publish-registry.sh) stays manual: its key is not here.
 # Do not rename this file: its name is part of what npm trusts.
@@ -135,7 +136,8 @@ jobs:
 
       # npm does not check a trusted publisher entry when it is saved; a typo shows only at
       # publish time. This asks npm for a publish token for every package, the same call
-      # `npm publish` makes, and throws the token away. It fails before anything is published.
+      # `npm publish` makes, and throws the token away. A real run stops here before anything
+      # is published; a dry run only warns, so it can run before the entries exist.
       - name: Check that npm trusts this workflow for every package
         run: |
           set -euo pipefail
@@ -157,8 +159,13 @@ jobs:
             [ "$answer" = trusted ] || failed=1
           done
           if [ "$failed" = 1 ]; then
-            echo "::error::add this workflow as trusted publisher for the packages above (npmjs.com -> package -> Settings -> Trusted publishing), see docs/mcp.md"
-            exit 1
+            hint="add this workflow as trusted publisher for the packages above (npmjs.com -> package -> Settings -> Trusted publishing), see docs/mcp.md"
+            if [ "$DRY_RUN" = true ]; then
+              echo "::warning::not trusted yet: $hint"
+            else
+              echo "::error::$hint"
+              exit 1
+            fi
           fi
 
       - name: Publish the platform packages, then the launcher

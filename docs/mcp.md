@@ -734,8 +734,9 @@ rights) installs Rust, zig and cargo-zigbuild, runs `scripts/build-npm.sh`, chec
 build-machine path is in the binaries, runs `cargo test --workspace --locked` and
 `npm/test/local-registry.sh`, and hands the six `.tgz` files to `publish`. `publish`
 (`id-token: write`, runs nothing but npm) asks npm whether it trusts the workflow for
-every package, then runs `scripts/publish-npm.sh`. Versions already on npm are skipped, so
-a run can be repeated.
+every package, then runs `scripts/publish-npm.sh`. A package npm does not trust the
+workflow for stops a real run before anything is published; a dry run lists it in the run
+summary as a warning. Versions already on npm are skipped, so a run can be repeated.
 
 A release, after `scripts/bump-version.sh`, the commit and the push to `main`:
 
