@@ -8,6 +8,17 @@ Apple Health and Apple Watch workouts for Claude, from files on your own compute
 - Node.js 18 or newer, so `npx` exists. Check with `npx --version`.
 - Claude Code, or Cowork running on your computer. Chat on claude.ai does not start local servers, so there the prompts load but cannot read your data.
 
+## Install
+
+In Claude Code, two commands in your shell:
+
+```sh
+claude plugin marketplace add leonhardprinz/healthaccess-mcp
+claude plugin install healthaccess-mcp@healthaccess
+```
+
+If you already registered the server by hand (`claude mcp add ... healthaccess`), remove that entry first, or Claude starts the server twice.
+
 ## What it adds
 
 - The `healthaccess` MCP server, started on your computer with `npx -y healthaccess-mcp@1.0.3`. It finds the Health Access folder on its own: iCloud Drive first, then Dropbox, Google Drive, OneDrive and Box, then `~/Documents`. Thirteen tools read workouts, days, vitals and trends, and write plans and effort ratings.

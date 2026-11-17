@@ -1,0 +1,15 @@
+{
+  "name": "healthaccess",
+  "description": "Health Access MCP: Apple Health and Apple Watch workouts for Claude, from files on your own computer.",
+  "owner": {
+    "name": "Prinz Tech Consulting d.o.o.",
+    "email": "support@healthaccessmcp.com"
+  },
+  "plugins": [
+    {
+      "name": "healthaccess-mcp",
+      "source": "./claude-plugin",
+      "description": "Reads the folder the Health Access iPhone app writes (workouts, daily health data, a one-page briefing) and puts workout plans back on the Apple Watch. A local MCP server started with npx, plus eleven prompts as skills."
+    }
+  ]
+}

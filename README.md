@@ -116,7 +116,7 @@ Nothing else writes, nothing deletes. The complete contract with every field is 
 - `examples/` a synthetic Health Access folder (`generate.py` rewrites it; tests, docs and the site quote it).
 - `docs/` [`north-star.md`](docs/north-star.md) (the acceptance checklist every build is checked against), [`schema.md`](docs/schema.md) (the folder contract), [`mcp.md`](docs/mcp.md) (install, client setup, tools, CLI, distribution), [`prompts.md`](docs/prompts.md) (the eleven prompts, source of truth), [`positioning.md`](docs/positioning.md) (canonical copy), [`brand.md`](docs/brand.md) (name, design language), [`export-coverage.md`](docs/export-coverage.md), [`phase0-spike.md`](docs/phase0-spike.md) (findings).
 - `npm/` the npm launcher package, `npm/server.json` (MCP registry entry), `npm/test/` (end-to-end test against a local registry).
-- `claude-plugin/` the Claude plugin: the MCP server and the prompts as skills (validated, not yet submitted).
+- `claude-plugin/` the Claude plugin: the MCP server and the prompts as skills. This repository is its own plugin marketplace (`.claude-plugin/marketplace.json`): `claude plugin marketplace add leonhardprinz/healthaccess-mcp`, then `claude plugin install healthaccess-mcp@healthaccess`. Not in Anthropic's directory.
 - `scripts/` `bump-version.sh`, `build-npm.sh`, `publish-npm.sh`, `publish-registry.sh`, `sync-prompts.py`, `build-site.sh`, `deploy-site.sh`, `make-og.py`.
 - `site/` the static docs site: plain HTML, one CSS file, self-hosted fonts. `scripts/build-site.sh` stages it with `/ref/` and `/examples/` into `dist/site`, `scripts/deploy-site.sh` deploys it to Cloudflare Workers (`wrangler.jsonc`, `site-worker/`). Preview: `scripts/build-site.sh && python3 -m http.server -d dist/site 8000`.
 
