@@ -4,6 +4,8 @@
 
 Health Access is middleware. It does the one thing Apple requires a phone app for, writing your workouts and daily health data as JSON into a folder you pick, and then it gets out of the way. Your AI reads that folder, through the MCP or just as files. If it writes you a workout plan, one tap puts it on your Watch, or none with Automatic on.
 
+Free and open source (MIT), no account, no server. If you are looking for a free alternative to Health Auto Export to get Apple Health data to an AI, this is one: [the two side by side](https://healthaccessmcp.com/docs/health-auto-export-alternative). Short answers to the usual questions: [questions and answers](https://healthaccessmcp.com/docs/faq).
+
 Site: [healthaccessmcp.com](https://healthaccessmcp.com) (built from `site/`). For an AI: [llms.txt](https://healthaccessmcp.com/llms.txt), [llms-full.txt](https://healthaccessmcp.com/llms-full.txt). Server: [`healthaccess-mcp` on npm](https://www.npmjs.com/package/healthaccess-mcp), listed in the official MCP registry as `com.healthaccessmcp/healthaccess-mcp`. What changed when: [`CHANGELOG.md`](CHANGELOG.md).
 
 > **Name.** The project ran under the codename "Tide" until 2026-10-25 and is now **Health Access MCP**. The repository directory on disk is still `~/Developer/tide` for now; everything inside uses the new names. Files and settings written before the rename keep working: the `tide.*` schema ids, `TIDE_DIR`, `~/.config/tide/config.toml` and the `tide://` resource URIs are accepted as aliases forever. See [`docs/schema.md`](docs/schema.md) and [`docs/mcp.md`](docs/mcp.md).
