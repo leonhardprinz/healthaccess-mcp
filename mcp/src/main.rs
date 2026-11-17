@@ -47,18 +47,14 @@ async fn main() -> anyhow::Result<()> {
 
     let args = Args::parse();
     let cfg = config::load().context("reading config")?;
-    let (dir, source, others) = config::resolve_dir_with_source(args.dir.as_deref())
-        .context("resolving the Health Access folder")?;
-    if source == config::DirSource::Discovered {
-        tracing::warn!(dir = %dir.display(), "no folder configured, using the only Health Access folder found on this computer");
-    }
-    let store = Store::open(&dir)
-        .with_context(|| format!("opening {}", dir.display()))?
-        .with_zone_bounds(cfg.zone_bounds());
-
     let telemetry = telemetry::Telemetry::init(args.telemetry || cfg.telemetry, &cfg);
 
     if args.check {
+        let (dir, source, others) = config::resolve_dir_with_source(args.dir.as_deref())
+            .context("resolving the Health Access folder")?;
+        let store = Store::open(&dir)
+            .with_context(|| format!("opening {}", dir.display()))?
+            .with_zone_bounds(cfg.zone_bounds());
         println!("dir: {} ({})", dir.display(), source.as_str());
         for other in &others {
             println!("also found: {}", other.display());
@@ -82,13 +78,32 @@ async fn main() -> anyhow::Result<()> {
         return Ok(());
     }
 
-    telemetry.started();
-    tracing::info!(dir = %dir.display(), "healthaccess-mcp {} starting", healthaccess_core::VERSION);
+    // No folder is not a reason to refuse the connection: the app may not have written
+    // anything yet, or the folder has not reached this computer. The server starts, every
+    // tool says what is missing, and it looks again on each call.
+    let store = match config::resolve_dir_with_source(args.dir.as_deref())
+        .and_then(|(dir, source, _)| Store::open(&dir).map(|store| (store, dir, source)))
+    {
+        Ok((store, dir, source)) => {
+            if source == config::DirSource::Discovered {
+                tracing::warn!(dir = %dir.display(), "no folder configured, using the only Health Access folder found on this computer");
+            }
+            tracing::info!(dir = %dir.display(), "healthaccess-mcp {} starting", healthaccess_core::VERSION);
+            Some(store.with_zone_bounds(cfg.zone_bounds()))
+        }
+        Err(e) => {
+            tracing::warn!("starting without a folder, will look again on every call: {e}");
+            None
+        }
+    };
 
-    let service = server::HealthAccessServer::new(store, telemetry)
-        .serve(stdio())
-        .await
-        .context("MCP handshake failed")?;
+    telemetry.started();
+
+    let service =
+        server::HealthAccessServer::new(store, args.dir.clone(), cfg.zone_bounds(), telemetry)
+            .serve(stdio())
+            .await
+            .context("MCP handshake failed")?;
     service.waiting().await.context("server task failed")?;
     Ok(())
 }

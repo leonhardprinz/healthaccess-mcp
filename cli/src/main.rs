@@ -284,11 +284,17 @@ fn cmd_list(
         ("ID", false),
     ]);
     for e in &rows {
+        // the app's index can lag behind the plans in the folder; the file knows
+        let plan_name = e.plan_name.clone().or_else(|| {
+            let mut w = store.load_workout_file(&store.workout_path(e)).ok()?;
+            store.enrich_with_plan(&mut w);
+            w.plan_ref?.name
+        });
         t.row(vec![
             e.start.format("%Y-%m-%d").to_string(),
             e.start.format("%H:%MZ").to_string(),
             e.activity.clone(),
-            opt_str(e.plan_name.clone()),
+            opt_str(plan_name),
             fmt_duration(e.duration_s),
             opt_num(e.distance_m, 0),
             opt_num(e.avg_hr, 0),
@@ -401,7 +407,8 @@ fn print_workout(store: &Store, w: &Workout, hr: bool) {
                 s.label.clone().unwrap_or_default(),
                 fmt_duration(s.duration_s),
                 opt_num(s.distance_m, 0),
-                s.pace_s_per_100m
+                s.swim_pace_s_per_100m
+                    .or(s.pace_s_per_100m)
                     .map(fmt_pace)
                     .unwrap_or_else(|| NONE.into()),
                 opt_num(s.avg_hr, 0),

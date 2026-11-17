@@ -26,7 +26,10 @@ pub fn is_plain_name(s: &str) -> bool {
         return false;
     }
     let mut parts = Path::new(s).components();
-    matches!((parts.next(), parts.next()), (Some(Component::Normal(_)), None))
+    matches!(
+        (parts.next(), parts.next()),
+        (Some(Component::Normal(_)), None)
+    )
 }
 
 /// Write `bytes` to `path` atomically: write a fresh sibling temp file (random name,

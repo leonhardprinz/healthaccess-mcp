@@ -102,9 +102,15 @@ The folder can live on any provider the iOS Files app can open (iCloud Drive, Dr
 Google Drive, OneDrive, Proton Drive, a NAS). The one rule: the same folder has to be
 reachable from the machine the AI runs on.
 
+From 1.0.4 the server starts without a folder: the app may not have written anything yet,
+or the folder has not reached this computer. It connects, lists its tools, and every tool
+answers with what is missing and what the athlete has to do. It looks again on every call,
+so the first sync needs no restart of the AI client. Before 1.0.4 it exited, and the client
+showed a failed server.
+
 `healthaccess-mcp --check` prints the resolved folder and where it came from, any other
 folders the search found, the zone bounds, the telemetry state and the config file path,
-then exits. `HEALTHACCESS_CONFIG=/path/to/other.toml` overrides the config file location
+then exits (with an error when there is no folder). `HEALTHACCESS_CONFIG=/path/to/other.toml` overrides the config file location
 (tests use it; alias `TIDE_CONFIG`).
 
 ## Claude Code
@@ -190,7 +196,7 @@ app's index can lag behind the files.
     "duration_s": 2166, "distance_m": 1200, "avg_hr": 129,
     "effort": 6, "effort_source": "apple", "rated": true, "plan_name": "S12",
     "file": "workouts/2026-05-14_0712_PoolSwim_7A1C3E90.json",
-    "summary": "2026-05-14 Pool swim \"S12\" · 1200 m · 36:06 · avg HR 129 (max 162) · Z1–2 93% · effort 6/10 (apple) · best FR 100 2:12 → 284 beats/100 m"
+    "summary": "2026-05-14 Pool swim \"S12\" · 1200 m · 36:06 · avg HR 129 (max 162) · Z1–2 93% · effort 6/10 (apple) · best FR 100 2:10 → 280 beats/100 m"
   }]
 }
 ```
@@ -218,16 +224,16 @@ show when no bounds are known or the file has no series. Without either, `zones`
 {
 ```json
 {
-  "summary": "2026-05-14 Pool swim \"S12\" · 1200 m · 36:06 · avg HR 129 (max 162) · Z1–2 93% · effort 6/10 (apple) · best FR 100 2:12 → 284 beats/100 m",
+  "summary": "2026-05-14 Pool swim \"S12\" · 1200 m · 36:06 · avg HR 129 (max 162) · Z1–2 93% · effort 6/10 (apple) · best FR 100 2:10 → 280 beats/100 m",
   "file": "workouts/2026-05-14_0712_PoolSwim_7A1C3E90.json",
-  "parts_text": ["FR easy, find your breathing · 200 m · 2:20/100 · HR 100", "DRILL 6-3-6: 6 kicks side, 3 strokes · 50 m · 2:50/100 · HR 125", "FR easy, long strokes · 50 m · 2:16/100 · HR 130", "recovery · 0:30 · HR 126", "...", "FR 100 steady, breathe every 3 · 100 m · 2:12/100 · HR 151", "recovery · 0:40 · HR 146", "...", "Easy, any stroke, long exhale · 100 m · 2:50/100 · HR 123"],
-  "cardiac_cost": {"beats_per_100m": 283.8, "best_100_pace_s": 132, "avg_hr": 129, "basis": "step 2.3.0 100 m in 2:12"},
+  "parts_text": ["FR easy, find your breathing · 200 m · 2:18/100 · HR 100", "DRILL 6-3-6: 6 kicks side, 3 strokes · 50 m · 2:46/100 · HR 125", "FR easy, long strokes · 50 m · 2:12/100 · HR 130", "recovery · 0:30 · HR 126", "...", "FR 100 steady, breathe every 3 · 100 m · 2:10/100 · HR 151", "recovery · 0:40 · HR 146", "...", "Easy, any stroke, long exhale · 100 m · 2:47/100 · HR 123"],
+  "cardiac_cost": {"beats_per_100m": 279.5, "best_100_pace_s": 130, "avg_hr": 129, "basis": "step 2.3.0 100 m in 2:10, push-off to touch"},
   "activity": "pool_swim", "distance_m": 1200, "duration_s": 2166, "pool_length_m": 50,
   "plan_ref": {"plan_id": "2026-05-13T19:02:11Z-s12", "name": "S12"},
   "zones": {"bounds": [133, 146, 158, 169], "bounds_source": "estimated", "seconds": {"z1": 1182, "z2": 827, "z3": 110, "z4": 42, "z5": 0}},
   "steps": [
-    {"key": "0.0.0", "block": 0, "rep": 0, "step": 0, "kind": "warmup", "label": "FR easy, find your breathing", "duration_s": 279, "distance_m": 200, "avg_hr": 100, "pace_s_per_100m": 139.5, "goal_met": true, "start": "2026-05-14T05:12:04Z", "end": "2026-05-14T05:16:43Z"},
-    {"key": "2.3.0", "block": 2, "rep": 3, "step": 0, "kind": "work", "label": "FR 100 steady, breathe every 3", "duration_s": 132, "distance_m": 100, "avg_hr": 151, "pace_s_per_100m": 132, "goal_met": true, "...": "..."}
+    {"key": "0.0.0", "block": 0, "rep": 0, "step": 0, "kind": "warmup", "label": "FR easy, find your breathing", "duration_s": 279, "distance_m": 200, "avg_hr": 100, "pace_s_per_100m": 139.5, "swim_s": 276, "swim_pace_s_per_100m": 138, "goal_met": true, "start": "2026-05-14T05:12:04Z", "end": "2026-05-14T05:16:43Z"},
+    {"key": "2.3.0", "block": 2, "rep": 3, "step": 0, "kind": "work", "label": "FR 100 steady, breathe every 3", "duration_s": 132, "distance_m": 100, "avg_hr": 151, "pace_s_per_100m": 132, "swim_s": 130, "swim_pace_s_per_100m": 130, "goal_met": true, "...": "..."}
   ],
   "laps": [{"start": "2026-05-14T05:12:07Z", "end": "2026-05-14T05:13:14Z", "duration_s": 67, "stroke": "freestyle", "swolf": 88}],
   "recovery_hr": {"end": 115, "1min": 104, "2min": 96},
@@ -628,11 +634,19 @@ the handshake files; `doctor` only reads them.)
   recorded distance of at least 20 m is `work`; remaining time-only steps alternate, even
   step index `work`, odd `recovery`. Activities without a key path in a multi-activity
   workout get `key` = activity index, `block` = index.
-- **Plan matching.** A workout is joined to the plan named by `plan_ref.plan_id`, else to
-  the plan of the same sport whose `scheduled_for` lies within 2 h of the workout start
-  (closest wins, and the workout's highest block number must fit the plan). Key path
-  block 0 = warm-up, 1 to n = blocks, n+1 = cool-down. Matching fills step `kind` and
-  missing `label`s and sets `plan_ref`.
+- **Plan matching**, for every sport a plan can have. A workout is joined to the plan
+  named by `plan_ref.plan_id`; else to the plan whose status holds the WorkoutKit id the
+  Watch ran (`workout_plan_id` equals `workoutkit_id`); else, when the Watch ran an id no
+  status holds, to the plan with the same steps: every recorded step is a step of the
+  plan (block, repeat, position), the workout got past the warm-up, and at least seven in
+  ten steps hit their goal (a distance within 10 %, a time within 10 % or 3 s). The Watch
+  gives a workout it keeps in its own list a new id, so a plan started from there, for
+  example days after its slot, only matches this way. An unknown id with other steps is
+  another workout and gets no plan. Only a workout without any WorkoutKit id is matched
+  by time: same sport, `scheduled_for` within 2 h of the start (closest wins, and the
+  workout's highest block number must fit the plan). Key path block 0 = warm-up, 1 to n =
+  blocks, n+1 = cool-down. Matching fills step `kind` and missing `label`s and sets
+  `plan_ref`.
 - **Weekly summary.** ISO weeks (Monday start); `avg_hr` is duration-weighted;
   `mean_effort` averages rated sessions only, whatever the source of the rating.
 - **Dedupe.** Same `start` (within 2 s) and same `source` means one workout, the longer is
@@ -841,7 +855,7 @@ app must write.
    alternate work/recovery instead of all being `recovery` (rowing intervals would
    otherwise all read as recovery). Applies to v0 files only; v1 files keep the app's
    kinds.
-6. **`pace_s_per_100m`** is `null` under 20 m even when a distance exists.
+6. **`pace_s_per_100m`** is `null` under 20 m even when a distance exists. It is the pace of the whole step, and the Watch starts a step the moment the rest before it ends, so it counts the seconds the athlete still stood at the wall. For pool swims the server adds **`swim_s`** and **`swim_pace_s_per_100m`** to a step when its lengths account for its distance: from the push-off of the first length to the touch of the last. `parts_text`, the summary line and the cardiac cost use the swim pace when it exists; judge a pace target against it, not against `pace_s_per_100m`. Neither field is in the file.
 7. **Zones for v0 files** are the exporter's `zone_seconds` with the default bounds;
    recomputed zones (custom bounds, or files without zones) use the app's rule (60 s cap,
    inside `[start, end]`) on second-truncated timestamps, so they differ slightly from

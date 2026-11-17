@@ -220,6 +220,8 @@ impl WorkoutV0 {
                     avg_hr: a.avg_hr,
                     goal_met,
                     pace_s_per_100m: derive::pace_s_per_100m(a.distance_m, duration_s),
+                    swim_s: None,
+                    swim_pace_s_per_100m: None,
                 }
             })
             .collect();

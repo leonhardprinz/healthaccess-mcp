@@ -2,6 +2,23 @@
 
 Versions are one number for everything: the app's `MARKETING_VERSION`, the Rust crates and the npm packages (`scripts/bump-version.sh`). The app's build number counts up on its own. Dates are Europe/Ljubljana.
 
+## 1.0.4, 2026-11-17: a plan started late keeps its name, and the server starts before the first sync
+
+### Fixed
+- **A workout run from one of your plans came back without the plan's name and step labels** when the Watch reported another id than the one the app had scheduled. That happens when the plan is started from the Watch's own list, for example days after its slot: the Watch gives the workout it keeps there a new id. The server (and the app, from its next build) now recognises the plan by its steps: every recorded step is a step of the plan, the workout got past the warm-up, and at least seven in ten steps hit their goal. A workout with an unknown id and other steps still gets no plan, so the wrong-label case fixed in 1.0.2 stays fixed.
+- **Plans were only joined onto swims and rows.** The server now joins them for all eleven sports a plan can have.
+- **The server refused to start when it found no Health Access folder**, so an AI client registered before the first sync showed a failed server and a directory that inspects servers saw none. It now connects, lists its tools and answers every call with what is missing and what to do, and it looks for the folder again on every call: after the first sync nothing has to be restarted. `--check` still ends with an error when there is no folder.
+- **Swim paces read 10 to 20 s per 100 m slow.** The Watch starts a step the moment the rest before it ends, and the athlete pushes off when ready; the step's duration counts that wait. For pool swims the server now adds `swim_s` and `swim_pace_s_per_100m` to a step whose lengths account for its distance (push-off of the first length to the touch of the last). The one-line `parts_text`, the summary line and the cardiac cost use the swim pace; `pace_s_per_100m` in the file is unchanged. Cardiac cost figures of swims with lengths come out lower than before, for old sessions too.
+- `healthaccess list` shows a plan name the app's index does not carry yet.
+
+### Security and upkeep
+- `rmcp` 3.7.0 → 3.10.0 (RUSTSEC-2026-0462, unbounded buffering in the Streamable HTTP client; the server does not build that client in, the pin is what scanners flag) and `rustix` 1.1.5 → 1.1.6 (RUSTSEC-2026-0486).
+- A local run of the server against `examples/` leaves a presence file with the computer's name there; `.gitignore` now keeps it out of the repository.
+- `Dockerfile` for directories that build and inspect a server in a container; the repository is its own Claude plugin marketplace (`.claude-plugin/marketplace.json`).
+
+### App
+- The same plan matching by steps in the exporter. Not on the App Store until the next app build; until then the server does the join when your AI reads a workout.
+
 ## 1.0.3 (app build 27), 2026-11-13: one message for any AI
 
 ### New

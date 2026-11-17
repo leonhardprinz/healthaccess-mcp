@@ -77,7 +77,10 @@ impl<'de> Deserialize<'de> for Rings {
                 None => map
                     .remove(&goal_key)
                     .and_then(|g| g.as_f64())
-                    .map(|goal| Ring { goal: Some(goal), actual: None }),
+                    .map(|goal| Ring {
+                        goal: Some(goal),
+                        actual: None,
+                    }),
             }
         };
         let move_kcal = ring("move_kcal");
@@ -87,7 +90,13 @@ impl<'de> Deserialize<'de> for Rings {
             Some(Value::String(s)) => Some(s),
             _ => None,
         };
-        Ok(Rings { move_kcal, exercise_min, stand_hours, move_mode, extra: map })
+        Ok(Rings {
+            move_kcal,
+            exercise_min,
+            stand_hours,
+            move_mode,
+            extra: map,
+        })
     }
 }
 
@@ -435,6 +444,15 @@ mod rings_shape_tests {
                 "activity":{"steps":4180,"rings":{"move_kcal":655,"move_kcal_goal":600}}}"#,
         )
         .unwrap();
-        assert_eq!(day.activity.unwrap().rings.unwrap().move_kcal.unwrap().actual, Some(655.0));
+        assert_eq!(
+            day.activity
+                .unwrap()
+                .rings
+                .unwrap()
+                .move_kcal
+                .unwrap()
+                .actual,
+            Some(655.0)
+        );
     }
 }

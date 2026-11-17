@@ -128,7 +128,7 @@
   "scheduled_for": "2026-05-14T05:00:00Z",
   "error": null
 }</pre>
-<p><code>workoutkit_id</code> is what links the finished swim back to this plan: the exported session on the files page carries <code>plan_ref</code> S12 and every step has its label back. <code>get_plan_status</code> returns the same fields; <code>list_plans</code> returns them for every plan in the folder, with planned distance and time.</p>
+<p><code>workoutkit_id</code> is what links the finished swim back to this plan: the exported session on the files page carries <code>plan_ref</code> S12 and every step has its label back. If you start the plan from the Watch's own list, for example days after its slot, the Watch reports another id; the server then recognises the plan by its steps. <code>get_plan_status</code> returns the same fields; <code>list_plans</code> returns them for every plan in the folder, with planned distance and time.</p>
 
 <h2>Limits, all Apple's</h2>
 <ul>

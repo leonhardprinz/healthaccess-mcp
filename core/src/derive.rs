@@ -8,7 +8,7 @@ use serde::Serialize;
 
 use crate::model::day::Day;
 use crate::model::workout::activity_label;
-use crate::model::{HrSample, RecoveryHr, StepKind, Workout, ZoneSeconds, Zones};
+use crate::model::{HrSample, Lap, RecoveryHr, StepKind, Workout, ZoneSeconds, Zones};
 use crate::util::{fmt_duration, fmt_pace, round_to};
 
 /// A gap between two HR samples longer than this counts as a sensor dropout and is
@@ -139,6 +139,46 @@ pub fn pace_s_per_100m(distance_m: Option<f64>, duration_s: f64) -> Option<f64> 
     (d >= MIN_PACE_DISTANCE_M && duration_s > 0.0).then(|| round_to(duration_s / d * 100.0, 1))
 }
 
+/// Fill `swim_s` and `swim_pace_s_per_100m` of every step of a pool swim whose lengths
+/// account for the step's distance: the lengths that lie inside the step (by their
+/// midpoint), from the first push-off to the last touch. The Watch starts a step the
+/// moment the rest before it ends; the athlete pushes off when ready, so the step's own
+/// duration reads slow. Steps without matching lengths keep `None`.
+pub fn fill_swim_times(w: &mut Workout) {
+    if w.activity != "pool_swim" || w.laps.is_empty() {
+        return;
+    }
+    let Some(pool) = w.pool_length_m.filter(|p| *p > 0.0) else {
+        return;
+    };
+    for step in &mut w.steps {
+        let Some(d) = step.distance_m.filter(|d| *d >= MIN_PACE_DISTANCE_M) else {
+            continue;
+        };
+        let inside: Vec<&Lap> = w
+            .laps
+            .iter()
+            .filter(|l| {
+                let mid = l.start + (l.end - l.start) / 2;
+                mid >= step.start && mid < step.end
+            })
+            .collect();
+        let (Some(first), Some(last)) = (inside.first(), inside.last()) else {
+            continue;
+        };
+        // the lengths must be this step's distance, or they belong to something else
+        if (inside.len() as f64 * pool - d).abs() > d * 0.15 {
+            continue;
+        }
+        let swim_s = (last.end - first.start).num_milliseconds() as f64 / 1000.0;
+        if swim_s <= 0.0 {
+            continue;
+        }
+        step.swim_s = Some(round_to(swim_s, 1));
+        step.swim_pace_s_per_100m = Some(round_to(swim_s / d * 100.0, 1));
+    }
+}
+
 /// Cardiac cost of a swim.
 #[derive(Debug, Clone, Serialize, PartialEq)]
 pub struct CardiacCost {
@@ -191,15 +231,20 @@ pub fn best_freestyle_100_pace(w: &Workout) -> Option<(f64, String)> {
                 continue;
             }
         }
-        let pace = s.duration_s / d * 100.0;
+        // push-off to touch when the lengths are known, else the whole step
+        let (time, how) = match s.swim_s {
+            Some(t) => (t, ", push-off to touch"),
+            None => (s.duration_s, ""),
+        };
+        let pace = time / d * 100.0;
         if best.as_ref().map(|(p, _)| pace < *p).unwrap_or(true) {
             best = Some((
                 round_to(pace, 1),
                 format!(
-                    "step {} {} m in {}",
+                    "step {} {} m in {}{how}",
                     s.key,
                     round_to(d, 0),
-                    fmt_duration(s.duration_s)
+                    fmt_duration(time)
                 ),
             ));
         }
@@ -242,7 +287,8 @@ pub fn effort_text(effort: Option<u8>, source: Option<&str>) -> String {
 }
 
 /// One line per step an AI can quote without parsing `steps[]`:
-/// `label · 200 m · 2:18/100 · HR 108` for a step with a distance and a pace,
+/// `label · 200 m · 2:18/100 · HR 108` for a step with a distance and a pace (the swim
+/// pace from push-off to touch when the lengths are known, else the pace of the step),
 /// `label · 0:45 · HR 97` for a timed step. The label falls back to the kind
 /// (`warmup`, `work`, `recovery`, `cooldown`).
 pub fn parts_text(w: &Workout) -> Vec<String> {
@@ -258,7 +304,7 @@ pub fn parts_text(w: &Workout) -> Vec<String> {
                     .map(str::to_string)
                     .unwrap_or_else(|| s.kind.to_string()),
             );
-            match (s.distance_m, s.pace_s_per_100m) {
+            match (s.distance_m, s.swim_pace_s_per_100m.or(s.pace_s_per_100m)) {
                 (Some(d), Some(p)) => {
                     parts.push(format!("{} m", round_to(d, 0)));
                     parts.push(format!("{}/100", fmt_pace(p)));
@@ -277,7 +323,9 @@ pub fn parts_text(w: &Workout) -> Vec<String> {
 /// known), effort.
 pub fn summary_line(w: &Workout, zones: Option<&Zones>) -> String {
     let mut parts: Vec<String> = Vec::with_capacity(8);
-    let date = crate::util::local_day(w.start).format("%Y-%m-%d").to_string();
+    let date = crate::util::local_day(w.start)
+        .format("%Y-%m-%d")
+        .to_string();
     let name = match w.plan_ref.as_ref().and_then(|p| p.name.as_deref()) {
         Some(n) => format!("{} \"{}\"", activity_label(&w.activity), n),
         None => activity_label(&w.activity),

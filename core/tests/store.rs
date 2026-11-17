@@ -397,12 +397,43 @@ fn plans_are_written_listed_and_joined_onto_workouts() {
         StepKind::Recovery
     );
 
-    // the Watch says it ran a WorkoutKit plan none of the folder's plans has: another
-    // workout was started, so the plan scheduled next to it is not attached
+    // the Watch says it ran a WorkoutKit plan none of the folder's plans has, and the
+    // steps are not R4's (every piece twice as long): another workout was started, so
+    // the plan scheduled next to it is not attached
+    let original = doc.clone();
     doc["workout_plan_id"] = json!("5DB59FD3-CF52-455E-A3A3-196625F7554E");
+    for step in doc["steps"].as_array_mut().unwrap() {
+        for field in ["duration_s", "distance_m"] {
+            if let Some(v) = step[field].as_f64() {
+                step[field] = json!(v * 2.0);
+            }
+        }
+    }
     fs::write(&row_path, doc.to_string()).unwrap();
     let other = store.load_workout("3f8b2d41").unwrap();
     assert!(other.plan_ref.is_none());
+
+    // unknown UUID, right goals, but a block the plan does not have: not R4 either
+    let mut doc = original.clone();
+    doc["workout_plan_id"] = json!("5DB59FD3-CF52-455E-A3A3-196625F7554E");
+    let mut extra = doc["steps"][1].clone();
+    extra["block"] = json!(9);
+    extra["key"] = json!("9.0.0");
+    doc["steps"].as_array_mut().unwrap().push(extra);
+    fs::write(&row_path, doc.to_string()).unwrap();
+    assert!(store.load_workout("3f8b2d41").unwrap().plan_ref.is_none());
+
+    // unknown UUID and R4's own steps: the Watch ran its copy of the plan (it gives a
+    // workout kept in its list a new id), so R4 is attached, however far from its slot
+    let mut doc = original;
+    doc["workout_plan_id"] = json!("5DB59FD3-CF52-455E-A3A3-196625F7554E");
+    doc["start"] = json!("2026-05-20T06:00:00Z");
+    fs::write(&row_path, doc.to_string()).unwrap();
+    let copy = store.load_workout("3f8b2d41").unwrap();
+    assert_eq!(copy.plan_ref.as_ref().unwrap().name.as_deref(), Some("R4"));
+    assert!(copy.steps.iter().any(|s| s.label.is_some()));
+    doc["start"] = json!(row.start);
+    fs::write(&row_path, doc.to_string()).unwrap();
 
     // the same UUID in a plan's status: that plan is the one, without a time match
     let r4 = store
@@ -455,7 +486,7 @@ fn weekly_summary_covers_both_fixtures() {
         w20.z12_pct, None,
         "v0.4 files carry no zones and no bounds are known"
     );
-    assert_eq!(w20.cardiac_cost, Some(284.0));
+    assert_eq!(w20.cardiac_cost, Some(280.0));
     assert_eq!(w20.mean_effort, Some(6.5), "Apple ratings count");
     assert_eq!(w20.rated_sessions, 2);
     assert_eq!(s.cardiac_cost_trend.len(), 1);
@@ -594,14 +625,25 @@ fn parts_text_quotes_each_step_in_one_line() {
     let parts = derive::parts_text(&w);
     assert_eq!(parts.len(), w.steps.len());
     assert_eq!(
-        parts[0], "FR easy, find your breathing · 200 m · 2:20/100 · HR 100",
+        parts[0], "FR easy, find your breathing · 200 m · 2:18/100 · HR 100",
         "{parts:?}"
     );
     let hundred = w.steps.iter().position(|s| s.key == "2.3.0").unwrap();
     assert_eq!(
-        parts[hundred], "FR 100 steady, breathe every 3 · 100 m · 2:12/100 · HR 151",
+        parts[hundred], "FR 100 steady, breathe every 3 · 100 m · 2:10/100 · HR 151",
         "{parts:?}"
     );
+    // the step took 2:12 on the Watch; the two lengths inside it took 2:10 from push-off to touch
+    let step = &w.steps[hundred];
+    assert_eq!(step.pace_s_per_100m, Some(132.0));
+    assert_eq!(step.swim_s, Some(130.0));
+    assert_eq!(step.swim_pace_s_per_100m, Some(130.0));
+    // a rest has no swim time, and the file on disk never carries one
+    assert!(w
+        .steps
+        .iter()
+        .filter(|s| s.distance_m.is_none())
+        .all(|s| s.swim_s.is_none()));
     // a step without a label falls back to its kind
     assert!(
         parts.contains(&"recovery · 0:30 · HR 126".to_string()),
@@ -659,9 +701,7 @@ fn briefing_is_generated_when_the_app_has_not_written_one() {
         "{text}"
     );
     assert!(
-        text.contains(
-            " Pool swim \"S12\": 1200 m, 36:06, avg HR 129, effort 6/10 (apple)"
-        ),
+        text.contains(" Pool swim \"S12\": 1200 m, 36:06, avg HR 129, effort 6/10 (apple)"),
         "{text}"
     );
     assert!(
@@ -1081,20 +1121,46 @@ fn ids_and_index_rows_cannot_reach_outside_the_folder() {
     let pool = fs::read_to_string(tmp.path().join("workouts").join(POOL)).unwrap();
     let elsewhere = outside.path().join("elsewhere-workout.json");
     fs::write(&elsewhere, &pool).unwrap();
-    fs::write(outside.path().join("creds.json"), r#"{"schema": "my-private-token-ABC123"}"#).unwrap();
-    fs::write(outside.path().join("secret.status.json"), r#"{"plan_id":"x","state":"scheduled","at":"2026-05-14T05:00:00Z","error":null}"#).unwrap();
+    fs::write(
+        outside.path().join("creds.json"),
+        r#"{"schema": "my-private-token-ABC123"}"#,
+    )
+    .unwrap();
+    fs::write(
+        outside.path().join("secret.status.json"),
+        r#"{"plan_id":"x","state":"scheduled","at":"2026-05-14T05:00:00Z","error":null}"#,
+    )
+    .unwrap();
     fs::write(outside.path().join("secret.json"), "{}").unwrap();
 
     // absolute paths and `..` in ids are refused
     let abs = elsewhere.display().to_string();
-    assert!(store.resolve(&abs).is_err(), "absolute path outside the folder");
-    let rel = format!("../{}/elsewhere-workout.json", outside.path().file_name().unwrap().to_string_lossy());
-    assert!(store.resolve(&rel).is_err(), "relative path outside the folder");
+    assert!(
+        store.resolve(&abs).is_err(),
+        "absolute path outside the folder"
+    );
+    let rel = format!(
+        "../{}/elsewhere-workout.json",
+        outside.path().file_name().unwrap().to_string_lossy()
+    );
+    assert!(
+        store.resolve(&rel).is_err(),
+        "relative path outside the folder"
+    );
     assert!(store.rate_workout(&abs, 3, Some("x"), false).is_err());
-    let err = store.resolve(&outside.path().join("creds.json").display().to_string()).unwrap_err().to_string();
+    let err = store
+        .resolve(&outside.path().join("creds.json").display().to_string())
+        .unwrap_err()
+        .to_string();
     assert!(!err.contains("ABC123"), "file contents never echo: {err}");
-    let secret = format!("../../{}/secret", outside.path().file_name().unwrap().to_string_lossy());
-    assert!(store.plan_status(&secret).is_err(), "plan ids are plain names");
+    let secret = format!(
+        "../../{}/secret",
+        outside.path().file_name().unwrap().to_string_lossy()
+    );
+    assert!(
+        store.plan_status(&secret).is_err(),
+        "plan ids are plain names"
+    );
     assert!(store.plan(&secret).is_err());
 
     // an index row that points outside resolves to nothing, and nothing is written there
@@ -1103,16 +1169,26 @@ fn ids_and_index_rows_cannot_reach_outside_the_folder() {
     fs::write(tmp.path().join("index.json"), idx.to_string()).unwrap();
     let before = fs::read_to_string(&elsewhere).unwrap();
     let _ = store.rate_workout("CAFEF00D", 3, Some("x"), false);
-    assert_eq!(fs::read_to_string(&elsewhere).unwrap(), before, "the outside file is untouched");
+    assert_eq!(
+        fs::read_to_string(&elsewhere).unwrap(),
+        before,
+        "the outside file is untouched"
+    );
 }
 
 #[test]
 fn rating_only_writes_into_workout_files() {
     let (tmp, store) = temp_store();
     let not_a_workout = tmp.path().join("workouts").join("notes.json");
-    fs::write(&not_a_workout, r#"{"schema": "something.else.v1", "secret": 1}"#).unwrap();
+    fs::write(
+        &not_a_workout,
+        r#"{"schema": "something.else.v1", "secret": 1}"#,
+    )
+    .unwrap();
     assert!(store.rate_workout("notes.json", 4, None, false).is_err());
-    assert!(!fs::read_to_string(&not_a_workout).unwrap().contains("effort"));
+    assert!(!fs::read_to_string(&not_a_workout)
+        .unwrap()
+        .contains("effort"));
 }
 
 #[cfg(unix)]
@@ -1121,12 +1197,26 @@ fn symlinks_and_fifos_are_not_read() {
     let (tmp, store) = temp_store();
     let outside = tempfile::tempdir().unwrap();
     let target = outside.path().join("t.json");
-    fs::write(&target, fs::read_to_string(tmp.path().join("workouts").join(POOL)).unwrap()).unwrap();
+    fs::write(
+        &target,
+        fs::read_to_string(tmp.path().join("workouts").join(POOL)).unwrap(),
+    )
+    .unwrap();
     std::os::unix::fs::symlink(&target, tmp.path().join("workouts").join("link.json")).unwrap();
-    assert!(store.resolve("link.json").is_err(), "a symlink inside workouts/ is not followed");
+    assert!(
+        store.resolve("link.json").is_err(),
+        "a symlink inside workouts/ is not followed"
+    );
     let fifo = tmp.path().join("workouts").join("pipe.json");
-    assert!(std::process::Command::new("mkfifo").arg(&fifo).status().unwrap().success());
-    assert!(store.resolve("pipe.json").is_err(), "a FIFO is refused instead of blocking");
+    assert!(std::process::Command::new("mkfifo")
+        .arg(&fifo)
+        .status()
+        .unwrap()
+        .success());
+    assert!(
+        store.resolve("pipe.json").is_err(),
+        "a FIFO is refused instead of blocking"
+    );
 }
 
 #[test]

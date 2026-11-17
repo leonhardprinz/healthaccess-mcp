@@ -227,6 +227,59 @@ fn json_files(dir: &Path) -> Result<Vec<PathBuf>> {
     Ok(files)
 }
 
+/// Whether a workout with this activity code can be the run of a plan of this sport.
+/// Mirrors the app's `PlanInstaller.exportActivity`: indoor runs and rides export as
+/// `run` and `cycle`, and sports outside the contract's list as `other:<HealthKit raw type>`.
+pub fn activity_fits_sport(activity: &str, sport: &str) -> bool {
+    match sport {
+        "pool_swim" | "open_water_swim" => matches!(activity, "pool_swim" | "open_water_swim"),
+        "run" | "indoor_run" => activity == "run",
+        "cycle" | "indoor_cycle" => activity == "cycle",
+        "walk" => activity == "walk",
+        "indoor_row" => activity == "indoor_row",
+        "hike" => activity == "other:24",
+        "hiit" => activity == "other:63",
+        "elliptical" => activity == "other:16",
+        _ => false,
+    }
+}
+
+/// Whether the steps the Watch recorded are the steps of this plan: every recorded step
+/// is a step the plan has (block, repeat and position), the workout got past the
+/// warm-up, and at least seven in ten steps hit their goal (a distance within 10 %, a
+/// time within 10 % or 3 s). Not all: the Watch splits a length now and then, and a
+/// cool-down runs long. A workout that stops early still fits.
+pub fn ran_plan(plan: &Plan, w: &Workout) -> bool {
+    let blocks = plan.blocks.len() as u32;
+    let mut steps = 0u32;
+    let mut on_goal = 0u32;
+    for s in &w.steps {
+        let Some((planned, _)) = plan.step_for_key(s.block, s.step) else {
+            return false;
+        };
+        let repeats = if (1..=blocks).contains(&s.block) {
+            plan.blocks[(s.block - 1) as usize].repeat
+        } else {
+            1
+        };
+        if s.rep >= repeats {
+            return false;
+        }
+        steps += 1;
+        let goal = planned.goal.value;
+        let (got, slack) = if planned.goal.is_time() {
+            (Some(s.duration_s), (goal * 0.1).max(3.0))
+        } else {
+            (s.distance_m, goal * 0.1)
+        };
+        if got.is_some_and(|g| (g - goal).abs() <= slack) {
+            on_goal += 1;
+        }
+    }
+    let past_warmup = w.steps.iter().any(|s| (1..=blocks).contains(&s.block));
+    past_warmup && steps >= 3 && on_goal * 10 >= steps * 7
+}
+
 impl Store {
     /// Open a Health Access folder (must exist).
     pub fn open(dir: impl Into<PathBuf>) -> Result<Self> {
@@ -499,10 +552,12 @@ impl Store {
     /// Parse one workout file (v0 or v1) without plan enrichment.
     pub fn load_workout_file(&self, path: &Path) -> Result<Workout> {
         let text = read_to_string(path)?;
-        parse_workout(&text).map_err(|e| match e {
+        let mut w = parse_workout(&text).map_err(|e| match e {
             Error::Json { source, .. } => Error::json(path, source),
             other => other,
-        })
+        })?;
+        derive::fill_swim_times(&mut w);
+        Ok(w)
     }
 
     /// Load a workout by id / file and join plan labels and kinds when a plan matches.
@@ -537,16 +592,14 @@ impl Store {
 
     /// Match the workout to a plan and fill step labels and kinds from it: by
     /// `plan_ref.plan_id`; else by the WorkoutKit plan UUID the Watch ran
-    /// (`workout_plan_id` against each plan status's `workoutkit_id`); else, only for
-    /// a workout without such a UUID, by `scheduled_for` within ±2 h and the same
-    /// sport. A workout whose UUID belongs to none of the folder's plans was started
-    /// from another workout on the Watch and gets no plan, however close the time.
+    /// (`workout_plan_id` against each plan status's `workoutkit_id`); else, for a UUID
+    /// the folder does not know, by the steps themselves ([`ran_plan`]): the Watch gives
+    /// a workout it keeps in its own list a new UUID, so a plan started from there, for
+    /// example days after its slot, comes back under an id no status file holds. A
+    /// workout with an unknown UUID and other steps was started from another workout on
+    /// the Watch and gets no plan, however close the time. Only a workout without any
+    /// UUID is matched by `scheduled_for` within ±2 h and the same sport.
     pub fn enrich_with_plan(&self, w: &mut Workout) {
-        let sport = match w.activity.as_str() {
-            "pool_swim" | "open_water_swim" => "pool_swim",
-            "indoor_row" => "indoor_row",
-            _ => return,
-        };
         let Ok(plans) = self.list_plans_full() else {
             return;
         };
@@ -562,13 +615,26 @@ impl Store {
             Some((p, _)) => p,
             None if w.workout_plan_id.is_some() => {
                 let ran = w.workout_plan_id.as_deref().unwrap_or_default();
-                let Some((p, _)) = plans.iter().find(|(p, _)| {
+                let by_uuid = plans.iter().find(|(p, _)| {
                     self.plan_status(&p.id)
                         .ok()
                         .flatten()
                         .and_then(|s| s.workoutkit_id)
                         .is_some_and(|id| id.eq_ignore_ascii_case(ran))
-                }) else {
+                });
+                let same_steps = || {
+                    plans
+                        .iter()
+                        .filter(|(p, _)| activity_fits_sport(&w.activity, &p.sport))
+                        .filter(|(p, _)| ran_plan(p, w))
+                        // several plans with the same steps: the one planned closest to this start
+                        .min_by_key(|(p, _)| {
+                            p.scheduled_for
+                                .map(|sf| (sf - w.start).num_seconds().abs())
+                                .unwrap_or(i64::MAX)
+                        })
+                };
+                let Some((p, _)) = by_uuid.or_else(same_steps) else {
                     return;
                 };
                 p
@@ -578,7 +644,7 @@ impl Store {
                 let max_block = w.steps.iter().map(|s| s.block).max().unwrap_or(0);
                 let Some((p, _)) = plans
                     .iter()
-                    .filter(|(p, _)| p.sport == sport)
+                    .filter(|(p, _)| activity_fits_sport(&w.activity, &p.sport))
                     .filter(|(p, _)| max_block <= p.blocks.len() as u32 + 1)
                     .filter_map(|pp| {
                         let sf = pp.0.scheduled_for?;

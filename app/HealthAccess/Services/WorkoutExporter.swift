@@ -15,17 +15,55 @@ struct InstalledPlan: Sendable {
 struct PlanLookup: Sendable {
     var plans: [InstalledPlan] = []
 
-    /// Exact match on the WorkoutKit plan UUID. A workout that carries a UUID none of our plans has was started from
-    /// another workout on the Watch, so it gets no plan, however close a plan's time is. Only a workout without any
-    /// UUID falls back to the contract's rule: same sport, scheduled within ±2 h of the start.
-    func match(workoutPlanID: UUID?, start: Date, activity: String) -> InstalledPlan? {
-        if let id = workoutPlanID { return plans.first { $0.workoutkitId == id } }
+    /// Exact match on the WorkoutKit plan UUID. For a UUID none of our plans has, the steps decide: the Watch gives a
+    /// workout it keeps in its own list a new UUID, so a plan started from there (for example days after its slot)
+    /// comes back under an id no status file holds. With other steps the workout was started from another workout on
+    /// the Watch and gets no plan, however close a plan's time is. Only a workout without any UUID falls back to the
+    /// contract's rule: same sport, scheduled within ±2 h of the start. Same rules as `enrich_with_plan` in core.
+    func match(workoutPlanID: UUID?, start: Date, activity: String, steps: [StepDoc] = []) -> InstalledPlan? {
+        if let id = workoutPlanID {
+            if let exact = plans.first(where: { $0.workoutkitId == id }) { return exact }
+            let gap: (InstalledPlan) -> TimeInterval = { $0.scheduledFor.map { abs($0.timeIntervalSince(start)) } ?? .greatestFiniteMagnitude }
+            return plans
+                .filter { Self.fits(activity: activity, sport: $0.sport) && Self.ran($0.doc, steps: steps) }
+                .min { gap($0) < gap($1) }
+        }
         let candidates = plans.compactMap { plan -> (InstalledPlan, TimeInterval)? in
             guard PlanInstaller.exportActivity(for: plan.sport) == activity, let at = plan.scheduledFor else { return nil }
             let distance = abs(at.timeIntervalSince(start))
             return distance <= 2 * 3600 ? (plan, distance) : nil
         }
         return candidates.min { $0.1 < $1.1 }?.0
+    }
+
+    /// Whether a workout exported with this activity code can be the run of a plan of this sport.
+    static func fits(activity: String, sport: String) -> Bool {
+        let swims: Set<String> = ["pool_swim", "open_water_swim"]
+        if swims.contains(sport) { return swims.contains(activity) }
+        return PlanInstaller.exportActivity(for: sport) == activity
+    }
+
+    /// Whether the steps the Watch recorded are the steps of this plan: every recorded step is one the plan has (block,
+    /// repeat and position), the workout got past the warm-up, and at least seven in ten steps hit their goal (a
+    /// distance within 10 %, a time within 10 % or 3 s). Not all: the Watch splits a length now and then, and a
+    /// cool-down runs long. Mirrors `ran_plan` in core/src/store.rs.
+    static func ran(_ plan: PlanDoc, steps: [StepDoc]) -> Bool {
+        guard steps.count >= 3 else { return false }
+        var onGoal = 0
+        var pastWarmup = false
+        for s in steps {
+            guard let planned = plan.resolve(keyPath: "\(s.block).\(s.rep).\(s.step)")?.step else { return false }
+            let inBlocks = s.block >= 1 && s.block <= plan.blocks.count
+            guard s.rep < (inBlocks ? plan.blocks[s.block - 1].repeatCount : 1) else { return false }
+            if inBlocks { pastWarmup = true }
+            let goal = planned.goal.value
+            if planned.goal.type == "time_s" {
+                if abs(Double(s.durationS) - goal) <= max(goal * 0.1, 3) { onGoal += 1 }
+            } else if let d = s.distanceM, abs(d - goal) <= goal * 0.1 {
+                onGoal += 1
+            }
+        }
+        return pastWarmup && onGoal * 10 >= steps.count * 7
     }
 }
 
@@ -63,7 +101,7 @@ struct WorkoutExporter: Sendable {
         let allHR = try await health.heartRate(from: workout.startDate, to: end.addingTimeInterval(Self.recoveryWindow))
         let inWorkout = allHR.filter { $0.0 <= end }
         let planID = await health.workoutPlanID(for: workout)
-        let matched = plans.match(workoutPlanID: planID, start: workout.startDate, activity: code)
+        let matched = plans.match(workoutPlanID: planID, start: workout.startDate, activity: code, steps: Self.steps(of: workout, plan: nil))
         let meta = workout.metadata ?? [:]
 
         let hrStats = workout.statistics(for: HKQuantityType(.heartRate))

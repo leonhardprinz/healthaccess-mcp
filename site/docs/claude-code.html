@@ -75,7 +75,7 @@ npx -y healthaccess-mcp --check         <span class="c"># prints the folder it f
 
 <h2>If something is off</h2>
 <ul>
-  <li><b>"no Health Access folder found"</b>: the folder has not synced to this computer yet, or it lives somewhere the search does not look. Open it in Finder, then pass it with <code>--dir</code>.</li>
+  <li><b>"Health Access has no folder to read on this computer yet"</b> (before 1.0.4: "no Health Access folder found", and the server did not start): the folder has not synced to this computer yet, or it lives somewhere the search does not look. Open it in Finder so it downloads, or pass it with <code>--dir</code>. The server looks again on every call, so there is nothing to restart once the folder is there.</li>
   <li><b>Two folders found</b>: the server does not guess, because one of them could be a folder someone shared with you. It lists both and stops. Pass <code>--dir</code> with yours, or put <code>dir = "…"</code> into <code>~/.config/healthaccess/config.toml</code>.</li>
   <li><b>A workout is missing in <code>list_workouts</code></b> but the file exists: the app's <code>index.json</code> lags behind. Ids are also resolved by scanning <code>workouts/</code>, so <code>get_workout</code> with the file name or the 8-character id in it still works.</li>
   <li><b>Logs</b> go to stderr. <code>HEALTHACCESS_LOG=debug</code> turns them up. Claude Code shows server stderr under <code>/mcp</code>.</li>

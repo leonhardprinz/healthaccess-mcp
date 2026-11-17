@@ -253,6 +253,16 @@ pub struct Step {
     /// Seconds per 100 m; only for steps that covered at least 20 m.
     #[serde(default)]
     pub pace_s_per_100m: Option<f64>,
+    /// Pool swims, filled in on read from the lengths, never in the file: seconds from
+    /// the push-off of the step's first length to the touch of its last. `duration_s`
+    /// also counts the time the athlete stood at the wall after the Watch moved on to
+    /// this step, which is often 10 to 20 s.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub swim_s: Option<f64>,
+    /// `swim_s` as seconds per 100 m: the pace the athlete swam, where
+    /// `pace_s_per_100m` is the pace of the whole step.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub swim_pace_s_per_100m: Option<f64>,
 }
 
 /// One pool length.

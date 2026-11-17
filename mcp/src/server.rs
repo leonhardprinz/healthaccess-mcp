@@ -2,7 +2,8 @@
 //! `healthaccess://` resources (`tide://` stays readable as an alias for the index
 //! and workout URIs).
 
-use std::sync::Arc;
+use std::path::PathBuf;
+use std::sync::{Arc, Mutex, RwLock};
 use std::time::Instant;
 
 use chrono::{DateTime, NaiveDate, Utc};
@@ -78,14 +79,48 @@ call count; never arguments or results) in mcp/clients/ so the app can show Conn
 Ids are the first 8 characters of the workout UUID, the suffix of the file name. Units: \
 metres, seconds, bpm; times are UTC with a Z.";
 
+/// A Health Access folder and what belongs to it.
+#[derive(Debug)]
+struct Folder {
+    store: Store,
+    /// Writes `mcp/clients/<id>.json` so the phone app can show "Connected".
+    clients: Recorder,
+}
+
+/// The folder, once there is one. The server starts without it (the app may not have
+/// written anything yet, or the folder has not synced to this computer) and looks again
+/// on every call, so nobody has to restart the AI client after the first sync.
+#[derive(Debug)]
+struct Shared {
+    folder: RwLock<Option<Arc<Folder>>>,
+    /// `--dir` as given on the command line, kept for the next look.
+    cli_dir: Option<PathBuf>,
+    /// Zone bounds from config.toml.
+    bounds: Option<[u32; 4]>,
+    /// A client that introduced itself before there was a folder to note it in.
+    waiting_client: Mutex<Option<ClientInfo>>,
+}
+
 /// Shared state behind the tools.
 #[derive(Debug, Clone)]
 pub struct HealthAccessServer {
-    store: Arc<Store>,
+    shared: Arc<Shared>,
     telemetry: Telemetry,
-    /// Writes `mcp/clients/<id>.json` so the phone app can show "Connected".
-    clients: Arc<Recorder>,
     tool_router: ToolRouter<Self>,
+}
+
+/// What a tool answers while there is no folder: a complete sentence for the model,
+/// with the cause and what the athlete has to do.
+fn no_folder(cause: Error) -> Error {
+    Error::Refused(format!(
+        "Health Access has no folder to read on this computer yet ({cause}). \
+         Nothing is wrong with the connection. What the athlete does once: install the Health Access \
+         app on the iPhone (https://apps.apple.com/app/id6831916470), pick a folder there that syncs \
+         to this computer (iCloud Drive, Dropbox, Google Drive, OneDrive or a NAS), allow Health \
+         access and let it sync. If the folder exists in a place this server does not search, \
+         register the server with --dir \"<folder>\". The server looks again on every call, so \
+         no restart is needed."
+    ))
 }
 
 // ------------------------------------------------------------------ params
@@ -340,14 +375,79 @@ fn prompt_meta(p: &PromptDef) -> Prompt {
 }
 
 impl HealthAccessServer {
-    /// New server over a store.
-    pub fn new(store: Store, telemetry: Telemetry) -> Self {
+    /// New server. `store` is the folder when it was found at start; without one the
+    /// server answers every tool with what is missing and looks again on each call
+    /// (`cli_dir` is `--dir`, `bounds` the zone bounds from config.toml).
+    pub fn new(
+        store: Option<Store>,
+        cli_dir: Option<PathBuf>,
+        bounds: Option<[u32; 4]>,
+        telemetry: Telemetry,
+    ) -> Self {
+        let folder = store.map(|store| {
+            Arc::new(Folder {
+                clients: Recorder::new(store.clone()),
+                store,
+            })
+        });
         HealthAccessServer {
-            clients: Arc::new(Recorder::new(store.clone())),
-            store: Arc::new(store),
+            shared: Arc::new(Shared {
+                folder: RwLock::new(folder),
+                cli_dir,
+                bounds,
+                waiting_client: Mutex::new(None),
+            }),
             telemetry,
             tool_router: Self::tool_router(),
         }
+    }
+
+    /// The folder if one is open, without looking for it.
+    fn open_folder(&self) -> Option<Arc<Folder>> {
+        self.shared
+            .folder
+            .read()
+            .unwrap_or_else(|e| e.into_inner())
+            .clone()
+    }
+
+    /// The folder; when none is open yet, look for it now.
+    fn folder(&self) -> Result<Arc<Folder>, Error> {
+        if let Some(folder) = self.open_folder() {
+            return Ok(folder);
+        }
+        let (dir, _, _) =
+            healthaccess_core::config::resolve_dir_with_source(self.shared.cli_dir.as_deref())
+                .map_err(no_folder)?;
+        let store = Store::open(&dir)
+            .map_err(no_folder)?
+            .with_zone_bounds(self.shared.bounds);
+        let folder = Arc::new(Folder {
+            clients: Recorder::new(store.clone()),
+            store,
+        });
+        let mut slot = self
+            .shared
+            .folder
+            .write()
+            .unwrap_or_else(|e| e.into_inner());
+        if let Some(existing) = slot.as_ref() {
+            return Ok(existing.clone());
+        }
+        tracing::info!(dir = %dir.display(), "Health Access folder found");
+        let waiting = self
+            .shared
+            .waiting_client
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .take();
+        if let Some(client) = waiting {
+            if let Err(e) = folder.clients.connected(client) {
+                tracing::warn!("handshake not written: {e}");
+            }
+        }
+        *slot = Some(folder.clone());
+        Ok(folder)
     }
 
     /// Run a tool body, time it, report to telemetry, and turn the outcome into
@@ -370,8 +470,10 @@ impl HealthAccessServer {
         };
         self.telemetry
             .tool_called(tool, t0.elapsed().as_millis(), ok, kind);
-        if let Err(e) = self.clients.tool_called(tool) {
-            tracing::debug!("handshake not written: {e}");
+        if let Some(folder) = self.open_folder() {
+            if let Err(e) = folder.clients.tool_called(tool) {
+                tracing::debug!("handshake not written: {e}");
+            }
         }
         match outcome {
             Ok(value) => {
@@ -396,7 +498,9 @@ impl HealthAccessServer {
     fn index_rows(&self, p: &ListWorkoutsParams) -> Result<Value, Error> {
         let since = p.since.as_deref().map(parse_since).transpose()?;
         let limit = p.limit.unwrap_or(20).clamp(1, 200) as usize;
-        let index = self.store.index()?;
+        let folder = self.folder()?;
+        let store = &folder.store;
+        let index = store.index()?;
         let total = index.workouts.len();
         let filtered: Vec<_> = index
             .workouts
@@ -415,16 +519,15 @@ impl HealthAccessServer {
             .take(limit)
             .map(|e| {
                 // the file is the truth for effort and plan; the app's index can lag
-                let loaded = self
-                    .store
-                    .load_workout_file(&self.store.workout_path(e))
+                let loaded = store
+                    .load_workout_file(&store.workout_path(e))
                     .map(|mut w| {
-                        self.store.enrich_with_plan(&mut w);
+                        store.enrich_with_plan(&mut w);
                         w
                     });
                 let (summary, effort, effort_source, plan_name) = match &loaded {
                     Ok(w) => (
-                        self.store.summary(w),
+                        store.summary(w),
                         w.effort,
                         w.effort_source.clone(),
                         w.plan_ref
@@ -465,14 +568,14 @@ impl HealthAccessServer {
     }
 
     fn workout_out(&self, p: &GetWorkoutParams) -> Result<WorkoutOut, Error> {
-        let resolved = self.store.resolve(&p.id)?;
-        let mut w = self.store.load_workout(&p.id)?;
-        let summary = self.store.summary(&w);
+        let resolved = self.folder()?.store.resolve(&p.id)?;
+        let mut w = self.folder()?.store.load_workout(&p.id)?;
+        let summary = self.folder()?.store.summary(&w);
         let cardiac_cost = derive::cardiac_cost(&w);
         let parts_text = derive::parts_text(&w);
         // zones as this side computes them (config or estimated bounds), never the
         // file's legacy zones unless nothing better is known
-        w.zones = self.store.zones(&w);
+        w.zones = self.folder()?.store.zones(&w);
         if !p.include_hr_series.unwrap_or(false) {
             w.hr_series.clear();
         }
@@ -489,7 +592,7 @@ impl HealthAccessServer {
     }
 
     fn vitals_out(&self, days: u32) -> Result<Value, Error> {
-        let vitals = self.store.vitals(days)?;
+        let vitals = self.folder()?.store.vitals(days)?;
         fn mean(values: impl Iterator<Item = Option<f64>>) -> Option<f64> {
             let v: Vec<f64> = values.flatten().collect();
             (!v.is_empty()).then(|| v.iter().sum::<f64>() / v.len() as f64)
@@ -513,7 +616,7 @@ impl HealthAccessServer {
 
     fn day_out(&self, p: &GetDayParams) -> Result<Value, Error> {
         let date = parse_date(&p.date, "date")?;
-        let day = self.store.day(date)?.ok_or_else(|| {
+        let day = self.folder()?.store.day(date)?.ok_or_else(|| {
             Error::NotFound(format!(
                 "days/{date}.json (the app writes one file per day from v0.4 on; get_vitals reads the older vitals/ files too)"
             ))
@@ -535,7 +638,7 @@ impl HealthAccessServer {
             ]));
         }
         let groups = p.groups.as_deref().filter(|g| !g.is_empty());
-        let days = self.store.days(from, to)?;
+        let days = self.folder()?.store.days(from, to)?;
         let mut available: Vec<String> = Vec::new();
         for d in &days {
             for g in d.groups() {
@@ -554,7 +657,7 @@ impl HealthAccessServer {
     }
 
     fn catalog_out(&self) -> Result<Value, Error> {
-        match self.store.catalog()? {
+        match self.folder()?.store.catalog()? {
             Some(catalog) => {
                 let coverage = healthaccess_core::Coverage::of(&catalog);
                 Ok(json!({"coverage": coverage, "catalog": catalog}))
@@ -569,7 +672,7 @@ impl HealthAccessServer {
     }
 
     fn profile_out(&self) -> Result<Value, Error> {
-        match self.store.profile()? {
+        match self.folder()?.store.profile()? {
             Some(profile) => Ok(json!({"profile": profile})),
             None => Ok(
                 json!({"profile": null, "note": "no profile.json yet; the app writes it from v0.4 on"}),
@@ -578,7 +681,7 @@ impl HealthAccessServer {
     }
 
     fn ecgs_out(&self) -> Result<Value, Error> {
-        let ecgs = self.store.ecgs()?;
+        let ecgs = self.folder()?.store.ecgs()?;
         Ok(json!({
             "count": ecgs.len(),
             "ecgs": ecgs,
@@ -642,7 +745,9 @@ impl HealthAccessServer {
         Parameters(p): Parameters<TrainingSummaryParams>,
     ) -> Result<CallToolResult, ErrorData> {
         let weeks = p.weeks.unwrap_or(8).clamp(1, 104);
-        self.run("training_summary", || self.store.training_summary(weeks))
+        self.run("training_summary", || {
+            self.folder()?.store.training_summary(weeks)
+        })
     }
 
     #[tool(
@@ -711,7 +816,7 @@ impl HealthAccessServer {
         Parameters(p): Parameters<RateWorkoutParams>,
     ) -> Result<CallToolResult, ErrorData> {
         self.run("rate_workout", || {
-            self.store.rate_workout(
+            self.folder()?.store.rate_workout(
                 &p.id,
                 p.effort,
                 p.feel.as_deref(),
@@ -737,7 +842,7 @@ impl HealthAccessServer {
         self.run("push_plan", || {
             let value = serde_json::to_value(&p.plan).map_err(|e| Error::Validation(vec![e.to_string()]))?;
             let plan: Plan = serde_json::from_value(value).map_err(|e| Error::Validation(vec![e.to_string()]))?;
-            let (plan, path) = self.store.write_plan(plan, "healthaccess-mcp")?;
+            let (plan, path) = self.folder()?.store.write_plan(plan, "healthaccess-mcp")?;
             Ok(json!({
                 "id": plan.id,
                 "file": path.file_name().map(|n| n.to_string_lossy().into_owned()),
@@ -764,7 +869,7 @@ impl HealthAccessServer {
         Parameters(p): Parameters<GetPlanStatusParams>,
     ) -> Result<CallToolResult, ErrorData> {
         self.run("get_plan_status", || {
-            let status = self.store.plan_status(&p.id)?;
+            let status = self.folder()?.store.plan_status(&p.id)?;
             Ok(match status {
                 Some(s) => json!({"plan_id": s.plan_id, "state": s.state, "at": s.at, "error": s.error,
                                   "method": s.method, "workoutkit_id": s.workoutkit_id, "scheduled_for": s.scheduled_for}),
@@ -781,7 +886,7 @@ impl HealthAccessServer {
     )]
     fn list_plans(&self) -> Result<CallToolResult, ErrorData> {
         self.run("list_plans", || {
-            let plans = self.store.list_plans()?;
+            let plans = self.folder()?.store.list_plans()?;
             Ok(json!({"count": plans.len(), "plans": plans}))
         })
     }
@@ -803,7 +908,16 @@ impl HealthAccessServer {
             name: info.name.clone(),
             version: info.version.clone(),
         };
-        match self.clients.connected(client) {
+        let Some(folder) = self.open_folder() else {
+            // no folder to write into yet; noted when one appears
+            *self
+                .shared
+                .waiting_client
+                .lock()
+                .unwrap_or_else(|e| e.into_inner()) = Some(client);
+            return;
+        };
+        match folder.clients.connected(client) {
             Ok(h) => tracing::info!(client = %h.client.name, id = %h.id, "handshake written"),
             Err(e) => tracing::warn!("handshake not written: {e}"),
         }
@@ -811,7 +925,16 @@ impl HealthAccessServer {
 
     /// First request of a session that skipped `initialize`: take the client from `_meta`.
     fn note_client(&self, context: &RequestContext<RoleServer>) {
-        if self.clients.knows_client() {
+        let known = match self.open_folder() {
+            Some(folder) => folder.clients.knows_client(),
+            None => self
+                .shared
+                .waiting_client
+                .lock()
+                .unwrap_or_else(|e| e.into_inner())
+                .is_some(),
+        };
+        if known {
             return;
         }
         if let Some(info) = context.client_info() {
@@ -932,10 +1055,17 @@ impl ServerHandler for HealthAccessServer {
         context: RequestContext<RoleServer>,
     ) -> Result<ListResourcesResult, ErrorData> {
         self.note_client(&context);
-        let index = self
-            .store
-            .index()
-            .map_err(|e| ErrorData::internal_error(e.to_string(), None))?;
+        // without a folder the two fixed resources are still listed; reading them says what is missing
+        let workouts = match self.folder() {
+            Ok(folder) => {
+                folder
+                    .store
+                    .index()
+                    .map_err(|e| ErrorData::internal_error(e.to_string(), None))?
+                    .workouts
+            }
+            Err(_) => Vec::new(),
+        };
         let mut resources = vec![
             Resource::new(URI_BRIEFING, "briefing")
                 .with_title("Briefing")
@@ -951,7 +1081,7 @@ impl ServerHandler for HealthAccessServer {
                 )
                 .with_mime_type("application/json"),
         ];
-        for e in index.workouts.iter().take(200) {
+        for e in workouts.iter().take(200) {
             let desc = format!(
                 "{} {} {}{}",
                 healthaccess_core::util::local_day(e.start).format("%Y-%m-%d"),
@@ -995,16 +1125,23 @@ impl ServerHandler for HealthAccessServer {
             .strip_prefix(URI_WORKOUT_PREFIX)
             .or_else(|| uri.strip_prefix(URI_WORKOUT_PREFIX_LEGACY));
         let (text, mime) = if uri == URI_BRIEFING {
-            let briefing = self.store.briefing().map_err(internal)?;
+            let briefing = self
+                .folder()
+                .and_then(|f| f.store.briefing())
+                .map_err(internal)?;
             (briefing.text, "text/markdown")
         } else if uri == URI_INDEX || uri == URI_INDEX_LEGACY {
-            let index = self.store.index().map_err(internal)?;
+            let index = self
+                .folder()
+                .and_then(|f| f.store.index())
+                .map_err(internal)?;
             (
                 healthaccess_core::util::to_sorted_pretty_json(&index).map_err(internal)?,
                 "application/json",
             )
         } else if let Some(id) = workout_id {
-            let w = self.store.load_workout(id).map_err(|e| match e {
+            let loaded = self.folder().and_then(|f| f.store.load_workout(id));
+            let w = loaded.map_err(|e| match e {
                 Error::NotFound(_) | Error::Ambiguous { .. } => {
                     ErrorData::resource_not_found(e.to_string(), Some(json!({"uri": uri})))
                 }

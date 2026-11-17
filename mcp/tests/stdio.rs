@@ -265,17 +265,17 @@ fn full_stdio_session() {
     );
     assert!(w["laps"].as_array().unwrap().len() > 10);
     assert_eq!(w["steps"][0]["key"], "0.0.0");
-    assert_eq!(w["cardiac_cost"]["best_100_pace_s"], 132);
+    assert_eq!(w["cardiac_cost"]["best_100_pace_s"], 130);
     let parts = w["parts_text"].as_array().unwrap();
     assert_eq!(parts.len(), w["steps"].as_array().unwrap().len());
     assert_eq!(
         parts[0],
-        "FR easy, find your breathing · 200 m · 2:20/100 · HR 100"
+        "FR easy, find your breathing · 200 m · 2:18/100 · HR 100"
     );
     assert!(
         parts
             .iter()
-            .any(|p| p == "FR 100 steady, breathe every 3 · 100 m · 2:12/100 · HR 151"),
+            .any(|p| p == "FR 100 steady, breathe every 3 · 100 m · 2:10/100 · HR 151"),
         "{parts:?}"
     );
     assert_eq!(w["effort_source"], "apple");
@@ -744,4 +744,56 @@ fn handshake_without_initialize() {
         serde_json::from_str(&std::fs::read_to_string(clients[0].path()).unwrap()).unwrap();
     assert_eq!(handshake["client"]["name"], "claude-code");
     assert_eq!(handshake["client"]["version"], "9.9.9");
+}
+
+/// A server registered before the app wrote anything must connect, list its tools and say
+/// what is missing, then pick the folder up on a later call without a restart.
+#[test]
+fn starts_without_a_folder_and_finds_it_later() {
+    let tmp = tempfile::tempdir().unwrap();
+    let dir = tmp.path().join("Health Access");
+    let mut s = Session::start(&dir);
+    let init = s.call(
+        1,
+        "initialize",
+        json!({"protocolVersion": "2025-06-18", "capabilities": {}, "clientInfo": {"name": "early", "version": "1"}}),
+    );
+    assert_eq!(init["serverInfo"]["name"], "healthaccess-mcp");
+    s.send(json!({"jsonrpc": "2.0", "method": "notifications/initialized"}));
+    let tools = s.call(2, "tools/list", json!({}));
+    assert!(
+        tools["tools"].as_array().is_some_and(|t| t.len() == 13),
+        "{tools}"
+    );
+    let resources = s.call(3, "resources/list", json!({}));
+    assert_eq!(resources["resources"].as_array().map(Vec::len), Some(2));
+
+    let (is_error, text) = s.tool_text(4, "list_workouts", json!({}));
+    assert!(is_error, "{text}");
+    let text = text.as_str().unwrap().to_string();
+    assert!(text.contains("no folder to read"), "{text}");
+    assert!(text.contains("apps.apple.com/app/id6831916470"), "{text}");
+    assert!(text.contains("no restart"), "{text}");
+    assert!(!text.contains('\u{2014}'), "{text}");
+    let (is_error, _) = s.tool_text(5, "training_summary", json!({}));
+    assert!(is_error);
+
+    // the phone writes its first files
+    std::fs::create_dir_all(dir.join("workouts")).unwrap();
+    std::fs::write(
+        dir.join("index.json"),
+        r#"{"schema":"healthaccess.index.v1","workouts":[]}"#,
+    )
+    .unwrap();
+    let (is_error, rows) = s.tool_text(6, "list_workouts", json!({}));
+    assert!(!is_error, "{rows}");
+    assert_eq!(rows["total_workouts"], 0);
+    // the client that introduced itself before the folder existed is noted now
+    let clients: Vec<_> = std::fs::read_dir(dir.join("mcp/clients"))
+        .expect("mcp/clients exists")
+        .flatten()
+        .collect();
+    assert_eq!(clients.len(), 1);
+    let noted = std::fs::read_to_string(clients[0].path()).unwrap();
+    assert!(noted.contains("\"early\""), "{noted}");
 }

@@ -8,3 +8,7 @@ target/
 app/HealthAccess/Resources/TelemetryConfig.plist
 dist/
 .wrangler/
+
+# Presence files a local run of the server leaves in the example folder (they carry the computer name).
+examples/mcp/clients/*
+!examples/mcp/clients/9f3c1a7e5b2d4c80.json
