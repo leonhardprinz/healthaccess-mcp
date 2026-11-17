@@ -73,7 +73,7 @@
         {
           "@type": "Question",
           "name": "Can it write workouts to my Apple Watch?",
-          "acceptedAnswer": {"@type": "Answer", "text": "Yes. Your AI calls push_plan, which writes plans/<id>.json into the folder. The app turns it into a WorkoutKit custom workout with the step names on your wrist and puts it on the Watch, either scheduled for a date or through Apple's Add to Watch sheet. Limits: pool swim and indoor rowing today, step labels under 40 characters, step names need iOS 18, and the Watch keeps its own pool length setting."}
+          "acceptedAnswer": {"@type": "Answer", "text": "Yes. Your AI calls push_plan, which writes plans/<id>.json into the folder. The app turns it into a WorkoutKit custom workout with the step names on your wrist and puts it on the Watch, either scheduled for a date or through Apple's Add to Watch sheet. It works for eleven sports, from running and cycling to pool swims and rowing. Limits: step labels under 40 characters, step names need iOS 18, and the Watch keeps its own pool length setting."}
         }
       ]
     }
@@ -256,7 +256,8 @@ Register it in this app, then list my last 5 workouts.</pre>
   <h3>Why does it need my phone unlocked?</h3>
   <p>Apple only lets apps read Health data while the iPhone is unlocked. iOS wakes the app the moment a workout is saved, but if the phone is locked in a bag the export waits until the phone is unlocked again. The app says so instead of pretending.</p>
   <h3>Can it write workouts to my Apple Watch?</h3>
-  <p>Yes. Your AI calls <code>push_plan</code>, which writes <code>plans/&lt;id&gt;.json</code> into the folder. The app turns it into a WorkoutKit custom workout with the step names on your wrist and puts it on the Watch, scheduled for a date or through Apple's "Add to Watch" sheet. Limits: pool swim and indoor rowing today, step labels under 40 characters, step names need iOS 18, and the Watch keeps its own pool length setting. <a href="/docs/plans">The plan format and the flow.</a></p>
+  <p>Yes. Your AI calls <code>push_plan</code>, which writes <code>plans/&lt;id&gt;.json</code> into the folder. The app turns it into a WorkoutKit custom workout with the step names on your wrist and puts it on the Watch, scheduled for a date or through Apple's "Add to Watch" sheet. It works for eleven sports, from running and cycling to pool swims and rowing. Limits: step labels under 40 characters, step names need iOS 18, and the Watch keeps its own pool length setting. <a href="/docs/plans">The plan format and the flow.</a></p>
+  <p><a href="/docs/faq">More questions and answers</a></p>
 </section>
 </main>
 
@@ -265,7 +266,7 @@ Register it in this app, then list my last 5 workouts.</pre>
     <div><h4>Connect an AI</h4><ul><li><a href="/docs/claude-code">Claude Code</a></li><li><a href="/docs/claude-desktop">Claude Desktop</a></li><li><a href="/docs/cursor">Cursor</a></li><li><a href="/docs/chatgpt">ChatGPT</a></li><li><a href="/docs/local-models">Local models</a></li></ul></div>
     <div><h4>Reference</h4><ul><li><a href="/docs/files">The folder is the API</a></li><li><a href="/docs/plans">Plans and Put on Watch</a></li><li><a href="/docs/prompts">Ideas for your AI</a></li><li><a href="/ref/mcp.md">Tool reference</a></li><li><a href="/ref/schema.md">Data contract</a></li></ul></div>
     <div><h4>For AIs</h4><ul><li><a href="/llms.txt">llms.txt</a></li><li><a href="/llms-full.txt">llms-full.txt</a></li><li><a href="https://www.npmjs.com/package/healthaccess-mcp">npm package</a></li></ul></div>
-    <div><h4>About</h4><ul><li><a href="/docs/privacy">Privacy in plain words</a></li><li><a href="/privacy-policy">Privacy policy</a></li><li><a href="/support">Support</a></li><li><a href="/docs/compare">Compared with the others</a></li></ul></div>
+    <div><h4>About</h4><ul><li><a href="/docs/privacy">Privacy in plain words</a></li><li><a href="/privacy-policy">Privacy policy</a></li><li><a href="/support">Support</a></li><li><a href="/docs/compare">Compared with the others</a></li><li><a href="/docs/faq">Questions and answers</a></li></ul></div>
   </div>
   <p class="fine">Health Access MCP is made by Prinz Technology Consultancy, svetovanje na področju informacijskih tehnologij d.o.o. (Prinz Tech Consulting), Dunajska cesta 33, 1000 Ljubljana, Slovenia. Registration number 7326106000, VAT ID SI86067494, contact@prinz-tc.com. The source is on <a href="https://github.com/leonhardprinz/healthaccess-mcp">GitHub</a> under the MIT licence. Apple, Apple Watch, Apple Health and HealthKit are trademarks of Apple Inc.; this project is not affiliated with Apple.</p>
 </footer>

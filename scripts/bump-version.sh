@@ -18,7 +18,7 @@ node -e '
   fs.writeFileSync(s, JSON.stringify(m, null, 2) + "\n");
 ' "$V"
 sed -i '' -E "s/\"version\": \"[^\"]+\"/\"version\": \"$V\"/" claude-plugin/.claude-plugin/plugin.json
-sed -i '' -E "s/healthaccess-mcp@[0-9][0-9.]*/healthaccess-mcp@$V/g" claude-plugin/.mcp.json claude-plugin/README.md
+sed -i '' -E "s/healthaccess-mcp@[0-9][0-9.]*/healthaccess-mcp@$V/g" claude-plugin/.mcp.json claude-plugin/README.md Dockerfile
 sed -i '' -E "s/version \"[^\"]+\"/version \"$V\"/; s#v[0-9.]+/healthaccess-mcp-[0-9.]+#v$V/healthaccess-mcp-$V#" packaging/homebrew/healthaccess-mcp.rb
 sed -i '' -E "s/MARKETING_VERSION: \"[^\"]+\"/MARKETING_VERSION: \"$V\"/" app/project.yml
 build=$(sed -n -E 's/.*CURRENT_PROJECT_VERSION: "([0-9]+)".*/\1/p' app/project.yml)

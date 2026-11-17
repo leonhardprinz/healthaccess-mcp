@@ -30,6 +30,7 @@ If you cannot start a local program (ChatGPT, any AI app on a phone, a chat in a
 ## Optional
 
 - [Privacy](https://healthaccessmcp.com/docs/privacy): no server, no account, and the exact event names if usage statistics are turned on
+- [Questions and answers](https://healthaccessmcp.com/docs/faq): short answers to what people ask an AI about Apple Health: is there an MCP server, Claude and ChatGPT, plans onto the Watch, price, privacy, limits
 - [Compared with the others](https://healthaccessmcp.com/docs/compare): Health Auto Export, HealthPipe, Health MCP: Private Sync, Health Bridge for AI, Apple's own export
 - [Example folder](https://healthaccessmcp.com/examples/README.md): a complete synthetic Health Access folder to try the server on (`--dir` pointed at a copy)
 - [Privacy policy](https://healthaccessmcp.com/privacy-policy): the formal policy, controller Prinz Tech Consulting d.o.o.

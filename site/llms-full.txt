@@ -526,7 +526,7 @@ Show the parts as a list. If I say yes, call `push_plan` with `scheduled_for`, t
 - Health data can only be read while the phone is unlocked (Apple). A workout finished with the phone in a bag exports the next time the phone is unlocked, not before. The app says so instead of pretending.
 - The Watch keeps its own pool length setting; a plan cannot set it (WorkoutKit has no parameter for it).
 - Step names on the Watch need iOS 18; on iOS 17 the workout installs without labels. Labels longer than 40 characters are cut.
-- Plans: pool swim and indoor rowing only, today.
+- Plans: eleven sports (run, indoor run, walk, hike, cycle, indoor cycle, pool swim, open-water swim, indoor row, HIIT, elliptical); HIIT and elliptical take time goals only.
 - `recovery_hr` is null right after a background export and filled in on the next run.
 - Rowing distance per step needs iOS 18; on iOS 17 only the workout total is known.
 - Apple's "Add to Watch" sheet does not report back; a plan installed that way is marked `scheduled` with `method: preview` after the user confirms.
