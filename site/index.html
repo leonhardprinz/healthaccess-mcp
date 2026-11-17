@@ -34,7 +34,11 @@
       "operatingSystem": "iOS 17 or later (app); macOS, Linux (MCP server and CLI)",
       "softwareVersion": "1.0.3",
       "downloadUrl": "https://apps.apple.com/app/id6831916470",
-      "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"},
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "EUR"
+      },
       "license": "https://opensource.org/license/mit",
       "description": "Health Access MCP writes Apple Watch workouts and daily vitals as JSON into a folder the user chooses, automatically after every workout. A local MCP server lets Claude, Cursor or any AI read the folder, and AI-written training plans are put back onto the Apple Watch. No account, no server.",
       "featureList": [
@@ -45,7 +49,10 @@
         "Any folder the iOS Files app can open: iCloud Drive, Dropbox, Google Drive, OneDrive, Proton Drive, a NAS, local",
         "No account, no server, usage statistics off by default"
       ],
-      "author": {"@type": "Person", "name": "Leonhard Prinz"}
+      "author": {
+        "@type": "Person",
+        "name": "Leonhard Prinz"
+      }
     },
     {
       "@type": "FAQPage",
@@ -53,29 +60,54 @@
         {
           "@type": "Question",
           "name": "How do I get Apple Health data into Claude?",
-          "acceptedAnswer": {"@type": "Answer", "text": "Install the Health Access app on your iPhone, pick a folder that syncs to your Mac (iCloud Drive, Dropbox, a NAS), and allow Health access. After every workout the app writes a JSON file into that folder. Then register the local MCP server with Claude Code (claude mcp add --scope user healthaccess -- npx -y healthaccess-mcp) or add it to Claude Desktop's config file. Claude can then list workouts, read a session, read vitals and write a plan. Without the MCP, the folder holds plain JSON and a one-page briefing.md that you can drop into a Claude Project."}
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Install the Health Access app on your iPhone, pick a folder that syncs to your Mac (iCloud Drive, Dropbox, a NAS), and allow Health access. After every workout the app writes a JSON file into that folder. Then register the local MCP server with Claude Code (claude mcp add --scope user healthaccess -- npx -y healthaccess-mcp) or add it to Claude Desktop's config file. Claude can then list workouts, read a session, read vitals and write a plan. Without the MCP, the folder holds plain JSON and a one-page briefing.md that you can drop into a Claude Project."
+          }
         },
         {
           "@type": "Question",
           "name": "Does it work with ChatGPT?",
-          "acceptedAnswer": {"@type": "Answer", "text": "Through the files, yes. Through the MCP, not today: ChatGPT connects to MCP servers at an HTTPS URL, on some plans only, and does not start a program on your Mac. Health Access MCP runs on your Mac over stdio. So with ChatGPT you upload briefing.md or the workout JSON, or paste the output of the healthaccess command line. If OpenAI allows local servers later, the server is ready."}
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Through the files, yes. Through the MCP, not today: ChatGPT connects to MCP servers at an HTTPS URL, on some plans only, and does not start a program on your Mac. Health Access MCP runs on your Mac over stdio. So with ChatGPT you upload briefing.md or the workout JSON, or paste the output of the healthaccess command line. If OpenAI allows local servers later, the server is ready."
+          }
         },
         {
           "@type": "Question",
           "name": "Where does my data go?",
-          "acceptedAnswer": {"@type": "Answer", "text": "Into the folder you picked, and nowhere else. There is no server and no account. The folder syncs through the storage provider you chose, which is your account with them, not ours. Usage statistics are off until you turn them on, and when on they carry event names and counts, never a health value, a file name or a path."}
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Into the folder you picked, and nowhere else. There is no server and no account. The folder syncs through the storage provider you chose, which is your account with them, not ours. Usage statistics are off until you turn them on, and when on they carry event names and counts, never a health value, a file name or a path."
+          }
         },
         {
           "@type": "Question",
           "name": "Why does it need my phone unlocked?",
-          "acceptedAnswer": {"@type": "Answer", "text": "Apple only lets apps read Health data while the iPhone is unlocked. iOS wakes the app when a workout is saved, but if the phone is locked in a bag the export waits until the phone is unlocked again. The app says so instead of pretending."}
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Apple only lets apps read Health data while the iPhone is unlocked. iOS wakes the app when a workout is saved, but if the phone is locked in a bag the export waits until the phone is unlocked again. The app says so instead of pretending."
+          }
         },
         {
           "@type": "Question",
           "name": "Can it write workouts to my Apple Watch?",
-          "acceptedAnswer": {"@type": "Answer", "text": "Yes. Your AI calls push_plan, which writes plans/<id>.json into the folder. The app turns it into a WorkoutKit custom workout with the step names on your wrist and puts it on the Watch, either scheduled for a date or through Apple's Add to Watch sheet. It works for eleven sports, from running and cycling to pool swims and rowing. Limits: step labels under 40 characters, step names need iOS 18, and the Watch keeps its own pool length setting."}
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Your AI calls push_plan, which writes plans/<id>.json into the folder. The app turns it into a WorkoutKit custom workout with the step names on your wrist and puts it on the Watch, either scheduled for a date or through Apple's Add to Watch sheet. It works for eleven sports, from running and cycling to pool swims and rowing. Limits: step labels under 40 characters, step names need iOS 18, and the Watch keeps its own pool length setting."
+          }
         }
       ]
+    },
+    {
+      "@type": "VideoObject",
+      "name": "How to give Claude your Apple Watch workouts (free, open source)",
+      "description": "A free iPhone app writes your Apple Watch workouts and daily health data as files into a folder you own; a local MCP server lets Claude, Cursor or another AI read them, and the workout your AI writes goes back onto your Watch.",
+      "thumbnailUrl": "https://healthaccessmcp.com/img/video.jpg",
+      "uploadDate": "2026-11-17",
+      "duration": "PT44S",
+      "contentUrl": "https://www.youtube.com/watch?v=nv4CvpBXArk",
+      "embedUrl": "https://www.youtube.com/embed/nv4CvpBXArk"
     }
   ]
 }
@@ -99,6 +131,7 @@
   <span class="label">Health Access MCP · Apple Health for AI</span>
   <h1>Apple won't let your AI read your Watch. This does.</h1>
   <p class="dek">Health Access is middleware. It does the one thing Apple requires a phone app for, writing your workouts and vitals as JSON into a folder you pick, and then it gets out of the way. Your AI reads that folder, through the MCP or just as files. If it writes you a plan, one tap puts it on your Watch.</p>
+  <p class="video"><a href="https://www.youtube.com/watch?v=nv4CvpBXArk"><img src="/img/video.jpg" width="1280" height="720" alt="Video, 44 seconds: from screenshots of every swim to an AI that reads the folder and puts the next session on the Watch"></a><br><a href="https://www.youtube.com/watch?v=nv4CvpBXArk">Watch the 44-second video on YouTube</a></p>
 </header>
 
 <main>

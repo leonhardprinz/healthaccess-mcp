@@ -122,3 +122,6 @@ footer.site .fine{margin-top:22px;font-size:13px;color:var(--ink3);max-width:non
 
 @media (prefers-reduced-motion:reduce){*{animation:none;transition:none}}
 @media print{nav.top,footer.site .cols{display:none}body{background:#fff;color:#000}}
+
+.video{margin-top:20px}
+.video img{width:100%;max-width:640px;height:auto;border-radius:12px;display:block;margin-bottom:6px}
