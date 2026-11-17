@@ -64,6 +64,11 @@
   }
 }</pre>
 
+<h2>Or as a plugin</h2>
+<p>The same server plus the eleven prompts as skills, in two commands. Use one way or the other, not both, or Claude starts the server twice.</p>
+<pre>claude plugin marketplace add leonhardprinz/healthaccess-mcp
+claude plugin install healthaccess-mcp@healthaccess</pre>
+
 <h2>Check</h2>
 <pre>claude mcp list                         <span class="c"># healthaccess should show as connected</span>
 npx -y healthaccess-mcp --check         <span class="c"># prints the folder it found and where from</span></pre>
