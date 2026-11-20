@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Health Access MCP compared with Health Auto Export, HealthPipe, Health MCP: Private Sync and Health Bridge for AI</title>
-<meta name="description" content="Facts only: where the data lives, account or not, formats, MCP, plans back to the Watch, open source, price. Health Access MCP next to Health Auto Export, HealthPipe, Health MCP: Private Sync, Health Bridge for AI and Apple's own export.">
+<title>Health Access MCP compared with Health Auto Export, Health.md, HealthPipe, Health MCP: Private Sync and Health Bridge for AI</title>
+<meta name="description" content="Facts only: where the data lives, account or not, formats, MCP, plans back to the Watch, open source, price. Health Access MCP next to Health Auto Export, Health.md, HealthPipe, Health MCP: Private Sync, Health Bridge for AI and Apple's own export.">
 <link rel="canonical" href="https://healthaccessmcp.com/docs/compare">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="Health Access MCP">
@@ -36,7 +36,7 @@
 <header class="hero">
   <span class="label">About</span>
   <h1>Compared with the others</h1>
-  <p class="answer">Five ways to get Apple Health data to an AI, plus Apple's own export. Facts only, checked against each product's own listing or site on 2026-10-25. What we could not confirm is marked, not guessed. The differences that matter: where your data lives, whether you need an account, and whether anything goes back to the Watch.</p>
+  <p class="answer">Six ways to get Apple Health data to an AI, plus Apple's own export. Facts only, checked against each product's own listing or site on 2026-10-25 (Health.md on 2026-11-20). What we could not confirm is marked, not guessed. The differences that matter: where your data lives, whether you need an account, and whether anything goes back to the Watch.</p>
 </header>
 
 <main>
@@ -63,6 +63,16 @@
       <td>No; its MCP server is read-only per its listing</td>
       <td>No</td>
       <td>Free download; Basic $2.99 once; Premium $1.99 a month, $6.99 a year or $24.99 once (US App Store prices)</td>
+    </tr>
+    <tr>
+      <td>Health.md</td>
+      <td>Destinations you pick: an Obsidian vault, iCloud Drive, Dropbox, local folders, an HTTP endpoint or a nearby Mac</td>
+      <td>None</td>
+      <td>Markdown, CSV, JSON or Obsidian Bases YAML; 225+ data points in 21 categories; daily or weekly scheduled export; a <code>healthmd</code> command line</td>
+      <td>The command line has MCP workflows, in preview per its source repository</td>
+      <td class="unk">Not found in its listing</td>
+      <td>Yes, AGPL-3.0</td>
+      <td>Free download; full access $49.99 once or $29.99 a year, family and weekly options, 7-day trial (US App Store, 2026-11-20)</td>
     </tr>
     <tr>
       <td>HealthPipe</td>
@@ -109,11 +119,13 @@
 </div>
 
 <h2>How to read the table</h2>
-<p>Three of the five products put your data on a computer you own or chose: Health Access MCP (a folder), Health Auto Export (destinations you pick) and Health Bridge for AI (a receiver you run). Two put it on theirs: HealthPipe and Health MCP: Private Sync (encrypted and in a trusted execution environment, but theirs). Only Health Access MCP writes anything back to the Watch. That is the one row that is not a matter of preference; everything else depends on what you want.</p>
+<p>Four of the six products put your data on a computer you own or chose: Health Access MCP (a folder), Health Auto Export and Health.md (destinations you pick) and Health Bridge for AI (a receiver you run). Two put it on theirs: HealthPipe and Health MCP: Private Sync (encrypted and in a trusted execution environment, but theirs). Only Health Access MCP writes anything back to the Watch. That is the one row that is not a matter of preference; everything else depends on what you want.</p>
 
 <h2>Notes per product</h2>
 <h3>Health Auto Export</h3>
 <p>Its automatic export is part of the paid Premium tier (checked on 16 Nov 2026); <a href="/docs/health-auto-export-alternative">the two apps side by side</a>. The established one, by Lybron Sobers, on the App Store since 2016. It exports 150 or more metrics as CSV, JSON, Markdown or GPX to many destinations, has automations and a Mac companion, and its listing now advertises a built-in MCP server, read-only, queried over your network. If you want everything Apple Health holds in a spreadsheet, it is the broader tool. Health Access MCP is narrower on purpose: workouts with every interval named, daily vitals, a one-page briefing, and the way back to the Watch. In this category the failure that matters most is an export that silently did not happen, which is why Health Access shows a sync log and says it is waiting for the phone to be unlocked instead of pretending.</p>
+<h3>Health.md</h3>
+<p>By Cody Bontecou, source on GitHub under AGPL-3.0. Built for notes: it turns a day of Apple Health into Markdown for an Obsidian vault, or CSV and JSON, on a daily or weekly schedule, with a Mac app, a <code>healthmd</code> command line and PDF reports for a clinician. Broad across Health types, and the better choice if your health data should live in your notes. Its listing does not mention workouts going back to the Watch, so an AI-written workout still has to be put on the Watch some other way. Which features sit behind the paid tier we did not check.</p>
 <h3>HealthPipe</h3>
 <p>An iPhone app that syncs the Health categories you choose to an account on their servers in Germany, where MCP-capable assistants you approve can read them. Read-only. Free while in TestFlight, with a subscription announced. The honest trade: no Mac and no folder to manage, in exchange for a copy of your health data on someone else's server.</p>
 <h3>Health MCP: Private Sync</h3>
@@ -121,17 +133,18 @@
 <h3>Health Bridge for AI</h3>
 <p>Open source, by roian6, also known as Apple Health AI Bridge: an iPhone companion sends your records to a receiver you run on your own computer, which stores them in SQLite and serves nine read-only MCP tools with source attribution. Needs iOS 18. The closest to Health Access MCP in spirit, and the better choice if you want time series across many Health types rather than workouts in depth. It does not write to the Watch.</p>
 <h3>Apple's own export</h3>
-<p>Health app, your picture, "Export All Health Data": a zip with one XML file holding everything, every time. No automation, no per-workout files, nothing an AI reads well without a parser. It is the fallback everyone has, and the reason the other five exist.</p>
+<p>Health app, your picture, "Export All Health Data": a zip with one XML file holding everything, every time. No automation, no per-workout files, nothing an AI reads well without a parser. It is the fallback everyone has, and the reason the other six exist.</p>
 
 <h2>What we could not confirm</h2>
 <ul>
   <li>Health MCP: Private Sync: what exactly the AI gets, and whether its code is open. Its listing does not say.</li>
   <li>Health Auto Export's MCP server is described as read-only in its listing, so it does not write workouts to the Watch; we did not test it.</li>
+  <li>Health.md: which features need the paid tier, and how far its MCP workflows go; the command line is marked preview.</li>
   <li>Whether HealthPipe's code is open. Its site does not say.</li>
   <li>Health Bridge for AI's license. The project calls itself open source; we did not check the license file.</li>
   <li>Prices change and differ by country; the Health Auto Export figures are the US App Store on 2026-10-25.</li>
 </ul>
-<p class="small">Sources: each product's App Store listing or website, read on 2026-10-25. Corrections welcome at support@healthaccessmcp.com; a row changes the day a fact does.</p>
+<p class="small">Sources: each product's App Store listing or website, read on 2026-10-25; Health.md's listing and repository on 2026-11-20. Corrections welcome at support@healthaccessmcp.com; a row changes the day a fact does.</p>
 
 <div class="next"><b>Next:</b> <a href="/docs/privacy">Where your data goes with Health Access</a> <a href="/docs/plans">Plans back to the Watch</a> <a href="/">Start</a></div>
 </main>
