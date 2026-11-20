@@ -388,6 +388,14 @@ fn print_workout(store: &Store, w: &Workout, hr: bool) {
             cell(z.seconds.z5)
         );
     }
+    let land = derive::is_land_distance(&w.activity);
+    let splits = derive::splits_text(w);
+    if w.steps.is_empty() && !splits.is_empty() {
+        println!();
+        for line in splits {
+            println!("{line}");
+        }
+    }
     if !w.steps.is_empty() {
         println!();
         let mut t = Table::new(&[
@@ -396,7 +404,7 @@ fn print_workout(store: &Store, w: &Workout, hr: bool) {
             ("LABEL", false),
             ("DUR", true),
             ("DIST m", true),
-            ("PACE/100", true),
+            (if land { "PACE/km" } else { "PACE/100" }, true),
             ("HR", true),
             ("GOAL", false),
         ]);
@@ -407,10 +415,13 @@ fn print_workout(store: &Store, w: &Workout, hr: bool) {
                 s.label.clone().unwrap_or_default(),
                 fmt_duration(s.duration_s),
                 opt_num(s.distance_m, 0),
-                s.swim_pace_s_per_100m
-                    .or(s.pace_s_per_100m)
-                    .map(fmt_pace)
-                    .unwrap_or_else(|| NONE.into()),
+                if land {
+                    s.pace_s_per_km
+                } else {
+                    s.swim_pace_s_per_100m.or(s.pace_s_per_100m)
+                }
+                .map(fmt_pace)
+                .unwrap_or_else(|| NONE.into()),
                 opt_num(s.avg_hr, 0),
                 match s.goal_met {
                     Some(true) => "met".into(),
@@ -601,6 +612,19 @@ fn read_plan(path: &PathBuf) -> anyhow::Result<Plan> {
 
 fn describe_plan(plan: &Plan) -> String {
     let mut out = String::new();
+    if let Some(p) = &plan.pacer {
+        let per_km = if p.distance_m > 0.0 {
+            p.time_s / p.distance_m * 1000.0
+        } else {
+            0.0
+        };
+        return format!(
+            "  pacer     {} m in {} ({}/km)",
+            p.distance_m.round(),
+            fmt_duration(p.time_s),
+            fmt_duration(per_km)
+        );
+    }
     if let Some(w) = &plan.warmup {
         out.push_str(&format!("  warmup    {}\n", w.describe()));
     }

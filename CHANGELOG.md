@@ -2,6 +2,30 @@
 
 Versions are one number for everything: the app's `MARKETING_VERSION`, the Rust crates and the npm packages (`scripts/bump-version.sh`). The app's build number counts up on its own. Dates are Europe/Ljubljana.
 
+## 1.0.5, unreleased: strength, race day, pace alerts, run splits, and sleep counted by night
+
+Most of this release comes from the first feedback of someone other than the developer.
+
+### New
+- **Strength workouts.** A plan can have `sport: "strength"`, and any step can have an `open` goal: it lasts until the athlete taps on the Watch. One open step per set, with the exercise, reps and weight in the label ("Squat 5 x 60 kg"), and a timed rest. HIIT, elliptical and strength take time or open goals; the Watch measures no distance for them. Strength plans are joined onto strength workouts like every other sport.
+- **Race day.** A run or cycle plan can be a `pacer` instead of steps: one distance in one time (`{"distance_m": 10000, "time_s": 3000}`). The app puts it on the Watch as Apple's pacer workout, which shows ahead of or behind the even pace for the whole distance.
+- **Automatic, offered when it matters.** The first plan you put on your Watch by hand offers "Turn on Automatic" once, under its result. It leads to the same confirmation as the switch; nothing changes without it, and it does not come back.
+- **Pace alerts.** A run or cycle step can carry `pace_s_per_km: [fast, slow]`, e.g. `[290, 310]` for 4:50 to 5:10 per km; the Watch taps when the current pace leaves the range. The app shows it as "4:50–5:10 per km" (a ride as km/h). Walk, hike and the swims have no pace alerts on the Watch (checked with WorkoutKit's `supportsAlert`), so a plan for them is refused with a clear message. One alert per step: a zone or a pace.
+- **Splits for runs, walks and hikes.** The workout file gets `splits`: one per km, or per mile when the athlete uses miles in Health, cut from the Watch's own distance samples, with moving time (pauses left out), pace and average heart rate per split. `get_workout` and `healthaccess show` print them as lines for a session without a plan. Runs of the last three days written by an older app get their splits on the next sync.
+- **Elevation.** `get_workout` and the summary line now report metres climbed and descended (`elevation_gain_m`, `elevation_loss_m`). The app always wrote it; the server never read it. Older files carry it only in the raw metadata ("722 cm"), which is read too.
+- **Run and ride steps read in pace per km.** `parts_text`, `healthaccess show` and a new `pace_s_per_km` on each step, instead of a pace per 100 m that only makes sense in the pool.
+- **Last night's sleep arrives on its own.** The app now also wakes when the Watch hands the night over to the phone, so the day file has it before anyone opens the app. For a set moment there is a Shortcuts action, **Sync Health data**, e.g. in an automation "When Sleep Focus turns off". The sync log shows the last wake by sleep and the last run from Shortcuts.
+- `push_plan` says when a plan needs app 1.0.5 (strength, an open step or a pacer; an older app lists it under Could not read) and when it has pace alerts (an older app puts it on the Watch without them).
+
+### Fixed
+- **A workout exported before the Watch had passed on its samples kept no heart-rate curve.** When the Watch dies or is out of range at the end of a workout, the phone can get the workout's summary first and the samples later. For three days the app now reads such a workout again on every sync and, once Health has the samples, adds the heart-rate series, the per-sample series and recovery heart rate to the file.
+- **A night of sleep was split over two days.** The Watch saves a night as dozens of short stage samples, and each counted for the day it ended, so the part before midnight landed on the previous day. A night now counts as a whole for the morning it ends on (a gap of more than an hour starts a new session, so a nap is its own). The first launch of 1.0.5 checks the day files of the last year once and rewrites the ones whose sleep changes. `vitals/` gets the same rule.
+- **`in_bed_s` was always null for Watch sleepers.** The Watch records sleep stages, not time in bed; the iPhone does (Health → Sleep → Track Time in Bed with iPhone). The app took every figure from the source with the most sleep, which dropped the iPhone's time in bed. It now takes time in bed from whichever source recorded it, and leaves it null when nobody did.
+- **Weather humidity was 100 times too high** (6200 instead of 62). The Watch stores 62 % as 62 in Health's percent unit.
+- **The distance series of a workout did not add up.** It mixed the iPhone's samples with the Watch's for the same minutes, and thinning it to one sample per 4 s dropped metres. It now holds only the workout's own samples, summed.
+- The sync log said "Last refresh by iOS: none yet" and promised a refresh every few hours. iOS decides when that runs, and for a new app it can take days; the log now says so, next to the wakes that do happen.
+- An unlabelled work step of a non-swim plan was called "Swim" in the app's plan view; it is "Work" now.
+
 ## 1.0.4, 2026-11-17: a plan started late keeps its name, and the server starts before the first sync
 
 ### Fixed

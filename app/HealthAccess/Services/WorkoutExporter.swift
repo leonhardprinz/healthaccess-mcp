@@ -20,12 +20,12 @@ struct PlanLookup: Sendable {
     /// comes back under an id no status file holds. With other steps the workout was started from another workout on
     /// the Watch and gets no plan, however close a plan's time is. Only a workout without any UUID falls back to the
     /// contract's rule: same sport, scheduled within ±2 h of the start. Same rules as `enrich_with_plan` in core.
-    func match(workoutPlanID: UUID?, start: Date, activity: String, steps: [StepDoc] = []) -> InstalledPlan? {
+    func match(workoutPlanID: UUID?, start: Date, activity: String, steps: [StepDoc] = [], distance: Double? = nil) -> InstalledPlan? {
         if let id = workoutPlanID {
             if let exact = plans.first(where: { $0.workoutkitId == id }) { return exact }
             let gap: (InstalledPlan) -> TimeInterval = { $0.scheduledFor.map { abs($0.timeIntervalSince(start)) } ?? .greatestFiniteMagnitude }
             return plans
-                .filter { Self.fits(activity: activity, sport: $0.sport) && Self.ran($0.doc, steps: steps) }
+                .filter { Self.fits(activity: activity, sport: $0.sport) && Self.ran($0.doc, steps: steps, distance: distance) }
                 .min { gap($0) < gap($1) }
         }
         let candidates = plans.compactMap { plan -> (InstalledPlan, TimeInterval)? in
@@ -46,8 +46,13 @@ struct PlanLookup: Sendable {
     /// Whether the steps the Watch recorded are the steps of this plan: every recorded step is one the plan has (block,
     /// repeat and position), the workout got past the warm-up, and at least seven in ten steps hit their goal (a
     /// distance within 10 %, a time within 10 % or 3 s). Not all: the Watch splits a length now and then, and a
-    /// cool-down runs long. Mirrors `ran_plan` in core/src/store.rs.
-    static func ran(_ plan: PlanDoc, steps: [StepDoc]) -> Bool {
+    /// cool-down runs long. An open step (a set that ends with a tap) is on goal whatever its length. A pacer plan has
+    /// no steps: it fits when the workout covered its distance within a quarter. Mirrors `ran_plan` in core/src/store.rs.
+    static func ran(_ plan: PlanDoc, steps: [StepDoc], distance: Double? = nil) -> Bool {
+        if let pacer = plan.pacer {
+            guard let distance else { return false }
+            return abs(distance - pacer.distanceM) <= pacer.distanceM * 0.25
+        }
         guard steps.count >= 3 else { return false }
         var onGoal = 0
         var pastWarmup = false
@@ -57,7 +62,9 @@ struct PlanLookup: Sendable {
             guard s.rep < (inBlocks ? plan.blocks[s.block - 1].repeatCount : 1) else { return false }
             if inBlocks { pastWarmup = true }
             let goal = planned.goal.value
-            if planned.goal.type == "time_s" {
+            if planned.goal.type == "open" {
+                onGoal += 1
+            } else if planned.goal.type == "time_s" {
                 if abs(Double(s.durationS) - goal) <= max(goal * 0.1, 3) { onGoal += 1 }
             } else if let d = s.distanceM, abs(d - goal) <= goal * 0.1 {
                 onGoal += 1
@@ -101,7 +108,8 @@ struct WorkoutExporter: Sendable {
         let allHR = try await health.heartRate(from: workout.startDate, to: end.addingTimeInterval(Self.recoveryWindow))
         let inWorkout = allHR.filter { $0.0 <= end }
         let planID = await health.workoutPlanID(for: workout)
-        let matched = plans.match(workoutPlanID: planID, start: workout.startDate, activity: code, steps: Self.steps(of: workout, plan: nil))
+        let matched = plans.match(workoutPlanID: planID, start: workout.startDate, activity: code,
+                                  steps: Self.steps(of: workout, plan: nil), distance: Self.distance(of: workout))
         let meta = workout.metadata ?? [:]
 
         let hrStats = workout.statistics(for: HKQuantityType(.heartRate))
@@ -146,6 +154,7 @@ struct WorkoutExporter: Sendable {
         doc.device = Self.device(of: workout)
         doc.metadataTyped = Self.typed(meta)
         doc.workoutPlanId = planID?.uuidString
+        doc.splits = await splits(of: workout, hr: inWorkout)
 
         var route: [[Double]]?
         if let points = try? await routePoints(for: workout), !points.isEmpty {
@@ -172,6 +181,48 @@ struct WorkoutExporter: Sendable {
             recovery?.apple1min = apple
         }
         return (recovery, maxHr.map { Int($0.rounded()) })
+    }
+
+    /// Activities that get splits: run, walk and hike (the Watch measures their distance with the same type).
+    static func hasSplits(_ activity: String) -> Bool {
+        activity == "run" || activity == "walk" || activity == "other:\(HKWorkoutActivityType.hiking.rawValue)"
+    }
+
+    /// One split per km, or per mile when the athlete uses miles in Health. Nil when the activity has none or the
+    /// Watch's distance samples are not on the phone yet (a later sync fills them in).
+    func splits(of workout: HKWorkout, hr: [(Date, Double)]) async -> SplitsDoc? {
+        guard Self.hasSplits(ActivityMapping.code(for: workout)),
+              let samples = try? await health.ownSamples(HKQuantityType(.distanceWalkingRunning), of: workout), !samples.isEmpty else { return nil }
+        let miles = await health.prefersMiles()
+        let pieces = samples.map { SplitMath.Piece(start: $0.startDate, end: $0.endDate, metres: $0.quantity.doubleValue(for: .meter())) }
+        let events = (workout.workoutEvents ?? []).map { (type: Self.eventName($0.type), at: $0.dateInterval.start) }
+        let items = SplitMath.splits(pieces, unitM: miles ? 1609.344 : 1000, pauses: SplitMath.pauses(events, workoutEnd: workout.endDate), hr: hr)
+        return items.isEmpty ? nil : SplitsDoc(unit: miles ? "mi" : "km", items: items)
+    }
+
+    /// Splits for a file written before the Watch had passed its distance samples on.
+    func lateSplits(for workout: HKWorkout) async throws -> SplitsDoc? {
+        let hr = try await health.heartRate(from: workout.startDate, to: workout.endDate)
+        return await splits(of: workout, hr: hr)
+    }
+
+    struct LateSamples {
+        let hr: [HRSample]
+        let series: [String: SeriesDoc]
+        let recovery: RecoveryHR?
+    }
+
+    /// Everything that comes from samples, read again: for a file written before the Watch had passed its samples on.
+    func lateSamples(for workout: HKWorkout) async throws -> LateSamples {
+        let end = workout.endDate
+        let allHR = try await health.heartRate(from: workout.startDate, to: end.addingTimeInterval(Self.recoveryWindow))
+        var recovery = Self.recovery(allHR, end: end)
+        if let apple = try? await appleRecovery(for: workout) {
+            if recovery == nil { recovery = RecoveryHR(end: nil, oneMin: nil, twoMin: nil) }
+            recovery?.apple1min = apple
+        }
+        let series = await series(of: workout, activity: ActivityMapping.code(for: workout))
+        return LateSamples(hr: Self.downsample(allHR.filter { $0.0 <= end }), series: series, recovery: recovery)
     }
 
     static func fileName(for doc: WorkoutDoc) -> String {
@@ -233,6 +284,23 @@ struct WorkoutExporter: Sendable {
             if let last = lastKept, s.0.timeIntervalSince(last) < 4, !isLast { continue }
             out.append(HRSample(at: s.0, bpm: Int(s.1.rounded())))
             lastKept = s.0
+        }
+        return out
+    }
+
+    /// For quantities that add up (distance): samples under 4 s apart are summed into the first, so the series still
+    /// adds up to the workout's total.
+    static func downsampleSum(_ samples: [HKQuantitySample], export: HealthUnits.Export) -> [SeriesSample] {
+        var out: [SeriesSample] = []
+        var bucketStart: Date?
+        for s in samples {
+            let value = export.value(s.quantity)
+            if let start = bucketStart, s.startDate.timeIntervalSince(start) < 4, !out.isEmpty {
+                out[out.count - 1].value = JSONBuilder.round(out[out.count - 1].value + value, 2)
+            } else {
+                out.append(SeriesSample(at: s.startDate, value: value))
+                bucketStart = s.startDate
+            }
         }
         return out
     }
@@ -305,7 +373,11 @@ struct WorkoutExporter: Sendable {
             wanted.append(("rowing_speed", HKQuantityType(.rowingSpeed)))
         }
         for type in ActivityMapping.distanceTypes(for: workout.workoutActivityType) {
-            if let spec = HealthTypes.quantity.first(where: { $0.identifier == type.identifier }) { wanted.append((spec.key, type)) }
+            // Distance adds up: only the workout's own samples, summed rather than thinned out.
+            guard let spec = HealthTypes.quantity.first(where: { $0.identifier == type.identifier }),
+                  let export = HealthUnits.export(for: spec),
+                  let samples = try? await health.ownSamples(type, of: workout), !samples.isEmpty else { continue }
+            out[spec.key] = SeriesDoc(unit: export.label, samples: Self.downsampleSum(samples, export: export))
         }
         for (key, type) in wanted {
             guard let spec = HealthTypes.quantity.first(where: { $0.identifier == type.identifier }),
@@ -380,7 +452,8 @@ struct WorkoutExporter: Sendable {
         let humidity = (meta[HKMetadataKeyWeatherHumidity] as? HKQuantity)?.doubleValue(for: .percent())
         let condition = metaInt(meta[HKMetadataKeyWeatherCondition]).map(weatherName)
         if temp != nil || humidity != nil || condition != nil {
-            t.weather = WeatherDoc(tempC: temp.map(round1), humidityPct: humidity.map { round1($0 * 100) }, condition: condition)
+            // The Watch stores 62 % as 62 in Health's percent unit (it prints as "6200 %"); a fraction would be 0.62.
+            t.weather = WeatherDoc(tempC: temp.map(round1), humidityPct: humidity.map { round1($0 > 1 ? $0 : $0 * 100) }, condition: condition)
         }
         t.elevationAscendedM = (meta[HKMetadataKeyElevationAscended] as? HKQuantity).map { round1($0.doubleValue(for: .meter())) }
         t.elevationDescendedM = (meta[HKMetadataKeyElevationDescended] as? HKQuantity).map { round1($0.doubleValue(for: .meter())) }

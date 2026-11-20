@@ -55,6 +55,8 @@ final class AppModel {
     /// Per row: what the last confirmed action did ("On your Watch for Sat 26 Oct 10:00. Workout app → Scheduled.").
     var results: [String: ActionResult] = [:]
     var undo: UndoToken?
+    /// The plan row that offers Automatic under its result: the first plan put on the Watch by hand, once.
+    var autoOfferKey: String?
 
     @ObservationIgnored private var launched = false
     /// A sync that is waiting for the running one to end before it runs itself.
@@ -122,11 +124,11 @@ final class AppModel {
     }
 
     enum Trigger: String {
-        case manual, observer, bgtask, foreground
+        case manual, observer, bgtask, foreground, sleep, shortcut
         var tag: LogTag {
             switch self {
-            case .manual, .foreground: return .sync
-            case .observer: return .observer
+            case .manual, .foreground, .shortcut: return .sync
+            case .observer, .sleep: return .observer
             case .bgtask: return .refresh
             }
         }
@@ -136,6 +138,8 @@ final class AppModel {
             case .observer: return "wake"
             case .bgtask: return "refresh"
             case .foreground: return "open"
+            case .sleep: return "sleep"
+            case .shortcut: return "Shortcuts"
             }
         }
     }
@@ -260,7 +264,7 @@ final class AppModel {
         if syncError != nil {
             return "Nothing new was written. Tap Try again. If it keeps failing, the sync log in Settings says why."
         }
-        return "Nothing to do. After every workout, iOS wakes the app and it writes the new files into your folder, even when it is closed. It pauses while the phone is locked, and after you swipe the app away, until you open it again."
+        return "Nothing to do. After every workout and every night's sleep, iOS wakes the app and it writes the new files into your folder, even when it is closed. It pauses while the phone is locked, and after you swipe the app away, until you open it again."
     }
 
     private var lastCheckLine: String {
@@ -292,6 +296,9 @@ final class AppModel {
         health.startObserving { [weak self] error in
             await self?.observerFired(error)
         }
+        health.startObservingSleep { [weak self] error in
+            await self?.sleepObserverFired(error)
+        }
     }
 
     func appDidLaunch() async {
@@ -311,7 +318,23 @@ final class AppModel {
         await refreshStatuses()
         await autoPutOnWatchIfOn()
         await syncIfDue(trigger: .foreground)
+        queueSleepRewriteOnce()
         kickBacklog()
+    }
+
+    /// 1.0.5 counts a night for the morning it ends on, where earlier versions split it at midnight. Day files of the
+    /// last year are checked once more; only the ones whose values change are written.
+    private func queueSleepRewriteOnce() {
+        guard !settings.sleepByNight else { return }
+        settings.sleepByNight = true
+        guard settings.lastDaySync != nil else { return }   // a new install writes every day file the new way already
+        let today = DayRanges.number(of: Date())
+        let from = max(settings.dayCoverageStart ?? (today - settings.backfillDays), today - 365)
+        guard from <= today - 2 else { return }
+        var queue = settings.pendingDays
+        queue.insert(from...(today - 2))
+        settings.pendingDays = queue
+        log("sleep now counts for the morning it ends on: \(today - 1 - from) day files are checked again", .sync)
     }
 
     func scenePhaseChanged(_ phase: ScenePhase) async {
@@ -354,6 +377,33 @@ final class AppModel {
         let state = UIApplication.shared.applicationState == .background ? "while closed" : "in front"
         log("observer fired (\(state))", .observer)
         await runSync(trigger: .observer)
+    }
+
+    private func sleepObserverFired(_ error: Error?) async {
+        if let error {
+            log("sleep observer error: \(error.localizedDescription)", .observer)
+            return
+        }
+        // HealthKit also calls an observer once when it starts; only a wake while closed is news.
+        guard UIApplication.shared.applicationState == .background else { return }
+        settings.lastSleepWake = Date()
+        log("sleep arrived (while closed)", .observer)
+        await runSync(trigger: .sleep)
+    }
+
+    /// The Shortcuts action "Sync Health data". Waits for a sync that is already running (an app launched by Shortcuts
+    /// syncs on launch too) instead of running a second one straight after it.
+    func syncFromShortcut() async -> String {
+        settings.lastShortcutRun = Date()
+        log("sync asked by Shortcuts", .sync)
+        guard folder != nil, settings.onboardingDone else { return "Open Health Access once and pick your folder first." }
+        while !launched || isSyncing { try? await Task.sleep(for: .milliseconds(200)) }
+        let fresh = settings.lastSync.map { Date().timeIntervalSince($0) < 60 } ?? false
+        var ok = fresh
+        if !fresh { ok = await runSync(trigger: .shortcut) }
+        if settings.deferredSync { return "Health is locked. Unlock your iPhone and Health Access writes the files on its own." }
+        if !ok { return syncError.map { "Sync failed: \($0)" } ?? "Sync failed. The sync log in the app says why." }
+        return "Synced: \(settings.lastSyncSummary.components(separatedBy: " · ").first ?? "done")."
     }
 
     func backgroundRefresh() async -> Bool {
@@ -471,9 +521,14 @@ final class AppModel {
     private func enableBackgroundDelivery() async {
         guard HealthService.isAvailable else { return }
         do {
+            try await health.enableSleepDelivery()
+        } catch {
+            log("wake on new sleep failed: \(error.localizedDescription)", .health)
+        }
+        do {
             try await health.enableBackgroundDelivery()
             settings.backgroundDeliveryEnabled = true
-            log("wake on new workouts enabled", .health)
+            log("wake on new workouts and sleep enabled", .health)
         } catch {
             settings.backgroundDeliveryEnabled = false
             fail("wake on new workouts failed: \(error.localizedDescription)")
@@ -582,6 +637,8 @@ final class AppModel {
             for (id, effort) in exportedEfforts { rememberAppleEffort(effort, for: id) }
 
             await patchLateHeartRate(exporter: exporter, folder: folder, tag: tag)
+            await patchLateSamples(exporter: exporter, folder: folder, tag: tag)
+            await patchLateSplits(exporter: exporter, folder: folder, tag: tag)
             await recheckAppleEffort(folder: folder, tag: tag)
 
             // The catalog first when it is due, so the day files only query types that have data.
@@ -723,6 +780,57 @@ final class AppModel {
             settings.recoveryPending = pending
         } catch {
             log("recovery HR patch failed: \(error.localizedDescription)", .error)
+        }
+    }
+
+    /// The Watch sometimes passes its samples to the phone long after the workout itself (a flat battery, out of range).
+    /// A workout of the last 3 days that has an average heart rate but no heart-rate series is read again on every sync;
+    /// once Health has the samples, the file gets them. Same window as the effort re-check below.
+    private func patchLateSamples(exporter: WorkoutExporter, folder: FolderStore, tag: LogTag) async {
+        guard let entries = index?.workouts else { return }
+        let cutoff = Date().addingTimeInterval(-3 * 86_400)
+        let missing = entries.filter { entry in
+            guard entry.start > cutoff, let data = try? folder.read(entry.file),
+                  let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return false }
+            return object["avg_hr"] is NSNumber && ((object["hr_series"] as? [Any])?.isEmpty ?? true)
+        }
+        guard !missing.isEmpty else { return }
+        do {
+            let workouts = try await health.workouts(ids: Set(missing.compactMap { UUID(uuidString: $0.id) }))
+            for workout in workouts {
+                guard let entry = missing.first(where: { $0.id == workout.uuid.uuidString }) else { continue }
+                let late = try await exporter.lateSamples(for: workout)
+                guard !late.hr.isEmpty else { continue }
+                try RatingStore.saveLateSamples(late, file: entry.file, folder: folder)
+                log("heart rate arrived late for \(fileName(entry.file)): \(late.hr.count) samples added", tag)
+            }
+        } catch {
+            log("late heart-rate check failed: \(error.localizedDescription)", .error)
+        }
+    }
+
+    /// Runs, walks and hikes of the last 3 days written without splits: the Watch's distance samples came late, or the
+    /// file is from before 1.0.5. Checked again on every sync until the samples are there.
+    private func patchLateSplits(exporter: WorkoutExporter, folder: FolderStore, tag: LogTag) async {
+        guard let entries = index?.workouts else { return }
+        let cutoff = Date().addingTimeInterval(-3 * 86_400)
+        let missing = entries.filter { entry in
+            guard entry.start > cutoff, WorkoutExporter.hasSplits(entry.activity), (entry.distanceM ?? 0) > 0,
+                  let data = try? folder.read(entry.file),
+                  let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return false }
+            return !(object["splits"] is [String: Any])
+        }
+        guard !missing.isEmpty else { return }
+        do {
+            let workouts = try await health.workouts(ids: Set(missing.compactMap { UUID(uuidString: $0.id) }))
+            for workout in workouts {
+                guard let entry = missing.first(where: { $0.id == workout.uuid.uuidString }),
+                      let splits = try await exporter.lateSplits(for: workout) else { continue }
+                try RatingStore.saveSplits(splits, file: entry.file, folder: folder)
+                log("splits added to \(fileName(entry.file)): \(splits.items.count) \(splits.unit)", tag)
+            }
+        } catch {
+            log("late splits check failed: \(error.localizedDescription)", .error)
         }
     }
 
@@ -1045,6 +1153,7 @@ final class AppModel {
                     return
                 }
                 self.settings.autoPutOnWatch = true
+                self.autoOfferKey = nil
                 self.log("automatic Put on Watch on", .plan)
                 self.results["auto"] = ActionResult(kind: .done, text: "On since \(Format.clock(Date())). New plans go onto your Watch by themselves.", at: Date())
                 await self.autoPutOnWatchIfOn()
@@ -1114,6 +1223,10 @@ final class AppModel {
             return
         }
         results[key] = ActionResult(kind: .done, text: "On your Watch for \(Format.dayTime(date)). Workout app → Scheduled.", at: Date())
+        if !settings.autoPutOnWatch && !settings.autoOffered {
+            settings.autoOffered = true
+            autoOfferKey = key
+        }
         offerUndo(key: key) { [weak self] in
             guard let self else { return }
             await PlanInstaller.remove(plan, at: date)

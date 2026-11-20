@@ -74,6 +74,29 @@ extension HealthService {
         return sorted
     }
 
+    /// The samples of `type` the workout itself recorded: the ones tied to it, else the ones from its own source inside
+    /// its window. Health also holds the iPhone's samples for the same minutes; adding those up counts the distance twice.
+    func ownSamples(_ type: HKQuantityType, of workout: HKWorkout) async throws -> [HKQuantitySample] {
+        let tied = HKSampleQueryDescriptor(
+            predicates: [.quantitySample(type: type, predicate: HKQuery.predicateForObjects(from: workout))],
+            sortDescriptors: [])
+        let own = try await tied.result(for: store)
+        if !own.isEmpty { return own.sorted { $0.startDate < $1.startDate } }
+        let source = workout.sourceRevision.source
+        let inWindow = HKQuery.predicateForSamples(withStart: workout.startDate, end: workout.endDate, options: [.strictStartDate, .strictEndDate])
+        let descriptor = HKSampleQueryDescriptor(
+            predicates: [.quantitySample(type: type, predicate: NSCompoundPredicate(andPredicateWithSubpredicates: [inWindow, HKQuery.predicateForObjects(from: source)]))],
+            sortDescriptors: [])
+        return try await descriptor.result(for: store).sorted { $0.startDate < $1.startDate }
+    }
+
+    /// `true` when the athlete set walking and running distances to miles in Health.
+    func prefersMiles() async -> Bool {
+        let type = HKQuantityType(.distanceWalkingRunning)
+        guard let unit = try? await store.preferredUnits(for: [type])[type] else { return false }
+        return unit == .mile()
+    }
+
     func categorySamples(_ type: HKCategoryType, from: Date, to: Date, options: HKQueryOptions = []) async throws -> [HKCategorySample] {
         let descriptor = HKSampleQueryDescriptor(
             predicates: [.categorySample(type: type, predicate: HKQuery.predicateForSamples(withStart: from, end: to, options: options))],

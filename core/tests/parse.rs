@@ -319,3 +319,65 @@ fn unknown_schema_is_rejected() {
     let err = parse_workout(r#"{"foo":1}"#).unwrap_err();
     assert!(matches!(err, healthaccess_core::Error::Schema(_)), "{err}");
 }
+
+#[test]
+fn elevation_splits_and_km_pace_are_read_for_runs() {
+    // a 1.0.5 run: typed elevation, splits per km; and a step that covered 1 km in 4:50
+    let mut v: Value = serde_json::from_str(&fixture(ROW)).unwrap();
+    v["activity"] = "run".into();
+    v["metadata_typed"] =
+        serde_json::json!({"elevation_ascended_m": 84.36, "elevation_descended_m": 80.0});
+    v["splits"] = serde_json::json!({"unit": "km", "items": [
+        {"start": "2026-05-12T06:30:00Z", "end": "2026-05-12T06:34:52Z", "distance_m": 1000, "duration_s": 292, "pace_s_per_km": 292, "avg_hr": 151.4},
+        {"start": "2026-05-12T06:34:52Z", "end": "2026-05-12T06:36:22Z", "distance_m": 300, "duration_s": 90, "pace_s_per_km": 300, "avg_hr": 158}
+    ]});
+    v["steps"][1]["distance_m"] = 1000.0.into();
+    v["steps"][1]["duration_s"] = 290.0.into();
+    v["steps"][1]["pace_s_per_100m"] = 29.0.into();
+    let mut w = parse_workout(&v.to_string()).unwrap();
+    derive::fill_on_read(&mut w);
+    assert_eq!(w.elevation_gain_m, Some(84.4));
+    assert_eq!(w.elevation_loss_m, Some(80.0));
+    assert_eq!(w.steps[1].pace_s_per_km, Some(290.0));
+    assert!(
+        derive::parts_text(&w)[1].contains("4:50/km"),
+        "{:?}",
+        derive::parts_text(&w)
+    );
+    assert!(derive::summary_line(&w, None).contains("+84 m climbed"));
+    // the typed copy is read, not written out again
+    let out = serde_json::to_value(&w).unwrap();
+    assert!(out.get("metadata_typed").is_none());
+    assert_eq!(out["elevation_gain_m"], 84.4);
+    // without a plan, the parts are the splits
+    w.steps.clear();
+    assert_eq!(
+        derive::parts_text(&w),
+        vec!["km 1 · 4:52/km · HR 151", "km 2 · 300 m · 5:00/km · HR 158"]
+    );
+    // in miles, as the athlete set it in Health
+    w.splits.as_mut().unwrap().unit = "mi".into();
+    w.splits.as_mut().unwrap().items[0].distance_m = 1609.3;
+    w.splits.as_mut().unwrap().items[0].duration_s = 492.0;
+    assert_eq!(derive::splits_text(&w)[0], "mi 1 · 8:12/mi · HR 151");
+}
+
+#[test]
+fn elevation_from_raw_metadata_of_older_files() {
+    assert_eq!(derive::parse_length_m("722 cm"), Some(7.22));
+    assert_eq!(derive::parse_length_m("303.521 m"), Some(303.521));
+    assert_eq!(derive::parse_length_m("10 ft"), Some(3.048));
+    assert_eq!(derive::parse_length_m("7500 %"), None);
+    assert_eq!(derive::parse_length_m("lots"), None);
+    let mut v: Value = serde_json::from_str(&fixture(ROW)).unwrap();
+    v["activity"] = "cycle".into();
+    v["metadata"]["HKElevationAscended"] = "303.521 m".into();
+    let mut w = parse_workout(&v.to_string()).unwrap();
+    derive::fill_on_read(&mut w);
+    assert_eq!(w.elevation_gain_m, Some(303.5));
+    assert_eq!(w.elevation_loss_m, None);
+    // swims and rows keep their pace per 100 m
+    let mut swim = parse_workout(&fixture(POOL)).unwrap();
+    derive::fill_on_read(&mut swim);
+    assert!(swim.steps.iter().all(|s| s.pace_s_per_km.is_none()));
+}

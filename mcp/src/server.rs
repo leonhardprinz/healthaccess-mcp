@@ -206,11 +206,22 @@ pub struct RateWorkoutParams {
 /// A step goal.
 #[derive(Debug, Serialize, Deserialize, JsonSchema)]
 pub struct GoalInput {
-    /// `time_s` or `distance_m`.
+    /// `time_s`, `distance_m` or `open`. An open step ends when the athlete taps on the Watch:
+    /// a strength set, a rest until ready.
     #[serde(rename = "type")]
     pub kind: String,
-    /// Seconds or metres, more than 0.
-    pub value: f64,
+    /// Seconds or metres, more than 0. Leave it out for an open step.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub value: Option<f64>,
+}
+
+/// A race-pace target: the Watch paces the whole distance against one finish time.
+#[derive(Debug, Serialize, Deserialize, JsonSchema)]
+pub struct PacerInput {
+    /// Metres, e.g. 10000 for a 10K.
+    pub distance_m: f64,
+    /// The finish time in seconds, e.g. 3000 for 50:00.
+    pub time_s: f64,
 }
 
 /// One plan step.
@@ -223,6 +234,11 @@ pub struct StepInput {
     /// Watch heart-rate zone 1 to 5 to alert on.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub zone: Option<u8>,
+    /// Run and cycle only: a pace range to alert on, seconds per km, fast end first, e.g.
+    /// [290, 310] for 4:50 to 5:10 per km (for a ride, 30 to 33 km/h is [109, 120]). The Watch
+    /// taps when the current pace leaves the range. One alert per step: zone or pace.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pace_s_per_km: Option<Vec<f64>>,
     /// Under 40 characters; what the athlete reads on the wrist, and what names the executed step later.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub label: Option<String>,
@@ -242,13 +258,17 @@ pub struct PlanInput {
     /// Short name shown on the Watch and in the app, e.g. `S27` (under 40 characters).
     pub name: String,
     /// run, indoor_run, walk, hike, cycle, indoor_cycle, pool_swim, open_water_swim,
-    /// indoor_row, hiit or elliptical. hiit and elliptical take time goals only.
+    /// indoor_row, hiit, elliptical or strength. hiit, elliptical and strength take time or
+    /// open goals (the Watch measures no distance for them). For strength, one open step per
+    /// set with the exercise, reps and weight in its label, and a time step for the rest.
     pub sport: String,
     /// Pool length in metres (swims). A reminder for the athlete; the Watch keeps its own setting.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pool_length_m: Option<f64>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub warmup: Option<StepInput>,
+    /// The steps, repeated per block. Leave empty for a pacer plan.
+    #[serde(default)]
     pub blocks: Vec<BlockInput>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub cooldown: Option<StepInput>,
@@ -263,6 +283,10 @@ pub struct PlanInput {
     /// Who created it, default `healthaccess-mcp`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub created_by: Option<String>,
+    /// Run or cycle only, instead of warmup, blocks and cooldown: one distance in one time,
+    /// for a race or a time trial. The Watch shows ahead or behind the even pace.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pacer: Option<PacerInput>,
 }
 
 /// Arguments of `push_plan`.
@@ -708,7 +732,7 @@ impl HealthAccessServer {
 
     #[tool(
         name = "get_workout",
-        description = "One session in full: every part with its label, distance, pace and heart rate (also as parts_text lines you can quote), zone seconds, pool lengths with stroke and SWOLF, recovery heart rate, the athlete's effort and feel, cardiac cost. Heart-rate series only if you ask.",
+        description = "One session in full: every part with its label, distance, pace and heart rate (also as parts_text lines you can quote; a run, walk or hike without a plan gets one line per km or mile split instead, from app 1.0.5), metres climbed, zone seconds, pool lengths with stroke and SWOLF, recovery heart rate, the athlete's effort and feel, cardiac cost. Heart-rate series only if you ask.",
         annotations(title = "Get workout", read_only_hint = true, idempotent_hint = true)
     )]
     fn get_workout(
@@ -827,7 +851,7 @@ impl HealthAccessServer {
 
     #[tool(
         name = "push_plan",
-        description = "Validates a session (sport one of run, indoor_run, walk, hike, cycle, indoor_cycle, pool_swim, open_water_swim, indoor_row, hiit, elliptical; labels under 40 characters, zones 1 to 5, positive goals) and writes it to plans/. Set scheduled_for to the day and time the athlete will do it: the app schedules it on the Watch for that time (one tap in the Import tab, or automatically when the athlete switched that on). Ask the athlete before you write one.",
+        description = "Validates a session (sport one of run, indoor_run, walk, hike, cycle, indoor_cycle, pool_swim, open_water_swim, indoor_row, hiit, elliptical, strength; labels under 40 characters, zones 1 to 5 or a pace range on run and cycle steps, goals time_s, distance_m or open; or a pacer for a race on run or cycle) and writes it to plans/. Set scheduled_for to the day and time the athlete will do it: the app schedules it on the Watch for that time (one tap in the Import tab, or automatically when the athlete switched that on). Ask the athlete before you write one.",
         annotations(
             title = "Push plan",
             read_only_hint = false,
@@ -843,6 +867,22 @@ impl HealthAccessServer {
             let value = serde_json::to_value(&p.plan).map_err(|e| Error::Validation(vec![e.to_string()]))?;
             let plan: Plan = serde_json::from_value(value).map_err(|e| Error::Validation(vec![e.to_string()]))?;
             let (plan, path) = self.folder()?.store.write_plan(plan, "healthaccess-mcp")?;
+            let steps = plan
+                .warmup
+                .iter()
+                .chain(plan.blocks.iter().flat_map(|b| b.steps.iter()))
+                .chain(plan.cooldown.iter());
+            let steps: Vec<_> = steps.collect();
+            let needs_105 = plan.pacer.is_some()
+                || plan.sport == "strength"
+                || steps.iter().any(|s| s.goal.is_open());
+            let has_pace = steps.iter().any(|s| s.pace_s_per_km.is_some());
+            let mut next = String::from("the app shows the plan in its Import tab; the athlete taps Put on Watch, or the app schedules it by itself when automatic mode is on; either way it writes plans/<id>.status.json; poll get_plan_status");
+            if needs_105 {
+                next.push_str(". This plan uses strength, an open step or a pacer: the Health Access app needs version 1.0.5 or later to read it, an older app lists it under Could not read");
+            } else if has_pace {
+                next.push_str(". This plan has pace alerts: the Health Access app needs version 1.0.5 or later for them, an older app puts the steps on the Watch without the alerts");
+            }
             Ok(json!({
                 "id": plan.id,
                 "file": path.file_name().map(|n| n.to_string_lossy().into_owned()),
@@ -850,7 +890,7 @@ impl HealthAccessServer {
                 "planned_distance_m": plan.planned_distance_m(),
                 "planned_time_s": plan.planned_time_s(),
                 "plan": plan,
-                "next": "the app shows the plan in its Import tab; the athlete taps Put on Watch, or the app schedules it by itself when automatic mode is on; either way it writes plans/<id>.status.json; poll get_plan_status",
+                "next": next,
             }))
         })
     }

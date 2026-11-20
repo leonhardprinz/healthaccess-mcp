@@ -162,6 +162,25 @@ struct PlansView: View {
     }
 }
 
+/// Under the first plan put on the Watch by hand, once: the next ones can go on by themselves. The button leads to the
+/// same confirmation as the Automatic switch.
+struct AutoOfferLine: View {
+    @Environment(AppModel.self) private var model
+    let key: String
+
+    var body: some View {
+        if model.autoOfferKey == key && !model.settings.autoPutOnWatch {
+            HStack(spacing: 8) {
+                Text("Next plans can go on by themselves.").font(.footnote).foregroundStyle(.secondary)
+                Spacer(minLength: 8)
+                Button("Turn on Automatic") { model.requestAutoPutOnWatch(true) }
+                    .buttonStyle(.bordered)
+                    .fixedSize()
+            }
+        }
+    }
+}
+
 /// A plan that is (or was) on the Watch: when, how it got there, and Remove from Watch while it is still ahead.
 struct ScheduledPlanRow: View {
     @Environment(AppModel.self) private var model

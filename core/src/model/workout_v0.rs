@@ -222,6 +222,7 @@ impl WorkoutV0 {
                     pace_s_per_100m: derive::pace_s_per_100m(a.distance_m, duration_s),
                     swim_s: None,
                     swim_pace_s_per_100m: None,
+                    pace_s_per_km: None,
                 }
             })
             .collect();
@@ -280,6 +281,10 @@ impl WorkoutV0 {
             effort_estimated: self.effort_estimated,
             feel: self.feel,
             metadata: self.metadata,
+            metadata_typed: None,
+            elevation_gain_m: None,
+            elevation_loss_m: None,
+            splits: None,
         }
     }
 }

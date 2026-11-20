@@ -27,6 +27,7 @@
 		34CE13636EB0CD3462017F89 /* Prompts.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFB0F2AFDAB1786DECD038A6 /* Prompts.swift */; };
 		3749C24E0415FF829E26B282 /* HealthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06A9791BC13DC09C2D8A9BD9 /* HealthService.swift */; };
 		37F8C4BFD563F5A302C098C7 /* NetworkLedger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B34DD9E1FC795328834D838 /* NetworkLedger.swift */; };
+		3832CC996EA48C2F827A15A9 /* SleepNights.swift in Sources */ = {isa = PBXBuildFile; fileRef = 211D7D544CB172350F9588C0 /* SleepNights.swift */; };
 		4086662DE49686FB73B72311 /* DiskLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = E711C6ACA246ECB2DB2DCFB5 /* DiskLog.swift */; };
 		459437576E4573257462881B /* PlansView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05C01E7828B330F6EE2450E3 /* PlansView.swift */; };
 		45D6BCC4843DDB98B06DFD01 /* RatingStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35C223A7C8847F666E79B4E7 /* RatingStore.swift */; };
@@ -44,8 +45,10 @@
 		7C1474816ED3AAEEE7831310 /* DayExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 559AA54A15A2CB226CDBFB5D /* DayExporter.swift */; };
 		82D34F5E32EDCF1308613D90 /* JSONBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2254EB77240D9CA6EE19A0 /* JSONBuilder.swift */; };
 		8444BB36D42E8D04AA309E50 /* VitalsExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C762F3F3DFF74ECA993B49C /* VitalsExporter.swift */; };
+		87DDE97BE7A9A68263DAAAF0 /* SplitMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA67B7B93069FF970C6BB0C1 /* SplitMath.swift */; };
 		8B304EB42FD8FF5E684A9C2E /* Briefing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53586F4E7CC80B8A8E069CF4 /* Briefing.swift */; };
 		8B988736CCA87B8358A154C2 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B524CC8C06FDFE7D681F25E8 /* OnboardingView.swift */; };
+		8EFD74B06E3B04C38F397099 /* SyncIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 388BE8F2BAD9EA4D2BBD4213 /* SyncIntent.swift */; };
 		97F0A9D346BE8BDB5406D4EA /* PlanInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A7AE8B881B3E04BC26236B3 /* PlanInstaller.swift */; };
 		9D793B80A378250B53DDB3B7 /* PlanEstimate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F772E6365ADA0972142BC96 /* PlanEstimate.swift */; };
 		9FADC8A2B13FF7C4F54B332B /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3307063233B5342305E7DC25 /* HomeView.swift */; };
@@ -79,6 +82,7 @@
 		1D5D9653688840924586E214 /* OFL.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = OFL.txt; sourceTree = "<group>"; };
 		1DDA6BDF2A467D7BC16182DA /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
 		1F9D1DC6DFA00E6C22D98EF0 /* HealthAccess.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HealthAccess.entitlements; sourceTree = "<group>"; };
+		211D7D544CB172350F9588C0 /* SleepNights.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepNights.swift; sourceTree = "<group>"; };
 		21F8CB0223D3F1AB9F5AD3E7 /* Mark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mark.swift; sourceTree = "<group>"; };
 		2624D220B0357EFD46631762 /* HealthUnits.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthUnits.swift; sourceTree = "<group>"; };
 		2A70CF10E3D317C7CD16F61B /* SessionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionsView.swift; sourceTree = "<group>"; };
@@ -87,6 +91,7 @@
 		2FB0A8B6DC3AE65DB2F3B158 /* HealthAccess.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = HealthAccess.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3307063233B5342305E7DC25 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		35C223A7C8847F666E79B4E7 /* RatingStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RatingStore.swift; sourceTree = "<group>"; };
+		388BE8F2BAD9EA4D2BBD4213 /* SyncIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncIntent.swift; sourceTree = "<group>"; };
 		3CBB060080A8F365C251A32E /* Schema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Schema.swift; sourceTree = "<group>"; };
 		3D8D221290544212548C3B73 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		4864A5D999E2EEDCE98A0DE7 /* SyncLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncLogView.swift; sourceTree = "<group>"; };
@@ -124,6 +129,7 @@
 		E12470BD4471936EF2BD93CD /* Format.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Format.swift; sourceTree = "<group>"; };
 		E711C6ACA246ECB2DB2DCFB5 /* DiskLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiskLog.swift; sourceTree = "<group>"; };
 		EA6248329A197DEBEE7659C1 /* Layout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Layout.swift; sourceTree = "<group>"; };
+		EA67B7B93069FF970C6BB0C1 /* SplitMath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplitMath.swift; sourceTree = "<group>"; };
 		EABD884B92E7F1125A7E7420 /* ProfileExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileExporter.swift; sourceTree = "<group>"; };
 		EC29B320FEF7C240015A851C /* PromptsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptsView.swift; sourceTree = "<group>"; };
 		EFE5E2A46E6E94DA39767AB3 /* TelemetryConfig.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = TelemetryConfig.plist; sourceTree = "<group>"; };
@@ -255,6 +261,7 @@
 				1DDA6BDF2A467D7BC16182DA /* AppModel.swift */,
 				A07BBDE31D98E2854A983A50 /* AppModel+Backlog.swift */,
 				4935D77648F1C36B4FAB5A17 /* HealthAccessApp.swift */,
+				388BE8F2BAD9EA4D2BBD4213 /* SyncIntent.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -268,6 +275,8 @@
 				089D976D6BD2679DD399DD2A /* HealthAccessJSON.swift */,
 				0F772E6365ADA0972142BC96 /* PlanEstimate.swift */,
 				3CBB060080A8F365C251A32E /* Schema.swift */,
+				211D7D544CB172350F9588C0 /* SleepNights.swift */,
+				EA67B7B93069FF970C6BB0C1 /* SplitMath.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -399,7 +408,10 @@
 				597C0D127D0D36E648FB3AD9 /* SessionsView.swift in Sources */,
 				75C70AF98B2D4F2A6B6BA12A /* SettingsView.swift in Sources */,
 				643ADC59F7A50EF5A40B5D88 /* SetupMessage.swift in Sources */,
+				3832CC996EA48C2F827A15A9 /* SleepNights.swift in Sources */,
+				87DDE97BE7A9A68263DAAAF0 /* SplitMath.swift in Sources */,
 				AFD86A599DC573AC4A43A9DB /* SupportStore.swift in Sources */,
+				8EFD74B06E3B04C38F397099 /* SyncIntent.swift in Sources */,
 				45F1E9B9FA0521520A77D389 /* SyncLogView.swift in Sources */,
 				D707D1751FE91519B5BE9833 /* Telemetry.swift in Sources */,
 				8444BB36D42E8D04AA309E50 /* VitalsExporter.swift in Sources */,
@@ -418,7 +430,7 @@
 				CODE_SIGN_ENTITLEMENTS = HealthAccess/HealthAccess.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 28;
+				CURRENT_PROJECT_VERSION = 29;
 				DEVELOPMENT_TEAM = 72995T7U66;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				INFOPLIST_FILE = HealthAccess/Info.plist;
@@ -426,7 +438,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.4;
+				MARKETING_VERSION = 1.0.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.healthaccessmcp.app;
 				PRODUCT_MODULE_NAME = HealthAccess;
 				PRODUCT_NAME = "Health Access";
@@ -501,7 +513,7 @@
 				CODE_SIGN_ENTITLEMENTS = HealthAccess/HealthAccess.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 28;
+				CURRENT_PROJECT_VERSION = 29;
 				DEVELOPMENT_TEAM = 72995T7U66;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				INFOPLIST_FILE = HealthAccess/Info.plist;
@@ -509,7 +521,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.4;
+				MARKETING_VERSION = 1.0.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.healthaccessmcp.app;
 				PRODUCT_MODULE_NAME = HealthAccess;
 				PRODUCT_NAME = "Health Access";

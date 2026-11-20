@@ -3,6 +3,6 @@
 # and lists its tools without anyone's health data. Not how you use Health Access MCP yourself:
 # for that, `npx -y healthaccess-mcp` on the computer that sees your own folder.
 FROM node:22-slim
-RUN npm install -g healthaccess-mcp@1.0.4
+RUN npm install -g healthaccess-mcp@1.0.5
 COPY examples /data
 ENTRYPOINT ["healthaccess-mcp", "--dir", "/data"]

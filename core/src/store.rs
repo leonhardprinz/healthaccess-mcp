@@ -240,6 +240,7 @@ pub fn activity_fits_sport(activity: &str, sport: &str) -> bool {
         "hike" => activity == "other:24",
         "hiit" => activity == "other:63",
         "elliptical" => activity == "other:16",
+        "strength" => activity == "other:50",
         _ => false,
     }
 }
@@ -248,8 +249,15 @@ pub fn activity_fits_sport(activity: &str, sport: &str) -> bool {
 /// is a step the plan has (block, repeat and position), the workout got past the
 /// warm-up, and at least seven in ten steps hit their goal (a distance within 10 %, a
 /// time within 10 % or 3 s). Not all: the Watch splits a length now and then, and a
-/// cool-down runs long. A workout that stops early still fits.
+/// cool-down runs long. A workout that stops early still fits. An open step (a set that ends
+/// with a tap) is on goal whatever its length. A pacer plan has no steps: it fits when the
+/// workout covered its distance within a quarter.
 pub fn ran_plan(plan: &Plan, w: &Workout) -> bool {
+    if let Some(p) = &plan.pacer {
+        return w
+            .distance_m
+            .is_some_and(|d| (d - p.distance_m).abs() <= p.distance_m * 0.25);
+    }
     let blocks = plan.blocks.len() as u32;
     let mut steps = 0u32;
     let mut on_goal = 0u32;
@@ -266,6 +274,10 @@ pub fn ran_plan(plan: &Plan, w: &Workout) -> bool {
             return false;
         }
         steps += 1;
+        if planned.goal.is_open() {
+            on_goal += 1;
+            continue;
+        }
         let goal = planned.goal.value;
         let (got, slack) = if planned.goal.is_time() {
             (Some(s.duration_s), (goal * 0.1).max(3.0))
@@ -556,7 +568,7 @@ impl Store {
             Error::Json { source, .. } => Error::json(path, source),
             other => other,
         })?;
-        derive::fill_swim_times(&mut w);
+        derive::fill_on_read(&mut w);
         Ok(w)
     }
 

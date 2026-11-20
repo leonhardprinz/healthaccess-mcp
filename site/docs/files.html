@@ -127,7 +127,8 @@
   <dt>recovery_hr</dt><dd>Heart rate at the end, one minute and two minutes after. <code>null</code> right after a background export; filled in on the next run.</dd>
   <dt>effort, feel</dt><dd>Your rating, 1 to 10, and a line of text. The rating comes from your Watch, which asks after a workout; Apple exports it and the file says <code>effort_source: apple</code>. The app never asks. <code>rate_workout</code> writes <code>ai</code> after you told the AI a number; files from older builds may say <code>app</code>. <code>effort_estimated</code> is Apple's own estimate and is never used as your effort.</dd>
   <dt>plan_ref</dt><dd>The plan this session was started from, matched by the WorkoutKit id the app recorded, else by sport and scheduled time within two hours. <code>null</code> for a workout started on the Watch by hand.</dd>
-  <dt>metadata</dt><dd>Apple's raw workout metadata as strings. <code>HKLapLength</code> is where the pool length comes from.</dd>
+  <dt>metadata</dt><dd>Apple's raw workout metadata as strings. <code>HKLapLength</code> is where the pool length comes from, <code>HKElevationAscended</code> the metres climbed (the MCP reports it as <code>elevation_gain_m</code>).</dd>
+  <dt>splits</dt><dd>Runs, walks and hikes, from app 1.0.5: one per km, or per mile when you use miles in Health, with moving time (pauses left out), pace and average heart rate. Cut from the Watch's own distance samples; the last one is shorter.</dd>
 </dl>
 
 <h2>Vitals, one file per day</h2>
@@ -142,7 +143,7 @@
   "vo2max": 44.1,
   "bp": null
 }</pre>
-<p>Every field can be <code>null</code>; a day on which only steps were recorded gives a file full of nulls. Sleep is credited to the morning it ended and summed from the one source with the most sleep, so Watch and iPhone are not double-counted. HRV is the day's average; resting heart rate, weight, VO2max and blood pressure are the day's latest. A day with no values gets no file.</p>
+<p>Every field can be <code>null</code>; a day on which only steps were recorded gives a file full of nulls. Sleep is credited to the morning it ended: a whole night counts for that day, even when it started before midnight, and a nap counts for the day it ends in. It is summed from the one source with the most sleep, so Watch and iPhone are not double-counted. In <code>days/</code>, time in bed comes from whichever source recorded it, usually the iPhone (Health, Sleep, Track Time in Bed with iPhone); the Watch records sleep stages only, so with the Watch alone <code>in_bed_s</code> is <code>null</code>. HRV is the day's average; resting heart rate, weight, VO2max and blood pressure are the day's latest. A day with no values gets no file.</p>
 
 <h2>days/, one file per day with everything <span class="tag plan">v0.4</span></h2>
 <p>From v0.4 the app writes <code>days/&lt;date&gt;.json</code> next to <code>vitals/</code>, with every Health group that has data that day: <b>activity</b> (the rings, steps, distances, energy, exercise and stand minutes, daylight), <b>heart</b>, <b>respiratory</b>, <b>sleep</b> (stages and sessions), <b>body</b>, <b>blood</b>, <b>mobility</b>, <b>hearing</b>, <b>nutrition</b>, <b>mind</b>, <b>symptoms</b>, <b>cycle</b>, <b>medications</b>, <b>hygiene</b>, <b>uv</b>, <b>wheelchair</b>. A group is present only when it has data; inside a present group, absent values are an explicit <code>null</code>. The example day, trimmed to three groups:</p>

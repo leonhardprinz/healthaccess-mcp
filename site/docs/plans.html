@@ -72,15 +72,51 @@
 }</pre>
 <h3>Rules the server checks</h3>
 <ul>
-  <li><code>sport</code> is one of <code>run</code>, <code>indoor_run</code>, <code>walk</code>, <code>hike</code>, <code>cycle</code>, <code>indoor_cycle</code>, <code>pool_swim</code>, <code>open_water_swim</code>, <code>indoor_row</code>, <code>hiit</code> or <code>elliptical</code>. <code>hiit</code> and <code>elliptical</code> take time goals only.</li>
+  <li><code>sport</code> is one of <code>run</code>, <code>indoor_run</code>, <code>walk</code>, <code>hike</code>, <code>cycle</code>, <code>indoor_cycle</code>, <code>pool_swim</code>, <code>open_water_swim</code>, <code>indoor_row</code>, <code>hiit</code>, <code>elliptical</code> or <code>strength</code>. The Watch measures no distance for <code>hiit</code>, <code>elliptical</code> and <code>strength</code>, so their steps take time or open goals.</li>
   <li><code>name</code> is not empty and at most 40 characters.</li>
-  <li>At least one block. <code>repeat</code> from 1 to 99, each block with at least one step.</li>
-  <li><code>goal.type</code> is <code>time_s</code> or <code>distance_m</code>, with a positive value.</li>
+  <li>At least one block, or a <code>pacer</code> (below). <code>repeat</code> from 1 to 99, each block with at least one step.</li>
+  <li><code>goal.type</code> is <code>time_s</code> or <code>distance_m</code> with a positive value, or <code>open</code> without one: an open step lasts until you tap on the Watch.</li>
   <li><code>zone</code>, when given, is 1 to 5. These are the Watch's own heart-rate zones; the Watch alerts when you leave the zone.</li>
+  <li><code>pace_s_per_km</code>, on a run or ride step, is a pace range in seconds per km, fast end first: <code>[290, 310]</code> is 4:50 to 5:10 per km. The Watch taps when your current pace leaves it. A step has one alert, a zone or a pace. Walks, hikes and swims have no pace alerts on the Watch.</li>
   <li><code>label</code> at most 40 characters. Write it as an instruction you can read on the wrist mid-length: "KICK on back, no board, hips up". The app truncates longer labels and logs it.</li>
   <li><code>kind</code> is <code>work</code> or <code>recovery</code>. Rests are real rests.</li>
   <li>Every violation is reported in one message, so the AI can fix them all at once.</li>
 </ul>
+
+<h2>Intervals at a pace</h2>
+<p>Six times 1 km at 10K pace with a pace alert, 90 seconds easy in between:</p>
+<pre>{
+  "name": "6 x 1k",
+  "sport": "run",
+  "blocks": [
+    {"repeat": 6, "steps": [
+      {"kind": "work",     "goal": {"type": "distance_m", "value": 1000}, "pace_s_per_km": [290, 310], "label": "1k at 10K pace"},
+      {"kind": "recovery", "goal": {"type": "time_s", "value": 90}}
+    ]}
+  ]
+}</pre>
+<p>For a ride, 30 to 33 km/h is <code>[109, 120]</code>. Pace alerts need the Health Access app 1.0.5 or later; an older app puts the steps on the Watch without them.</p>
+
+<h2>Strength and race day</h2>
+<p>A strength session is one open step per set, with the exercise, reps and weight in the label, and a timed rest. You tap when the set is done; the rest counts down.</p>
+<pre>{
+  "name": "Legs A",
+  "sport": "strength",
+  "blocks": [
+    {"repeat": 5, "steps": [
+      {"kind": "work",     "goal": {"type": "open"}, "label": "Squat 5 x 60 kg"},
+      {"kind": "recovery", "goal": {"type": "time_s", "value": 120}}
+    ]}
+  ]
+}</pre>
+<p>For a race or a time trial, a run or cycle plan takes a <code>pacer</code> instead of steps: one distance in one time. The Watch shows whether you are ahead of or behind the even pace for the whole distance.</p>
+<pre>{
+  "name": "10K race",
+  "sport": "run",
+  "pacer": {"distance_m": 10000, "time_s": 3000},
+  "scheduled_for": "2026-11-28T08:00:00Z"
+}</pre>
+<p>Both need the Health Access app 1.0.5 or later.</p>
 
 <h2>A full example</h2>
 <p>The plan behind the example swim on the <a href="/docs/files">files page</a>, <code>plans/2026-05-13T19:02:11Z-s12.json</code> in the repository's <a href="/examples/README.md">synthetic example folder</a>: 1,200 m in six parts, about 36 minutes, as <code>push_plan</code> wrote it.</p>
@@ -136,7 +172,8 @@
   <li><b>Step names on the Watch</b> need iOS 18. On iOS 17 the workout installs without labels, and the app logs it.</li>
   <li><b>Labels</b> longer than 40 characters are cut.</li>
   <li><b>Zone alerts</b> an activity does not support are dropped and logged.</li>
-  <li><b>Sports</b>: the eleven listed above. <code>hiit</code> and <code>elliptical</code> take time goals only.</li>
+  <li><b>Sports</b>: the twelve listed above. <code>hiit</code>, <code>elliptical</code> and <code>strength</code> take time or open goals.</li>
+  <li><b>Pacer</b> plans work for outdoor runs and rides only.</li>
 </ul>
 
 <div class="next"><b>Next:</b> <a href="/docs/prompts">Ideas for your AI</a> <a href="/docs/files">What is in the folder</a> <a href="/ref/mcp.md">push_plan in the tool reference</a></div>

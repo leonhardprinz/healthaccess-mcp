@@ -270,44 +270,22 @@ struct DayContext: Sendable {
     }
 
     func sleep() async -> JSONObject? {
-        // Sleep is credited to the day it ended (the morning); the source with the most sleep wins, no double counting.
-        let samples = await categorySamples("SleepAnalysis", options: [.strictEndDate])
-        guard !samples.isEmpty else { return nil }
-        let asleepValues: Set<Int> = [HKCategoryValueSleepAnalysis.asleepUnspecified.rawValue, HKCategoryValueSleepAnalysis.asleepCore.rawValue,
-                                      HKCategoryValueSleepAnalysis.asleepDeep.rawValue, HKCategoryValueSleepAnalysis.asleepREM.rawValue]
-        var bySource: [String: TimeInterval] = [:]
-        for s in samples where asleepValues.contains(s.value) {
-            bySource[s.sourceRevision.source.bundleIdentifier, default: 0] += s.endDate.timeIntervalSince(s.startDate)
-        }
-        let best = bySource.max { $0.value < $1.value }?.key ?? samples[0].sourceRevision.source.bundleIdentifier
-        let mine = samples.filter { $0.sourceRevision.source.bundleIdentifier == best }
-        func seconds(_ values: Set<Int>) -> Int {
-            Int(mine.filter { values.contains($0.value) }.reduce(0) { $0 + $1.endDate.timeIntervalSince($1.startDate) }.rounded())
-        }
+        // A night counts for the day it ends on, as a whole (see SleepNights): the samples reach back a day.
+        guard let (type, _) = category("SleepAnalysis"),
+              let raw = try? await health.categorySamples(type, from: start.addingTimeInterval(-SleepNights.lookBack), to: end),
+              let night = SleepNights.night(raw.map(SleepNights.Sample.init), dayStart: start, dayEnd: end) else { return nil }
+        typealias V = SleepNights.Value
+        func nonNull(_ x: Int) -> Any { x > 0 ? x : JSONBuilder.null }
         var g: JSONObject = [:]
-        let inBed = seconds([HKCategoryValueSleepAnalysis.inBed.rawValue])
-        let asleep = seconds(asleepValues)
-        g["in_bed_s"] = inBed > 0 ? inBed : JSONBuilder.null
-        g["asleep_s"] = asleep > 0 ? asleep : JSONBuilder.null
-        g["core_s"] = JSONBuilder.value(nonZero(seconds([HKCategoryValueSleepAnalysis.asleepCore.rawValue])))
-        g["deep_s"] = JSONBuilder.value(nonZero(seconds([HKCategoryValueSleepAnalysis.asleepDeep.rawValue])))
-        g["rem_s"] = JSONBuilder.value(nonZero(seconds([HKCategoryValueSleepAnalysis.asleepREM.rawValue])))
-        g["awake_s"] = JSONBuilder.value(nonZero(seconds([HKCategoryValueSleepAnalysis.awake.rawValue])))
-        // Sessions: the best source's samples, split where the gap is over an hour.
-        var sessions: [JSONObject] = []
-        var sessionStart: Date?
-        var sessionEnd: Date?
-        for s in mine.sorted(by: { $0.startDate < $1.startDate }) {
-            if let currentEnd = sessionEnd, s.startDate.timeIntervalSince(currentEnd) > 3600, let currentStart = sessionStart {
-                sessions.append(["start": HealthAccessJSON.string(currentStart), "end": HealthAccessJSON.string(currentEnd), "source": mine[0].sourceRevision.source.name])
-                sessionStart = nil
-                sessionEnd = nil
-            }
-            if sessionStart == nil { sessionStart = s.startDate }
-            sessionEnd = max(sessionEnd ?? s.endDate, s.endDate)
-        }
-        if let currentStart = sessionStart, let currentEnd = sessionEnd {
-            sessions.append(["start": HealthAccessJSON.string(currentStart), "end": HealthAccessJSON.string(currentEnd), "source": mine[0].sourceRevision.source.name])
+        // Null when no source recorded time in bed: the Watch records sleep stages only.
+        g["in_bed_s"] = nonNull(night.inBedS ?? 0)
+        g["asleep_s"] = nonNull(night.seconds(V.asleep))
+        g["core_s"] = nonNull(night.seconds([V.asleepCore]))
+        g["deep_s"] = nonNull(night.seconds([V.asleepDeep]))
+        g["rem_s"] = nonNull(night.seconds([V.asleepREM]))
+        g["awake_s"] = nonNull(night.seconds([V.awake]))
+        let sessions: [JSONObject] = night.sessions.map {
+            ["start": HealthAccessJSON.string($0.start), "end": HealthAccessJSON.string($0.end), "source": night.sourceName]
         }
         g["sessions"] = sessions
         g["wrist_temperature_c"] = JSONBuilder.value(await latest("AppleSleepingWristTemperature"))
@@ -322,8 +300,6 @@ struct DayContext: Sendable {
         }
         return g
     }
-
-    private func nonZero(_ x: Int) -> Int? { x > 0 ? x : nil }
 
     private func averageBetween(_ name: String, _ from: Date, _ to: Date) async -> Double? {
         guard let (type, export) = quantity(name),
@@ -560,5 +536,12 @@ struct DayContext: Sendable {
              "issued": HealthAccessJSON.string(sample.dateIssued),
              "expires": JSONBuilder.value(sample.expirationDate)]
         }
+    }
+}
+
+extension SleepNights.Sample {
+    init(_ sample: HKCategorySample) {
+        self.init(source: sample.sourceRevision.source.bundleIdentifier, sourceName: sample.sourceRevision.source.name,
+                  value: sample.value, start: sample.startDate, end: sample.endDate)
     }
 }

@@ -104,7 +104,7 @@ Nothing else writes, nothing deletes. The complete contract with every field is 
 - Health data is readable only while the phone is unlocked (Apple); exports wait until it is.
 - The Watch keeps its own pool length; plans cannot set it (WorkoutKit has no parameter).
 - Step names on the Watch need iOS 18; labels over 40 characters are cut.
-- Plans: run, indoor run, walk, hike, cycle, indoor cycle, pool and open-water swim, indoor row, HIIT and elliptical (the last two take time goals only). Plans land in the Watch's Workout app, not in Apple Fitness+.
+- Plans: run, indoor run, walk, hike, cycle, indoor cycle, pool and open-water swim, indoor row, HIIT, elliptical and strength (the last three take time or open goals; an open step lasts until you tap, one per strength set). Run and cycle plans can also be a pacer: one distance in one time, for a race. Plans land in the Watch's Workout app, not in Apple Fitness+.
 - Automatic Put on Watch runs when the app opens or iOS wakes it, within hours; iOS does not wake apps the second a file arrives.
 - Apple's "Add to Watch" sheet does not report back; the app asks and records `method: preview`.
 - The npm server contains no network code. The app's usage statistics are off by default and never carry a health value, a file name or a path. The exact event names: [site/docs/privacy.html](site/docs/privacy.html).

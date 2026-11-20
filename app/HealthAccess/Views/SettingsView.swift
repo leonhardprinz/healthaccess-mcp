@@ -94,7 +94,7 @@ struct SettingsView: View {
                 }
                 .disabled(!model.usageStatisticsAvailable)
                 NavigationLink { SyncLogView() } label: {
-                    row("Sync log", settings.lastObserverFire.map { "Last wake \(Format.clock($0))" } ?? "No wake yet")
+                    row("Sync log", [settings.lastObserverFire, settings.lastSleepWake].compactMap { $0 }.max().map { "Last wake \(Format.clock($0))" } ?? "No wake yet")
                 }
             } header: {
                 SectionTitle("Privacy")

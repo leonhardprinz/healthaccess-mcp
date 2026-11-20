@@ -139,6 +139,59 @@ pub fn pace_s_per_100m(distance_m: Option<f64>, duration_s: f64) -> Option<f64> 
     (d >= MIN_PACE_DISTANCE_M && duration_s > 0.0).then(|| round_to(duration_s / d * 100.0, 1))
 }
 
+/// Activities whose pace reads in minutes per km: on foot or on a bike (hiking is `other:24`).
+pub fn is_land_distance(activity: &str) -> bool {
+    matches!(activity, "run" | "walk" | "cycle" | "other:24")
+}
+
+/// Everything the Rust side fills in on read, after parsing a file.
+pub fn fill_on_read(w: &mut Workout) {
+    fill_swim_times(w);
+    fill_elevation(w);
+    if is_land_distance(&w.activity) {
+        for step in &mut w.steps {
+            step.pace_s_per_km = step
+                .distance_m
+                .filter(|d| *d >= MIN_PACE_DISTANCE_M && step.duration_s > 0.0)
+                .map(|d| round_to(step.duration_s / d * 1000.0, 1));
+        }
+    }
+}
+
+/// `elevation_gain_m` / `elevation_loss_m` from the app's typed metadata, else from the raw
+/// HealthKit strings (`"722 cm"`, `"303.521 m"`) that files before the typed copy carry.
+pub fn fill_elevation(w: &mut Workout) {
+    let typed = w.metadata_typed.clone().unwrap_or_default();
+    let raw = |key: &str| w.metadata.get(key).and_then(|s| parse_length_m(s));
+    w.elevation_gain_m = typed
+        .elevation_ascended_m
+        .or_else(|| raw("HKElevationAscended"))
+        .map(|m| round_to(m, 1));
+    w.elevation_loss_m = typed
+        .elevation_descended_m
+        .or_else(|| raw("HKElevationDescended"))
+        .map(|m| round_to(m, 1));
+}
+
+/// A HealthKit length as text (`"722 cm"`, `"303.521 m"`, `"12 ft"`) in metres.
+pub fn parse_length_m(text: &str) -> Option<f64> {
+    let (number, unit) = text.trim().split_once(' ')?;
+    let value: f64 = number.trim().parse().ok()?;
+    let factor = match unit.trim() {
+        "m" => 1.0,
+        "cm" => 0.01,
+        "mm" => 0.001,
+        "km" => 1000.0,
+        "ft" => 0.3048,
+        "in" => 0.0254,
+        "yd" => 0.9144,
+        "mi" => 1609.344,
+        _ => return None,
+    };
+    let metres = value * factor;
+    metres.is_finite().then_some(metres)
+}
+
 /// Fill `swim_s` and `swim_pace_s_per_100m` of every step of a pool swim whose lengths
 /// account for the step's distance: the lengths that lie inside the step (by their
 /// midpoint), from the first push-off to the last touch. The Watch starts a step the
@@ -292,6 +345,10 @@ pub fn effort_text(effort: Option<u8>, source: Option<&str>) -> String {
 /// `label · 0:45 · HR 97` for a timed step. The label falls back to the kind
 /// (`warmup`, `work`, `recovery`, `cooldown`).
 pub fn parts_text(w: &Workout) -> Vec<String> {
+    if w.steps.is_empty() {
+        return splits_text(w);
+    }
+    let land = is_land_distance(&w.activity);
     w.steps
         .iter()
         .map(|s| {
@@ -305,11 +362,63 @@ pub fn parts_text(w: &Workout) -> Vec<String> {
                     .unwrap_or_else(|| s.kind.to_string()),
             );
             match (s.distance_m, s.swim_pace_s_per_100m.or(s.pace_s_per_100m)) {
+                (Some(d), Some(_)) if land => {
+                    parts.push(format!("{} m", round_to(d, 0)));
+                    parts.push(fmt_duration(s.duration_s));
+                    if let Some(p) = s.pace_s_per_km {
+                        parts.push(land_pace(&w.activity, p));
+                    }
+                }
                 (Some(d), Some(p)) => {
                     parts.push(format!("{} m", round_to(d, 0)));
                     parts.push(format!("{}/100", fmt_pace(p)));
                 }
                 _ => parts.push(fmt_duration(s.duration_s)),
+            }
+            if let Some(hr) = s.avg_hr {
+                parts.push(format!("HR {}", hr.round()));
+            }
+            parts.join(" · ")
+        })
+        .collect()
+}
+
+/// `4:52/km` on foot, `31.4 km/h` on a bike.
+fn land_pace(activity: &str, s_per_km: f64) -> String {
+    if activity == "cycle" {
+        format!("{} km/h", round_to(3600.0 / s_per_km, 1))
+    } else {
+        format!("{}/km", fmt_duration(s_per_km))
+    }
+}
+
+/// One line per split, `km 3 · 4:51/km · HR 152`, in the athlete's unit; the last one names
+/// its length when it is short.
+pub fn splits_text(w: &Workout) -> Vec<String> {
+    let Some(splits) = &w.splits else {
+        return Vec::new();
+    };
+    let unit_m = if splits.unit == "mi" {
+        1609.344
+    } else {
+        1000.0
+    };
+    splits
+        .items
+        .iter()
+        .enumerate()
+        .map(|(i, s)| {
+            let mut parts = vec![format!("{} {}", splits.unit, i + 1)];
+            if s.distance_m < unit_m * 0.98 {
+                parts.push(format!("{} m", round_to(s.distance_m, 0)));
+            }
+            if s.distance_m > 0.0 && s.duration_s > 0.0 {
+                let per_unit = s.duration_s / s.distance_m * unit_m;
+                if w.activity == "cycle" {
+                    parts.push(land_pace("cycle", s.duration_s / s.distance_m * 1000.0));
+                } else {
+                    parts.push(format!("{}/{}", fmt_duration(per_unit), splits.unit));
+                }
             }
             if let Some(hr) = s.avg_hr {
                 parts.push(format!("HR {}", hr.round()));
@@ -337,6 +446,9 @@ pub fn summary_line(w: &Workout, zones: Option<&Zones>) -> String {
         }
     }
     parts.push(fmt_duration(w.duration_s));
+    if let Some(gain) = w.elevation_gain_m.filter(|g| *g >= 1.0) {
+        parts.push(format!("+{} m climbed", round_to(gain, 0)));
+    }
     match (w.avg_hr, w.max_hr) {
         (Some(a), Some(m)) => parts.push(format!("avg HR {} (max {})", a.round(), m.round())),
         (Some(a), None) => parts.push(format!("avg HR {}", a.round())),

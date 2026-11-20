@@ -342,9 +342,13 @@ Validates a `healthaccess.plan.v1` plan and writes `plans/<id>.json` with
 it as "Your AI wrote S30"; the athlete taps Put on Watch; the app installs it through
 WorkoutKit and writes `plans/<id>.status.json`.
 
-Rules: `sport` is one of `run`, `indoor_run`, `walk`, `hike`, `cycle`, `indoor_cycle`, `pool_swim`, `open_water_swim`, `indoor_row`, `hiit` or `elliptical` (`hiit` and `elliptical` take `time_s` goals only); `name` non-empty, at most 40 characters;
-at least one block, `repeat` 1 to 99, each with at least one step; `goal.type` is
-`time_s` or `distance_m` with a positive value; `zone` 1 to 5 (the Watch's own HR zones);
+Rules: `sport` is one of `run`, `indoor_run`, `walk`, `hike`, `cycle`, `indoor_cycle`, `pool_swim`, `open_water_swim`, `indoor_row`, `hiit`, `elliptical` or `strength` (`hiit`, `elliptical` and `strength` take no distance goals); `name` non-empty, at most 40 characters;
+at least one block, `repeat` 1 to 99, each with at least one step, or instead a `pacer`
+`{distance_m, time_s}` for `run` or `cycle` (a race: one distance in one time, no steps); `goal.type` is
+`time_s` or `distance_m` with a positive value, or `open` without one (the step lasts until the
+athlete taps: one per strength set, exercise, reps and weight in the label); `zone` 1 to 5 (the Watch's own HR zones),
+or on `run`, `indoor_run`, `cycle` and `indoor_cycle` steps `pace_s_per_km: [fast, slow]` (a pace range the Watch
+alerts on; one alert per step);
 `label` at most 40 characters; `kind` is `work` or `recovery`. Every violation is
 reported in one message. Labels are what the athlete reads on the wrist and what names
 the executed steps later, so make them instructions.

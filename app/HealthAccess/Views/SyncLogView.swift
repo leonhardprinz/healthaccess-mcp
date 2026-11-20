@@ -30,13 +30,15 @@ struct SyncLogView: View {
             Section {
                 LabeledContent("Last check", value: model.settings.lastSync.map(Format.dateTime) ?? "none yet")
                 LabeledContent("Last wake by a workout", value: model.settings.lastObserverFire.map(Format.dateTime) ?? "none yet")
-                LabeledContent("Last refresh by iOS", value: model.settings.lastBGTaskRun.map(Format.dateTime) ?? "none yet")
+                LabeledContent("Last wake by sleep", value: model.settings.lastSleepWake.map(Format.dateTime) ?? "none yet")
+                LabeledContent("Last run from Shortcuts", value: model.settings.lastShortcutRun.map(Format.dateTime) ?? "none")
+                LabeledContent("Last refresh by iOS", value: model.settings.lastBGTaskRun.map(Format.dateTime) ?? "not yet")
                 LabeledContent("Workouts", value: model.sessionFilesLine)
                 LabeledContent("Catalog", value: model.settings.lastCatalogAt.map(Format.dateTime) ?? "none yet")
             } header: {
                 Text("How files get written")
             } footer: {
-                Text("A finished workout wakes the app and it writes the session file, as long as the phone has been unlocked once since it started. iOS also wakes it every few hours as a fallback. The status row counts the sessions listed, so a hidden duplicate is not counted. \(PlansText.whereFrom)")
+                Text("Files are written when you open the app, when a workout finishes and when the Watch hands last night's sleep to the phone, as long as the phone has been unlocked once since it started. iOS's own refresh comes on top when iOS decides; for a new app that can take days. To sync at a set moment, use the Shortcuts action Sync Health data, for example in an automation when Sleep Focus turns off. The status row counts the sessions listed, so a hidden duplicate is not counted. \(PlansText.whereFrom)")
             }
 
             Section {

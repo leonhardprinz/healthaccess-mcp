@@ -61,6 +61,26 @@ enum RatingStore {
         return true
     }
 
+    /// Fills a file written without samples: the heart-rate series, the per-sample series and recovery heart rate.
+    static func saveLateSamples(_ late: WorkoutExporter.LateSamples, file: String, folder: FolderStore) throws {
+        let hr = try JSONSerialization.jsonObject(with: HealthAccessJSON.encode(late.hr))
+        let series = late.series.isEmpty ? nil : try JSONSerialization.jsonObject(with: HealthAccessJSON.encode(late.series))
+        let recovery = try late.recovery.map { try JSONSerialization.jsonObject(with: HealthAccessJSON.encode($0)) }
+        try patch(file: file, folder: folder) { object in
+            object["hr_series"] = hr
+            if let series { object["series"] = series }
+            if let recovery { object["recovery_hr"] = recovery }
+        }
+    }
+
+    /// Adds splits to a run, walk or hike written without them.
+    static func saveSplits(_ splits: SplitsDoc, file: String, folder: FolderStore) throws {
+        let encoded = try JSONSerialization.jsonObject(with: HealthAccessJSON.encode(splits))
+        try patch(file: file, folder: folder) { object in
+            object["splits"] = encoded
+        }
+    }
+
     static func saveLateHeartRate(recovery: RecoveryHR?, maxHr: Int?, file: String, folder: FolderStore) throws {
         let encoded = try recovery.map { try JSONSerialization.jsonObject(with: HealthAccessJSON.encode($0)) }
         try patch(file: file, folder: folder) { object in

@@ -487,6 +487,7 @@ fn step_to_plan(s: &CodecStep, kind: Option<&str>) -> PlanStep {
             Goal::time(s.goal.value)
         },
         zone: s.alert.as_ref().map(|a| a.zone.min(255) as u8),
+        pace_s_per_km: None,
         label: s.label.clone(),
     }
 }
@@ -512,6 +513,21 @@ impl WorkoutFile {
             "indoor_row" => (ACTIVITY_INDOOR_ROW, LOCATION_INDOOR),
             other => return Err(Error::Codec(format!("unsupported sport {other}"))),
         };
+        let steps = plan
+            .warmup
+            .iter()
+            .chain(plan.blocks.iter().flat_map(|b| b.steps.iter()))
+            .chain(plan.cooldown.iter());
+        if plan.pacer.is_some()
+            || steps
+                .into_iter()
+                .any(|s| s.goal.is_open() || s.pace_s_per_km.is_some())
+        {
+            return Err(Error::Codec(
+                "a .workout file holds time and distance steps only (no pacer, no open steps, no pace alerts)"
+                    .into(),
+            ));
+        }
         Ok(WorkoutFile {
             uuid: uuid.unwrap_or_else(new_uuid),
             activity,
@@ -583,6 +599,7 @@ impl WorkoutFile {
             created_by: None,
             created_at: None,
             scheduled_for: None,
+            pacer: None,
         })
     }
 }

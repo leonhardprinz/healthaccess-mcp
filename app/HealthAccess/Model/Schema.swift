@@ -44,10 +44,12 @@ struct WorkoutDoc: Codable, Sendable {
     var device: DeviceDoc?
     var metadataTyped: MetadataTyped?
     var workoutPlanId: String?
+    /// Runs, walks and hikes: one split per km or mile (the athlete's unit in Health). Nil for everything else.
+    var splits: SplitsDoc?
 
     enum CodingKeys: String, CodingKey {
         case schema, id, activity, source, start, end, zones, steps, laps, effort, feel, metadata
-        case statistics, totals, events, series, device
+        case statistics, totals, events, series, device, splits
         case healthaccessVersion = "healthaccess_version"
         case legacyVersion = "tide_version" // alias: written before the rename, read-only
         case durationS = "duration_s"
@@ -102,6 +104,41 @@ struct WorkoutDoc: Codable, Sendable {
         try c.encode(device, forKey: .device)
         try c.encode(metadataTyped, forKey: .metadataTyped)
         try c.encode(workoutPlanId, forKey: .workoutPlanId)
+        try c.encodeIfPresent(splits, forKey: .splits)
+    }
+}
+
+/// `splits`: `{unit: "km" | "mi", items: [...]}`.
+struct SplitsDoc: Codable, Sendable, Hashable {
+    var unit: String
+    var items: [SplitDoc]
+}
+
+struct SplitDoc: Codable, Sendable, Hashable {
+    var start: Date
+    var end: Date
+    var distanceM: Double
+    /// Moving time; pauses are left out.
+    var durationS: Double
+    var paceSPerKm: Double?
+    var avgHr: Int?
+
+    enum CodingKeys: String, CodingKey {
+        case start, end
+        case distanceM = "distance_m"
+        case durationS = "duration_s"
+        case paceSPerKm = "pace_s_per_km"
+        case avgHr = "avg_hr"
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(start, forKey: .start)
+        try c.encode(end, forKey: .end)
+        try c.encode(distanceM, forKey: .distanceM)
+        try c.encode(durationS, forKey: .durationS)
+        try c.encode(paceSPerKm, forKey: .paceSPerKm)
+        try c.encode(avgHr, forKey: .avgHr)
     }
 }
 
@@ -344,6 +381,7 @@ extension WorkoutDoc {
         device = try c.decodeIfPresent(DeviceDoc.self, forKey: .device)
         metadataTyped = try c.decodeIfPresent(MetadataTyped.self, forKey: .metadataTyped)
         workoutPlanId = try c.decodeIfPresent(String.self, forKey: .workoutPlanId)
+        splits = try c.decodeIfPresent(SplitsDoc.self, forKey: .splits)
     }
 
     /// A 1 to 10 score written as an integer by the app or as a float by other writers.
@@ -621,9 +659,11 @@ struct PlanDoc: Codable, Sendable, Hashable {
     var createdBy: String?
     var createdAt: Date?
     var scheduledFor: Date?
+    /// A race-pace target instead of steps (run and cycle): one distance in one time.
+    var pacer: PlanPacer?
 
     enum CodingKeys: String, CodingKey {
-        case schema, id, name, sport, warmup, blocks, cooldown, notes
+        case schema, id, name, sport, warmup, blocks, cooldown, notes, pacer
         case poolLengthM = "pool_length_m"
         case createdBy = "created_by"
         case createdAt = "created_at"
@@ -674,12 +714,46 @@ struct PlanStep: Codable, Sendable, Hashable {
     var kind: String?
     var goal: PlanGoal
     var zone: Int?
+    /// A pace range to alert on, seconds per km, either order: `[290, 310]` is 4:50 to 5:10 per km. Run and cycle.
+    var paceSPerKm: [Double]?
     var label: String?
+
+    enum CodingKeys: String, CodingKey {
+        case kind, goal, zone, label
+        case paceSPerKm = "pace_s_per_km"
+    }
+
+    /// (fast, slow) seconds per km.
+    var paceRange: (fast: Double, slow: Double)? {
+        guard let p = paceSPerKm, p.count == 2 else { return nil }
+        return (Swift.min(p[0], p[1]), Swift.max(p[0], p[1]))
+    }
 }
 
 struct PlanGoal: Codable, Sendable, Hashable {
-    var type: String   // distance_m | time_s
+    var type: String   // distance_m | time_s | open (ends with a tap, no value)
     var value: Double
+
+    init(type: String, value: Double) {
+        self.type = type
+        self.value = value
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        type = try c.decode(String.self, forKey: .type)
+        value = try c.decodeIfPresent(Double.self, forKey: .value) ?? 0
+    }
+}
+
+struct PlanPacer: Codable, Sendable, Hashable {
+    var distanceM: Double
+    var timeS: Double
+
+    enum CodingKeys: String, CodingKey {
+        case distanceM = "distance_m"
+        case timeS = "time_s"
+    }
 }
 
 // MARK: - plans/<plan_id>.status.json (written here)

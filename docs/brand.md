@@ -60,7 +60,7 @@ Audiences, in order: (1) people already using Claude/Cursor/ChatGPT who want the
 
 Ranked by how much it differentiates per unit of work. Status as of 2026-10-27.
 
-1. **Write-back to the Watch. Built.** AI-written workout plans go into the Watch's Workout app as scheduled custom workouts, for eleven sports, at the plan's own time; one tap, or none with Automatic. Nobody else ships this. It is the reason to exist.
+1. **Write-back to the Watch. Built.** AI-written workout plans go into the Watch's Workout app as scheduled custom workouts, for twelve sports, at the plan's own time; one tap, or none with Automatic. Nobody else ships this. It is the reason to exist.
 2. **Effort without the app asking. Built.** The Watch asks for the effort rating; Apple exports it (`WorkoutEffortScore`) and the app picks it up as `effort_source: apple`. The app never asks for a rating.
 3. **Step names. Built.** HealthKit drops custom-step labels; Health Access joins them back from the plan. Every interval in the JSON says what it was.
 4. **A briefing any AI can read. Built.** `briefing.md`, regenerated after each sync: the last four weeks on one page. Works without the MCP.

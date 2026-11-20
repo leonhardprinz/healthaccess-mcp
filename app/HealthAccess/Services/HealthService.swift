@@ -9,6 +9,7 @@ final class HealthService: @unchecked Sendable {
     let store = HKHealthStore()
     private let lock = NSLock()
     private var observer: HKObserverQuery?
+    private var sleepObserver: HKObserverQuery?
 
     static var isAvailable: Bool { HKHealthStore.isHealthDataAvailable() }
     static let bpm = HKUnit.count().unitDivided(by: .minute())
@@ -82,6 +83,22 @@ final class HealthService: @unchecked Sendable {
         store.execute(query)
     }
 
+    /// The same for sleep: the Watch hands last night over to the phone in the morning, and that wakes the app so the
+    /// day file has the night in it before anyone opens the app.
+    func startObservingSleep(_ handler: @escaping @Sendable (Error?) async -> Void) {
+        lock.lock()
+        defer { lock.unlock() }
+        guard sleepObserver == nil else { return }
+        let query = HKObserverQuery(sampleType: HKCategoryType(.sleepAnalysis), predicate: nil) { _, completion, error in
+            Task {
+                await handler(error)
+                completion()
+            }
+        }
+        sleepObserver = query
+        store.execute(query)
+    }
+
     /// Ends the observer query so `startObserving` can register a fresh one. HealthKit ends a query that was started
     /// before Health access was asked for ("authorization not determined") and never calls it again.
     func stopObserving() {
@@ -89,10 +106,17 @@ final class HealthService: @unchecked Sendable {
         defer { lock.unlock() }
         if let observer { store.stop(observer) }
         observer = nil
+        if let sleepObserver { store.stop(sleepObserver) }
+        sleepObserver = nil
     }
 
     func enableBackgroundDelivery() async throws {
         try await store.enableBackgroundDelivery(for: .workoutType(), frequency: .immediate)
+    }
+
+    /// Hourly at most: a night arrives in a few batches, one wake for them is enough.
+    func enableSleepDelivery() async throws {
+        try await store.enableBackgroundDelivery(for: HKCategoryType(.sleepAnalysis), frequency: .hourly)
     }
 
     struct WorkoutDelta {
@@ -142,26 +166,17 @@ final class HealthService: @unchecked Sendable {
         return try await descriptor.result(for: store)
     }
 
-    /// Seconds asleep (core + deep + REM + unspecified) for sleep samples ending inside the window.
-    /// When several sources overlap (Watch and iPhone), the source with the most sleep wins instead of double counting.
+    /// Seconds asleep (core + deep + REM + unspecified) of the night that ends inside the window, counted as a whole
+    /// (see SleepNights). When several sources overlap (Watch and iPhone), the source with the most sleep wins.
     func sleepSeconds(from: Date, to: Date) async throws -> Int? {
-        let predicate = HKQuery.predicateForSamples(withStart: from, end: to, options: [.strictEndDate])
+        let predicate = HKQuery.predicateForSamples(withStart: from.addingTimeInterval(-SleepNights.lookBack), end: to, options: [])
         let descriptor = HKSampleQueryDescriptor(
             predicates: [.categorySample(type: HKCategoryType(.sleepAnalysis), predicate: predicate)],
             sortDescriptors: [])
-        let samples = try await descriptor.result(for: store)
-        let asleep: Set<Int> = [
-            HKCategoryValueSleepAnalysis.asleepUnspecified.rawValue,
-            HKCategoryValueSleepAnalysis.asleepCore.rawValue,
-            HKCategoryValueSleepAnalysis.asleepDeep.rawValue,
-            HKCategoryValueSleepAnalysis.asleepREM.rawValue,
-        ]
-        var bySource: [String: TimeInterval] = [:]
-        for sample in samples where asleep.contains(sample.value) {
-            bySource[sample.sourceRevision.source.bundleIdentifier, default: 0] += sample.endDate.timeIntervalSince(sample.startDate)
-        }
-        guard let best = bySource.values.max() else { return nil }
-        return Int(best.rounded())
+        let samples = try await descriptor.result(for: store).map(SleepNights.Sample.init)
+        guard let night = SleepNights.night(samples, dayStart: from, dayEnd: to) else { return nil }
+        let asleep = night.seconds(SleepNights.Value.asleep)
+        return asleep > 0 ? asleep : nil
     }
 
     func bloodPressure(from: Date, to: Date) async throws -> BloodPressure? {

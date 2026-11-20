@@ -27,9 +27,13 @@ struct PlanItem: Identifiable, Sendable, Hashable {
 enum PlanInstaller {
     /// Same list as `SPORTS` in core/src/model/plan.rs.
     static let supportedSports = ["run", "indoor_run", "walk", "hike", "cycle", "indoor_cycle",
-                                  "pool_swim", "open_water_swim", "indoor_row", "hiit", "elliptical"]
-    /// Sports the Watch measures no distance for: time goals only.
-    static let timeOnlySports = ["hiit", "elliptical"]
+                                  "pool_swim", "open_water_swim", "indoor_row", "hiit", "elliptical", "strength"]
+    /// Sports the Watch measures no distance for: time or open goals.
+    static let noDistanceSports = ["hiit", "elliptical", "strength"]
+    /// Sports a plan can be a pacer for (one distance in one time). Same as `PACER_SPORTS` in core.
+    static let pacerSports = ["run", "cycle"]
+    /// Sports whose steps can carry a pace alert. Same as `PACE_SPORTS` in core.
+    static let paceSports = ["run", "indoor_run", "cycle", "indoor_cycle"]
     /// Current schema tag plus the pre-rename alias, accepted forever.
     static let acceptedSchemas = ["healthaccess.plan.v1", "tide.plan.v1"]
 
@@ -71,9 +75,23 @@ enum PlanInstaller {
         guard plan.name.count <= 40 else { throw HealthAccessError("name is longer than 40 characters") }
         if let pool = plan.poolLengthM, !(pool.isFinite && pool > 0 && pool <= 100) { throw HealthAccessError("pool length must be 1 to 100 m") }
         guard supportedSports.contains(plan.sport) else { throw HealthAccessError("sport must be one of \(supportedSports.joined(separator: ", ")), got \(plan.sport)") }
-        if timeOnlySports.contains(plan.sport) {
-            let steps = [plan.warmup, plan.cooldown].compactMap { $0 } + plan.blocks.flatMap(\.steps)
-            if steps.contains(where: { $0.goal.type != "time_s" }) { throw HealthAccessError("\(plan.sport) takes time goals only") }
+        let allSteps = [plan.warmup, plan.cooldown].compactMap { $0 } + plan.blocks.flatMap(\.steps)
+        if noDistanceSports.contains(plan.sport), allSteps.contains(where: { $0.goal.type == "distance_m" }) {
+            throw HealthAccessError("the Watch measures no distance for \(plan.sport)")
+        }
+        if !paceSports.contains(plan.sport), allSteps.contains(where: { $0.paceSPerKm != nil }) {
+            throw HealthAccessError("pace alerts work for run and cycle only")
+        }
+        if let pacer = plan.pacer {
+            guard pacerSports.contains(plan.sport) else { throw HealthAccessError("a pacer works for run and cycle only") }
+            guard plan.blocks.isEmpty, plan.warmup == nil, plan.cooldown == nil else {
+                throw HealthAccessError("a pacer plan has no warm-up, blocks or cool-down")
+            }
+            guard pacer.distanceM.isFinite, pacer.distanceM > 0, pacer.distanceM <= 1_000_000,
+                  pacer.timeS.isFinite, pacer.timeS > 0, pacer.timeS <= 86_400 else {
+                throw HealthAccessError("pacer distance and time must be positive and plausible")
+            }
+            return
         }
         guard !plan.blocks.isEmpty else { throw HealthAccessError("plan has no blocks") }
         guard plan.blocks.count <= maxBlocks else { throw HealthAccessError("plan has more than \(maxBlocks) blocks") }
@@ -93,7 +111,17 @@ enum PlanInstaller {
     }
 
     private static func validate(step: PlanStep, context: String) throws {
-        guard ["distance_m", "time_s"].contains(step.goal.type) else { throw HealthAccessError("\(context): goal type must be distance_m or time_s") }
+        guard ["distance_m", "time_s", "open"].contains(step.goal.type) else { throw HealthAccessError("\(context): goal type must be distance_m, time_s or open") }
+        if let pace = step.paceSPerKm {
+            guard pace.count == 2, pace.allSatisfy({ $0.isFinite && $0 >= 30 && $0 <= 1800 }), pace[0] != pace[1] else {
+                throw HealthAccessError("\(context): a pace alert is two different paces in seconds per km")
+            }
+            guard step.zone == nil else { throw HealthAccessError("\(context): one alert per step, a zone or a pace") }
+        }
+        if step.goal.type == "open" {
+            if let zone = step.zone, !(1...5).contains(zone) { throw HealthAccessError("\(context): zone must be 1–5") }
+            return
+        }
         guard step.goal.value.isFinite, step.goal.value > 0 else { throw HealthAccessError("\(context): goal value must be > 0") }
         let limit = step.goal.type == "distance_m" ? 1_000_000.0 : 86_400.0
         guard step.goal.value <= limit else { throw HealthAccessError("\(context): goal value is too large") }
@@ -112,6 +140,7 @@ enum PlanInstaller {
         case "indoor_row": return (.rowing, .indoor)
         case "hiit": return (.highIntensityIntervalTraining, .indoor)
         case "elliptical": return (.elliptical, .indoor)
+        case "strength": return (.traditionalStrengthTraining, .indoor)
         default: return (.swimming, .indoor)
         }
     }
@@ -121,7 +150,7 @@ enum PlanInstaller {
         switch sport {
         case "indoor_run": return "run"
         case "indoor_cycle": return "cycle"
-        case "hike", "hiit", "elliptical": return "other:\(activity(for: sport).type.rawValue)"
+        case "hike", "hiit", "elliptical", "strength": return "other:\(activity(for: sport).type.rawValue)"
         default: return sport
         }
     }
@@ -133,9 +162,18 @@ enum PlanInstaller {
 
     /// Verified against WorkoutKit.swiftinterface (iOS 27.1 SDK): CustomWorkout(activity:location:displayName:warmup:blocks:cooldown:),
     /// IntervalBlock(steps:iterations:), IntervalStep(_:step:), WorkoutStep(goal:alert:displayName:) (displayName iOS 18+),
-    /// WorkoutGoal.distance/.time, HeartRateZoneAlert(zone:). Pool length is not expressible; the Watch uses its own setting.
+    /// WorkoutGoal.distance/.time/.open, HeartRateZoneAlert(zone:), SpeedRangeAlert.speed(_:unit:metric:) (iOS 27.2 SDK).
+    /// Pool length is not expressible; the Watch uses its own setting.
     static func build(_ plan: PlanDoc) throws -> Built {
         let (type, location) = activity(for: plan.sport)
+        if let pacer = plan.pacer {
+            // WorkoutKit's pacer: the Watch shows ahead of or behind the even pace for the whole distance.
+            guard PacerWorkout.supportsActivity(type) else { throw HealthAccessError("WorkoutKit has no pacer for \(type.humanName)") }
+            let workout = PacerWorkout(activity: type, location: location,
+                                       distance: Measurement(value: pacer.distanceM, unit: .meters),
+                                       time: Measurement(value: pacer.timeS, unit: .seconds))
+            return Built(plan: WorkoutPlan(.pacer(workout), id: stableID(plan.id)), warnings: [])
+        }
         guard CustomWorkout.supportsActivity(type) else { throw HealthAccessError("WorkoutKit does not support custom \(type.humanName) workouts") }
         var warnings: [String] = []
         let warmup = try plan.warmup.map { try workoutStep($0, type: type, location: location, context: "warmup", warnings: &warnings) }
@@ -167,11 +205,25 @@ enum PlanInstaller {
 
     private static func workoutStep(_ step: PlanStep, type: HKWorkoutActivityType, location: HKWorkoutSessionLocationType,
                                     context: String, warnings: inout [String]) throws -> WorkoutStep {
-        let goal: WorkoutGoal = step.goal.type == "distance_m" ? .distance(step.goal.value, .meters) : .time(step.goal.value, .seconds)
+        let goal: WorkoutGoal
+        switch step.goal.type {
+        case "distance_m": goal = .distance(step.goal.value, .meters)
+        case "open": goal = .open
+        default: goal = .time(step.goal.value, .seconds)
+        }
         guard CustomWorkout.supportsGoal(goal, activity: type, location: location) else {
-            throw HealthAccessError("\(context): goal \(step.goal.type) = \(step.goal.value) is not supported for \(type.humanName)")
+            throw HealthAccessError("\(context): a \(step.goal.type) goal is not supported for \(type.humanName)")
         }
         var alert: (any WorkoutAlert)?
+        if let pace = step.paceRange {
+            // Seconds per km to metres per second: the slow end is the low speed.
+            let paceAlert = SpeedRangeAlert.speed((1000 / pace.slow)...(1000 / pace.fast), unit: .metersPerSecond, metric: .current)
+            if CustomWorkout.supportsAlert(paceAlert, activity: type, location: location) {
+                alert = paceAlert
+            } else {
+                warnings.append("\(context): pace alert not supported for \(type.humanName), dropped")
+            }
+        }
         if let zone = step.zone {
             let zoneAlert = HeartRateZoneAlert(zone: zone)
             if CustomWorkout.supportsAlert(zoneAlert, activity: type, location: location) {

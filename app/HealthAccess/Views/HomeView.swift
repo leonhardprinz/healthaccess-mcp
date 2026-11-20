@@ -58,7 +58,7 @@ struct HomeView: View {
                 Section {
                     InfoRow(symbol: "arrow.triangle.2.circlepath", tint: .accentColor,
                             title: "Automatic",
-                            line: "After every workout, while your phone is unlocked.")
+                            line: "After every workout and every night, while your phone is unlocked.")
                 } header: {
                     SectionTitle("Sync from Health")
                 } footer: {
@@ -229,6 +229,7 @@ struct PlanRow: View {
                 }
                 if let result = model.results[key] {
                     ResultLine(result: result, undoKey: key)
+                    AutoOfferLine(key: key)
                 } else {
                     if item.state == .failed, let error = item.status?.error {
                         Text("Could not put it on your Watch last time: \(error)").font(.footnote).foregroundStyle(.secondary)

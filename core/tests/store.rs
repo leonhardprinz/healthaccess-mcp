@@ -463,6 +463,51 @@ fn plans_are_written_listed_and_joined_onto_workouts() {
 }
 
 #[test]
+fn open_steps_and_pacer_plans_match_what_the_watch_recorded() {
+    use healthaccess_core::store::{activity_fits_sport, ran_plan};
+    let (_tmp, store) = temp_store();
+    let row = store.load_workout("3f8b2d41").unwrap();
+    let text = fs::read_to_string(fixtures().join("plans/2026-05-11T18:40:02Z-r4.json")).unwrap();
+    let mut r4: Plan = serde_json::from_str(&text).unwrap();
+    assert!(ran_plan(&r4, &row));
+
+    // every work step an open goal (a set that ends with a tap): any length is on goal
+    for block in &mut r4.blocks {
+        for step in &mut block.steps {
+            if !step.is_recovery() {
+                step.goal = healthaccess_core::model::plan::Goal::open();
+            }
+        }
+    }
+    assert!(ran_plan(&r4, &row));
+
+    // a pacer plan has no steps: it fits when the distance is within a quarter
+    let swim = store.load_workout("7a1c3e90").unwrap();
+    let d = swim.distance_m.unwrap();
+    let pacer = |distance: f64| -> Plan {
+        serde_json::from_value(json!({"name": "TT", "sport": "run",
+            "pacer": {"distance_m": distance, "time_s": 600}}))
+        .unwrap()
+    };
+    assert!(ran_plan(&pacer(d * 1.2), &swim));
+    assert!(!ran_plan(&pacer(d * 2.0), &swim));
+
+    // strength plans join strength workouts (HKWorkoutActivityType 50) and nothing else
+    assert!(activity_fits_sport("other:50", "strength"));
+    assert!(!activity_fits_sport("other:63", "strength"));
+    let legs: Plan = serde_json::from_value(json!({
+        "name": "Legs A", "sport": "strength",
+        "blocks": [{"repeat": 3, "steps": [
+            {"goal": {"type": "open"}, "label": "Squat 5 x 60 kg"},
+            {"kind": "recovery", "goal": {"type": "time_s", "value": 90}}]}]
+    }))
+    .unwrap();
+    let (written, _) = store.write_plan(legs, "healthaccess-test").unwrap();
+    assert_eq!(written.blocks[0].steps[0].goal.kind, "open");
+    assert_eq!(written.blocks[0].steps[0].kind.as_deref(), Some("work"));
+}
+
+#[test]
 fn weekly_summary_covers_both_fixtures() {
     let (_tmp, store) = temp_store();
     let today = NaiveDate::from_ymd_opt(2026, 5, 17).unwrap();

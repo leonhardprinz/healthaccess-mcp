@@ -47,6 +47,7 @@ enum ActivityMapping {
         case "indoor_cycle": return "Indoor cycle"
         case "hiit": return "HIIT"
         case "elliptical": return "Elliptical"
+        case "strength": return "Strength"
         default:
             if let raw = UInt(code.replacingOccurrences(of: "other:", with: "")), let type = HKWorkoutActivityType(rawValue: raw) {
                 return type.humanName

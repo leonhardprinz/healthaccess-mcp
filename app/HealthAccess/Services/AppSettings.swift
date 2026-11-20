@@ -100,6 +100,14 @@ final class AppSettings {
     var supportCardRemoved: Bool { didSet { d.set(supportCardRemoved, forKey: Self.key("supportCardRemoved")) } }
     /// Plans tab: new plans go onto the Watch without a tap, at the plan's time. Off by default; turned on with a confirmation.
     var autoPutOnWatch: Bool { didSet { d.set(autoPutOnWatch, forKey: Self.key("autoPutOnWatch")) } }
+    /// The first Put on Watch by hand offers Automatic once, under its result. Never again after that.
+    var autoOffered: Bool { didSet { d.set(autoOffered, forKey: Self.key("autoOffered")) } }
+    /// Last time new sleep woke the app while it was closed.
+    var lastSleepWake: Date? { didSet { d.set(lastSleepWake, forKey: Self.key("lastSleepWake")) } }
+    /// Last time the Shortcuts action asked for a sync.
+    var lastShortcutRun: Date? { didSet { d.set(lastShortcutRun, forKey: Self.key("lastShortcutRun")) } }
+    /// The day files of the last year were queued once to be written with sleep counted by night (1.0.5).
+    var sleepByNight: Bool { didSet { d.set(sleepByNight, forKey: Self.key("sleepByNight")) } }
     /// Set by the sync that wrote a fresh workout; the Export tab shows it for a day.
     var lastSyncedWorkout: SyncedWorkout? {
         didSet { d.set(lastSyncedWorkout.flatMap { try? JSONEncoder().encode($0) }, forKey: Self.key("lastSyncedWorkout")) }
@@ -140,6 +148,10 @@ final class AppSettings {
         folderSetAt = d.object(forKey: Self.key("folderSetAt")) as? Date
         supportCardRemoved = d.bool(forKey: Self.key("supportCardRemoved"))
         autoPutOnWatch = d.bool(forKey: Self.key("autoPutOnWatch"))
+        autoOffered = d.bool(forKey: Self.key("autoOffered"))
+        lastSleepWake = d.object(forKey: Self.key("lastSleepWake")) as? Date
+        lastShortcutRun = d.object(forKey: Self.key("lastShortcutRun")) as? Date
+        sleepByNight = d.bool(forKey: Self.key("sleepByNight"))
         lastSyncedWorkout = d.data(forKey: Self.key("lastSyncedWorkout")).flatMap { try? JSONDecoder().decode(SyncedWorkout.self, from: $0) }
         if let id = d.string(forKey: Self.key("installID")) {
             installID = id

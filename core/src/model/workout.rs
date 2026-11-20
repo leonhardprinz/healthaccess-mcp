@@ -136,6 +136,53 @@ pub struct Workout {
     /// Raw HealthKit metadata, stringified.
     #[serde(default, deserialize_with = "crate::util::string_map")]
     pub metadata: BTreeMap<String, String>,
+    /// The app's typed copy of some metadata keys. Read for the elevation, not written out.
+    #[serde(default, skip_serializing)]
+    pub metadata_typed: Option<MetadataTyped>,
+    /// Metres climbed, from the Watch's barometer (`HKElevationAscended`). Filled in on read.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub elevation_gain_m: Option<f64>,
+    /// Metres descended (`HKElevationDescended`). Filled in on read.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub elevation_loss_m: Option<f64>,
+    /// Runs, walks and hikes from app 1.0.5: one split per km or mile, as the athlete set
+    /// distances in Health, from the Watch's own distance samples, pauses left out.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub splits: Option<Splits>,
+}
+
+/// The few typed metadata values the Rust side reads.
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
+pub struct MetadataTyped {
+    #[serde(default)]
+    pub elevation_ascended_m: Option<f64>,
+    #[serde(default)]
+    pub elevation_descended_m: Option<f64>,
+}
+
+/// Splits of a run, walk or hike.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct Splits {
+    /// `km` or `mi`: the distance unit the athlete uses in Health.
+    pub unit: String,
+    /// In order; the last one is shorter when the distance does not end on a whole unit.
+    #[serde(default)]
+    pub items: Vec<Split>,
+}
+
+/// One split.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct Split {
+    pub start: DateTime<Utc>,
+    pub end: DateTime<Utc>,
+    /// 1000 or 1609.3, less for the last one.
+    pub distance_m: f64,
+    /// Moving time: pauses are not counted.
+    pub duration_s: f64,
+    #[serde(default)]
+    pub pace_s_per_km: Option<f64>,
+    #[serde(default)]
+    pub avg_hr: Option<f64>,
 }
 
 /// Heart-rate zone bounds plus seconds spent per zone.
@@ -263,6 +310,9 @@ pub struct Step {
     /// `pace_s_per_100m` is the pace of the whole step.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub swim_pace_s_per_100m: Option<f64>,
+    /// Runs, walks, hikes and rides, filled in on read: the step's pace in seconds per km.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pace_s_per_km: Option<f64>,
 }
 
 /// One pool length.

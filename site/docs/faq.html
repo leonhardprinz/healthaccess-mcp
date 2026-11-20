@@ -43,7 +43,7 @@
       "name": "How do I export Apple Health data as JSON automatically?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "The app does it after every workout, in the background, with no shortcut to run and no export button to press. You get one file per workout and one file per day, in a folder that keeps itself current. Apple only lets apps read Health while the iPhone is unlocked, so a workout finished with the phone in a bag is written at the next unlock. What the files look like."
+        "text": "The app does it after every workout and after every night's sleep, in the background, with no shortcut to run and no export button to press. You get one file per workout and one file per day, in a folder that keeps itself current. Apple only lets apps read Health while the iPhone is unlocked, so a workout finished with the phone in a bag is written at the next unlock. To sync at a set moment, the Shortcuts action Sync Health data works in an automation, for example when Sleep Focus turns off. What the files look like."
       }
     },
     {
@@ -99,7 +99,7 @@
       "name": "Which sports does it work for?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Reading works for every workout type Apple Health stores. Plans go to the Watch for eleven sports: run, indoor run, walk, hike, cycle, indoor cycle, pool swim, open-water swim, indoor row, HIIT and elliptical. HIIT and elliptical take time goals only."
+        "text": "Reading works for every workout type Apple Health stores. Plans go to the Watch for twelve sports: run, indoor run, walk, hike, cycle, indoor cycle, pool swim, open-water swim, indoor row, HIIT, elliptical and strength. HIIT, elliptical and strength take time goals or open steps that end with a tap, one per strength set. Run and ride steps can carry a pace alert, and for a race a run or ride can be a pacer: one distance in one time."
       }
     },
     {
@@ -206,7 +206,7 @@
 <h3>How do I give Claude access to my Apple Watch workouts?</h3>
 <p>Install the app, pick a folder that syncs to your computer, and register the server once. In Claude Code that is one command, <code>claude mcp add --scope user healthaccess -- npx -y healthaccess-mcp</code>; in Claude Desktop it is seven lines in the config file. You can also paste the message the app copies for you (Export, Your AI, Copy) into Claude and it sets itself up. <a href="/docs/claude-code">Claude Code</a>, <a href="/docs/claude-desktop">Claude Desktop</a>.</p>
 <h3>How do I export Apple Health data as JSON automatically?</h3>
-<p>The app does it after every workout, in the background, with no shortcut to run and no export button to press. You get one file per workout and one file per day, in a folder that keeps itself current. Apple only lets apps read Health while the iPhone is unlocked, so a workout finished with the phone in a bag is written at the next unlock. <a href="/docs/files">What the files look like.</a></p>
+<p>The app does it after every workout and after every night's sleep, in the background, with no shortcut to run and no export button to press. You get one file per workout and one file per day, in a folder that keeps itself current. Apple only lets apps read Health while the iPhone is unlocked, so a workout finished with the phone in a bag is written at the next unlock. To sync at a set moment, the Shortcuts action Sync Health data works in an automation, for example when Sleep Focus turns off. <a href="/docs/files">What the files look like.</a></p>
 <h3>Can ChatGPT read my Apple Health data?</h3>
 <p>Yes, as text or files, not through the MCP server. Copy the message from the app (Export, Your AI, Copy) and paste it into ChatGPT: it carries your summary of the last four weeks. ChatGPT cannot start a program on your computer, so it cannot run a local MCP server. <a href="/docs/chatgpt">What works with ChatGPT today.</a></p>
 <h3>Does it work with Cursor, Codex, LM Studio or Ollama?</h3>
@@ -221,7 +221,7 @@
 <h3>Can an AI write a workout and put it on my Apple Watch?</h3>
 <p>Yes. The AI writes a plan, and the app turns it into a custom workout on your Watch, with the step names on your wrist, at the time the plan says. That takes one tap in the app, or no tap once you switch on "Put new plans on my Watch automatically". Step names need iOS 18. <a href="/docs/plans">Plans and Put on Watch.</a></p>
 <h3>Which sports does it work for?</h3>
-<p>Reading works for every workout type Apple Health stores. Plans go to the Watch for eleven sports: run, indoor run, walk, hike, cycle, indoor cycle, pool swim, open-water swim, indoor row, HIIT and elliptical. HIIT and elliptical take time goals only.</p>
+<p>Reading works for every workout type Apple Health stores. Plans go to the Watch for twelve sports: run, indoor run, walk, hike, cycle, indoor cycle, pool swim, open-water swim, indoor row, HIIT, elliptical and strength. HIIT, elliptical and strength take time goals or open steps that end with a tap, one per strength set. Run and ride steps can carry a pace alert, and for a race a run or ride can be a pacer: one distance in one time.</p>
 <h3>Can I use Claude as a swim or running coach with my Apple Watch?</h3>
 <p>Yes, that is what it was built for. The AI reads what you actually did, step by step, with pace and heart rate for each interval, asks you how it felt, and writes the next session onto your Watch. Eleven prompts ship with it, from a weekly check-in to a plan for the week. It never rates a session for you, and questions that point to illness belong with a doctor. <a href="/docs/prompts">Ideas for your AI.</a></p>
 <h3>Can I turn a workout from my coach or a training app into an Apple Watch workout?</h3>

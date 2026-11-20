@@ -13,7 +13,7 @@ pub const SCHEMA_PLAN: &str = "healthaccess.plan.v1";
 pub const SCHEMA_PLAN_LEGACY: &str = "tide.plan.v1";
 /// Sports a plan can have: each maps to a WorkoutKit custom-workout activity and location
 /// in the app (`PlanInstaller.activity(for:)`).
-pub const SPORTS: [&str; 11] = [
+pub const SPORTS: [&str; 12] = [
     "run",
     "indoor_run",
     "walk",
@@ -25,9 +25,17 @@ pub const SPORTS: [&str; 11] = [
     "indoor_row",
     "hiit",
     "elliptical",
+    "strength",
 ];
-/// Sports whose steps take time goals only (the Watch measures no distance for them).
-pub const TIME_ONLY_SPORTS: [&str; 2] = ["hiit", "elliptical"];
+/// Sports the Watch measures no distance for: their steps take time or open goals.
+pub const NO_DISTANCE_SPORTS: [&str; 3] = ["hiit", "elliptical", "strength"];
+/// Sports a plan can be a pacer for (WorkoutKit's PacerWorkout: one distance in one time).
+pub const PACER_SPORTS: [&str; 2] = ["run", "cycle"];
+/// Sports whose steps can carry a pace alert (WorkoutKit's speed range alert; checked with
+/// `CustomWorkout.supportsAlert` on the iOS 27.2 SDK: walk, hike and the swims say no).
+pub const PACE_SPORTS: [&str; 4] = ["run", "indoor_run", "cycle", "indoor_cycle"];
+/// Fastest and slowest pace an alert may name, in seconds per km (120 km/h and 2 km/h).
+pub const PACE_LIMITS_S_PER_KM: (f64, f64) = (30.0, 1800.0);
 /// Maximum label length shown on the Watch.
 pub const MAX_LABEL_CHARS: usize = 40;
 /// Maximum plan name length (same Watch constraint).
@@ -43,12 +51,13 @@ pub struct Plan {
     pub id: String,
     pub name: String,
     /// One of [`SPORTS`]: `run | indoor_run | walk | hike | cycle | indoor_cycle | pool_swim |
-    /// open_water_swim | indoor_row | hiit | elliptical`.
+    /// open_water_swim | indoor_row | hiit | elliptical | strength`.
     pub sport: String,
     #[serde(default)]
     pub pool_length_m: Option<f64>,
     #[serde(default)]
     pub warmup: Option<PlanStep>,
+    /// The steps. Empty for a pacer plan.
     #[serde(default)]
     pub blocks: Vec<PlanBlock>,
     #[serde(default)]
@@ -61,6 +70,17 @@ pub struct Plan {
     pub created_at: Option<DateTime<Utc>>,
     #[serde(default)]
     pub scheduled_for: Option<DateTime<Utc>>,
+    /// A race-pace target instead of steps: the Watch paces the whole distance against one
+    /// time (WorkoutKit's pacer workout). Run and cycle only; a pacer plan has no blocks.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pacer: Option<Pacer>,
+}
+
+/// One distance in one time, paced evenly by the Watch.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct Pacer {
+    pub distance_m: f64,
+    pub time_s: f64,
 }
 
 /// A repeated group of steps.
@@ -85,6 +105,10 @@ pub struct PlanStep {
     /// Watch HR zone 1–5 to alert on.
     #[serde(default)]
     pub zone: Option<u8>,
+    /// Pace range to alert on, seconds per km, fast end first: `[290, 310]` is 4:50 to
+    /// 5:10 per km. Run and cycle only; a step has one alert, a zone or a pace.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub pace_s_per_km: Option<Vec<f64>>,
     #[serde(default)]
     pub label: Option<String>,
 }
@@ -92,9 +116,11 @@ pub struct PlanStep {
 /// Step goal.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Goal {
-    /// `time_s | distance_m`.
+    /// `time_s | distance_m | open`. An open step ends when the athlete taps on the Watch
+    /// (a strength set, a rest until ready); it has no value.
     #[serde(rename = "type")]
     pub kind: String,
+    #[serde(default)]
     pub value: f64,
 }
 
@@ -115,13 +141,34 @@ impl Goal {
         }
     }
 
+    /// An open goal: the step lasts until the athlete taps.
+    pub fn open() -> Self {
+        Goal {
+            kind: "open".into(),
+            value: 0.0,
+        }
+    }
+
     /// `true` for a time goal.
     pub fn is_time(&self) -> bool {
         self.kind == "time_s"
     }
+
+    /// `true` for an open goal.
+    pub fn is_open(&self) -> bool {
+        self.kind == "open"
+    }
 }
 
 impl PlanStep {
+    /// The pace alert as (fast, slow) seconds per km, whichever order the plan gave them.
+    pub fn pace_range(&self) -> Option<(f64, f64)> {
+        match self.pace_s_per_km.as_deref() {
+            Some([a, b]) => Some((a.min(*b), a.max(*b))),
+            _ => None,
+        }
+    }
+
     /// `true` when the step is a recovery step.
     pub fn is_recovery(&self) -> bool {
         self.kind.as_deref() == Some("recovery")
@@ -129,7 +176,9 @@ impl PlanStep {
 
     /// Compact one-line rendering, e.g. `4×50 m` style pieces are rendered per step.
     pub fn describe(&self) -> String {
-        let goal = if self.goal.is_time() {
+        let goal = if self.goal.is_open() {
+            "open".to_string()
+        } else if self.goal.is_time() {
             crate::util::fmt_duration(self.goal.value)
         } else {
             format!("{} m", crate::util::round_to(self.goal.value, 1))
@@ -137,6 +186,13 @@ impl PlanStep {
         let mut s = goal;
         if let Some(z) = self.zone {
             s.push_str(&format!(" Z{z}"));
+        }
+        if let Some((fast, slow)) = self.pace_range() {
+            s.push_str(&format!(
+                " @{}-{}/km",
+                crate::util::fmt_pace(fast),
+                crate::util::fmt_pace(slow)
+            ));
         }
         if let Some(l) = &self.label {
             s.push_str(&format!(" \"{l}\""));
@@ -151,13 +207,15 @@ pub const MAX_GOAL_DISTANCE_M: f64 = 1_000_000.0;
 pub const MAX_GOAL_TIME_S: f64 = 86_400.0;
 
 fn check_step(prefix: &str, step: &PlanStep, problems: &mut Vec<String>) {
-    if step.goal.kind != "time_s" && step.goal.kind != "distance_m" {
+    if !matches!(step.goal.kind.as_str(), "time_s" | "distance_m" | "open") {
         problems.push(format!(
-            "{prefix}: goal.type must be time_s or distance_m, got {:?}",
+            "{prefix}: goal.type must be time_s, distance_m or open, got {:?}",
             step.goal.kind
         ));
     }
-    if !(step.goal.value.is_finite() && step.goal.value > 0.0) {
+    if step.goal.is_open() {
+        // no value: the athlete ends the step
+    } else if !(step.goal.value.is_finite() && step.goal.value > 0.0) {
         problems.push(format!("{prefix}: goal.value must be a positive number"));
     } else if step.goal.kind == "distance_m" && step.goal.value > MAX_GOAL_DISTANCE_M {
         problems.push(format!(
@@ -171,6 +229,27 @@ fn check_step(prefix: &str, step: &PlanStep, problems: &mut Vec<String>) {
     if let Some(z) = step.zone {
         if !(1..=5).contains(&z) {
             problems.push(format!("{prefix}: zone must be 1–5, got {z}"));
+        }
+    }
+    if let Some(pace) = &step.pace_s_per_km {
+        let (lo, hi) = PACE_LIMITS_S_PER_KM;
+        if pace.len() != 2
+            || pace
+                .iter()
+                .any(|v| !(v.is_finite() && *v >= lo && *v <= hi))
+        {
+            problems.push(format!(
+                "{prefix}: pace_s_per_km must be two paces in seconds per km from {lo} to {hi}, fast end first, e.g. [290, 310] for 4:50 to 5:10"
+            ));
+        } else if pace[0] == pace[1] {
+            problems.push(format!(
+                "{prefix}: pace_s_per_km needs a range, e.g. [290, 310]; the Watch taps whenever the pace leaves it"
+            ));
+        }
+        if step.zone.is_some() {
+            problems.push(format!(
+                "{prefix}: a step has one alert on the Watch: zone or pace_s_per_km, not both"
+            ));
         }
     }
     if let Some(label) = &step.label {
@@ -191,6 +270,23 @@ fn check_step(prefix: &str, step: &PlanStep, problems: &mut Vec<String>) {
 }
 
 impl Plan {
+    /// Every step with its place in the plan (`warmup`, `blocks[0].steps[1]`, `cooldown`).
+    pub fn all_steps(&self) -> Vec<(String, &PlanStep)> {
+        let mut steps: Vec<(String, &PlanStep)> = Vec::new();
+        if let Some(w) = &self.warmup {
+            steps.push(("warmup".to_string(), w));
+        }
+        for (bi, b) in self.blocks.iter().enumerate() {
+            for (si, s) in b.steps.iter().enumerate() {
+                steps.push((format!("blocks[{bi}].steps[{si}]"), s));
+            }
+        }
+        if let Some(c) = &self.cooldown {
+            steps.push(("cooldown".to_string(), c));
+        }
+        steps
+    }
+
     /// Validate against the contract. Every problem is reported at once.
     pub fn validate(&self) -> Result<()> {
         let mut problems = Vec::new();
@@ -207,26 +303,19 @@ impl Plan {
                 self.sport
             ));
         }
-        if TIME_ONLY_SPORTS.contains(&self.sport.as_str()) {
-            let mut steps: Vec<(String, &PlanStep)> = Vec::new();
-            if let Some(w) = &self.warmup {
-                steps.push(("warmup".to_string(), w));
+        for (at, s) in self.all_steps() {
+            if NO_DISTANCE_SPORTS.contains(&self.sport.as_str()) && s.goal.kind == "distance_m" {
+                problems.push(format!(
+                    "{at}: the Watch measures no distance for {}; use time_s or open",
+                    self.sport
+                ));
             }
-            for (bi, b) in self.blocks.iter().enumerate() {
-                for (si, s) in b.steps.iter().enumerate() {
-                    steps.push((format!("blocks[{bi}].steps[{si}]"), s));
-                }
-            }
-            if let Some(c) = &self.cooldown {
-                steps.push(("cooldown".to_string(), c));
-            }
-            for (at, s) in steps {
-                if !s.goal.is_time() {
-                    problems.push(format!(
-                        "{at}: {} takes time goals only (time_s), got {}",
-                        self.sport, s.goal.kind
-                    ));
-                }
+            if s.pace_s_per_km.is_some() && !PACE_SPORTS.contains(&self.sport.as_str()) {
+                problems.push(format!(
+                    "{at}: the Watch has pace alerts for {} only, not {}; use zone",
+                    PACE_SPORTS.join(", "),
+                    self.sport
+                ));
             }
         }
         if let Some(p) = self.pool_length_m {
@@ -249,8 +338,36 @@ impl Plan {
         if let Some(c) = &self.cooldown {
             check_step("cooldown", c, &mut problems);
         }
-        if self.blocks.is_empty() {
-            problems.push("blocks must contain at least one block".to_string());
+        if let Some(pacer) = &self.pacer {
+            if !PACER_SPORTS.contains(&self.sport.as_str()) {
+                problems.push(format!(
+                    "pacer works for {} only, got {:?}",
+                    PACER_SPORTS.join(" and "),
+                    self.sport
+                ));
+            }
+            if !self.blocks.is_empty() || self.warmup.is_some() || self.cooldown.is_some() {
+                problems.push(
+                    "a pacer plan has no warmup, blocks or cooldown: the Watch paces the whole distance"
+                        .to_string(),
+                );
+            }
+            if !(pacer.distance_m.is_finite()
+                && pacer.distance_m > 0.0
+                && pacer.distance_m <= MAX_GOAL_DISTANCE_M)
+            {
+                problems.push(format!(
+                    "pacer.distance_m must be more than 0 and at most {MAX_GOAL_DISTANCE_M}"
+                ));
+            }
+            if !(pacer.time_s.is_finite() && pacer.time_s > 0.0 && pacer.time_s <= MAX_GOAL_TIME_S)
+            {
+                problems.push(format!(
+                    "pacer.time_s must be more than 0 and at most {MAX_GOAL_TIME_S}"
+                ));
+            }
+        } else if self.blocks.is_empty() {
+            problems.push("blocks must contain at least one block (or a pacer)".to_string());
         }
         for (bi, block) in self.blocks.iter().enumerate() {
             if !(1..=99).contains(&block.repeat) {
@@ -311,6 +428,9 @@ impl Plan {
 
     /// Total planned distance in metres (distance goals only), including repeats.
     pub fn planned_distance_m(&self) -> f64 {
+        if let Some(p) = &self.pacer {
+            return p.distance_m;
+        }
         let step_d = |s: &PlanStep| if s.goal.is_time() { 0.0 } else { s.goal.value };
         let mut d = self.warmup.as_ref().map(step_d).unwrap_or(0.0);
         d += self.cooldown.as_ref().map(step_d).unwrap_or(0.0);
@@ -322,6 +442,9 @@ impl Plan {
 
     /// Total planned time in seconds (time goals only), including repeats.
     pub fn planned_time_s(&self) -> f64 {
+        if let Some(p) = &self.pacer {
+            return p.time_s;
+        }
         let step_t = |s: &PlanStep| if s.goal.is_time() { s.goal.value } else { 0.0 };
         let mut t = self.warmup.as_ref().map(step_t).unwrap_or(0.0);
         t += self.cooldown.as_ref().map(step_t).unwrap_or(0.0);
@@ -490,14 +613,129 @@ mod sport_tests {
     }
 
     #[test]
-    fn time_only_sports_reject_distance_goals() {
-        for sport in TIME_ONLY_SPORTS {
+    fn no_distance_sports_reject_distance_goals() {
+        for sport in NO_DISTANCE_SPORTS {
             let err = plan(sport, "distance_m").validate().unwrap_err();
             assert!(
-                err.to_string().contains("time goals only"),
+                err.to_string().contains("measures no distance"),
                 "{sport}: {err}"
             );
         }
         assert!(plan("run", "distance_m").validate().is_ok());
+    }
+
+    #[test]
+    fn strength_sets_are_open_steps_without_a_value() {
+        let p: Plan = serde_json::from_value(serde_json::json!({
+            "name": "Legs A", "sport": "strength",
+            "blocks": [{"repeat": 5, "steps": [
+                {"goal": {"type": "open"}, "label": "Squat 5 x 60 kg"},
+                {"kind": "recovery", "goal": {"type": "time_s", "value": 120}}
+            ]}]
+        }))
+        .unwrap();
+        p.validate().unwrap();
+        assert_eq!(p.planned_time_s(), 600.0);
+        assert_eq!(p.blocks[0].steps[0].describe(), "open \"Squat 5 x 60 kg\"");
+        let bad = plan("strength", "rest_until_ready");
+        assert!(bad
+            .validate()
+            .unwrap_err()
+            .to_string()
+            .contains("time_s, distance_m or open"));
+    }
+
+    fn paced(sport: &str, pace: serde_json::Value, zone: Option<u8>) -> Plan {
+        serde_json::from_value(serde_json::json!({
+            "name": "6x1k", "sport": sport,
+            "blocks": [{"repeat": 6, "steps": [
+                {"goal": {"type": "distance_m", "value": 1000}, "pace_s_per_km": pace, "zone": zone, "label": "1k"},
+                {"kind": "recovery", "goal": {"type": "time_s", "value": 90}}
+            ]}]
+        }))
+        .unwrap()
+    }
+
+    #[test]
+    fn pace_alerts_are_a_range_on_run_and_cycle_steps_only() {
+        for sport in PACE_SPORTS {
+            paced(sport, serde_json::json!([290, 310]), None)
+                .validate()
+                .unwrap();
+        }
+        let p = paced("run", serde_json::json!([310, 290]), None);
+        assert_eq!(p.blocks[0].steps[0].pace_range(), Some((290.0, 310.0)));
+        assert_eq!(
+            p.blocks[0].steps[0].describe(),
+            "1000 m @4:50-5:10/km \"1k\""
+        );
+        for (sport, pace, zone, says) in [
+            (
+                "walk",
+                serde_json::json!([600, 660]),
+                None,
+                "pace alerts for run",
+            ),
+            (
+                "pool_swim",
+                serde_json::json!([100, 110]),
+                None,
+                "pace alerts for run",
+            ),
+            ("run", serde_json::json!([300]), None, "two paces"),
+            ("run", serde_json::json!([5, 310]), None, "two paces"),
+            ("run", serde_json::json!([300, 300]), None, "needs a range"),
+            (
+                "run",
+                serde_json::json!([290, 310]),
+                Some(3),
+                "zone or pace_s_per_km",
+            ),
+        ] {
+            let err = paced(sport, pace, zone).validate().unwrap_err().to_string();
+            assert!(err.contains(says), "{sport}: {err}");
+        }
+        // written back without the field when a step has none
+        let plain = serde_json::to_value(plan("run", "time_s")).unwrap();
+        assert!(plain["blocks"][0]["steps"][0]
+            .get("pace_s_per_km")
+            .is_none());
+    }
+
+    fn pacer(sport: &str) -> Plan {
+        serde_json::from_value(serde_json::json!({
+            "name": "10K race", "sport": sport,
+            "pacer": {"distance_m": 10000, "time_s": 3000}
+        }))
+        .unwrap()
+    }
+
+    #[test]
+    fn a_pacer_plan_has_no_steps_and_counts_its_distance_and_time() {
+        let p = pacer("run");
+        p.validate().unwrap();
+        assert_eq!(p.planned_distance_m(), 10000.0);
+        assert_eq!(p.planned_time_s(), 3000.0);
+        assert!(pacer("cycle").validate().is_ok());
+        let swim = pacer("pool_swim").validate().unwrap_err().to_string();
+        assert!(swim.contains("pacer works for run and cycle"), "{swim}");
+        let mut mixed = pacer("run");
+        mixed.blocks = plan("run", "time_s").blocks;
+        assert!(mixed
+            .validate()
+            .unwrap_err()
+            .to_string()
+            .contains("no warmup, blocks or cooldown"));
+        let mut zero = pacer("run");
+        zero.pacer.as_mut().unwrap().time_s = 0.0;
+        assert!(zero.validate().is_err());
+        let empty =
+            serde_json::from_value::<Plan>(serde_json::json!({"name": "x", "sport": "run"}))
+                .unwrap();
+        assert!(empty
+            .validate()
+            .unwrap_err()
+            .to_string()
+            .contains("or a pacer"));
     }
 }
