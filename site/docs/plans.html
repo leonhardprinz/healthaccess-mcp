@@ -36,25 +36,25 @@
 <header class="hero">
   <span class="label">Reference</span>
   <h1>Plans and "Put on Watch"</h1>
-  <p class="answer">Your AI writes one small JSON file. The app turns it into a custom workout with the step names on your wrist and puts it on the Watch, one tap. When you swim it, the exported session comes back with those names on every interval. This page is the format, the rules and the flow.</p>
+  <p class="answer">Your AI writes one small JSON file. With one tap, the app turns it into a custom workout with the step names on your wrist and puts it on the Watch. When you do the session, the exported file comes back with those names on every interval. Below are the format, the rules the server checks and the flow.</p>
 </header>
 
 <main>
-<h2>The flow</h2>
+<h2>How a plan gets onto the Watch</h2>
 <ol>
-  <li><b>Your AI calls <code>push_plan</code></b> with the plan below (or writes the file itself, or you run <code>healthaccess plan push session.json</code>). The server validates it, fills <code>id</code>, <code>created_at</code> and <code>schema</code>, and writes <code>plans/&lt;id&gt;.json</code>. The id is the UTC time plus the slug of the name: <code>2026-05-13T19:02:11Z-s12</code>.</li>
-  <li><b>The folder syncs to the phone.</b> The app scans <code>plans/</code> on launch, when it comes to the foreground and after every export, so the plan shows up in the app's <b>Import</b> tab as "Your AI wrote S27", with the day and time it will go onto the Watch. If the app was not in front, you get a notification.</li>
-  <li><b>It goes onto the Watch.</b> WorkoutKit schedules it in the Watch's Workout app, under Scheduled, for the plan's <code>scheduled_for</code>; a plan without a time (or whose time has passed) gets the next morning at 10:00. The app checks the scheduler afterwards, so the status is a fact. Two ways:
+  <li><b>Your AI calls <code>push_plan</code></b> with the plan below (or writes the file itself, or you run <code>healthaccess plan push session.json</code>). The server checks it, fills in <code>id</code>, <code>created_at</code> and <code>schema</code>, and writes <code>plans/&lt;id&gt;.json</code>. The id is the UTC time plus the slug of the name: <code>2026-05-13T19:02:11Z-s12</code>.</li>
+  <li><b>The folder syncs to the phone.</b> The app looks in <code>plans/</code> when it launches, when it comes to the foreground and after every export. The plan then shows up in the app's <b>Import</b> tab as "Your AI wrote S27", with the day and time it will go onto the Watch. If the app wasn't in front, you get a notification.</li>
+  <li><b>It goes onto the Watch.</b> WorkoutKit schedules it in the Watch's Workout app, under Scheduled, for the plan's <code>scheduled_for</code>. A plan without a time, or whose time has passed, gets the next morning at 10:00. Afterwards the app checks with the scheduler, so the status it reports is what really happened. There are two ways:
     <ul>
-      <li><b>One tap</b> (the default): "Put on Watch" on the plan, then a confirmation that names the day and time.</li>
-      <li><b>Automatically</b>: with "Put new plans on my Watch automatically" switched on in the Import tab, the app does it on its own the next time it runs or iOS wakes it, usually within a few hours, and sends a notification per plan. iOS does not wake apps the second a file lands in iCloud Drive, so this is not instant.</li>
+      <li><b>One tap</b> (the default): tap "Put on Watch" on the plan, then confirm. The confirmation names the day and time.</li>
+      <li><b>Automatically</b>: switch on "Put new plans on my Watch automatically" in the Import tab, and the app does it by itself the next time it runs or iOS wakes it, usually within a few hours. You get a notification for each plan. It isn't instant, because iOS doesn't wake apps the moment a file lands in iCloud Drive.</li>
     </ul>
-    "Remove from Watch" takes a scheduled plan off again and marks it <code>cancelled</code>. "Preview on Watch" under See parts opens Apple's sheet instead, which installs a plain custom workout without a date and does not report back (<code>method: preview</code>). Apple Fitness+ programs stay Apple's; plans appear in the Workout app.</li>
-  <li><b>The app writes <code>plans/&lt;id&gt;.status.json</code></b>: <code>scheduled</code>, <code>failed</code> (with the error text) or <code>cancelled</code>. Your AI reads it with <code>get_plan_status</code>; until the file exists the state is <code>pending</code>.</li>
+    "Remove from Watch" takes a scheduled plan off again and marks it <code>cancelled</code>. "Preview on Watch" under See parts opens Apple's sheet instead. That installs a plain custom workout without a date and doesn't report back (<code>method: preview</code>). Plans appear in the Workout app. Apple Fitness+ programs are Apple's own and stay separate.</li>
+  <li><b>The app writes <code>plans/&lt;id&gt;.status.json</code></b>: <code>scheduled</code>, <code>failed</code> (with the error text) or <code>cancelled</code>. Your AI reads it with <code>get_plan_status</code>. Until the file exists, the state is <code>pending</code>.</li>
   <li><b>You do the session.</b> The Watch shows each step's label. HealthKit drops the labels when it saves the workout, but it keeps the WorkoutKit id, so the exported file gets an exact <code>plan_ref</code> and every step gets its <code>label</code> back from the plan.</li>
 </ol>
 
-<h2>The format</h2>
+<h2>Plan format</h2>
 <pre>{
   "name": "S27",                         <span class="c"># shown in the app and on the Watch, 40 characters at most</span>
   "sport": "pool_swim",                  <span class="c"># run, cycle, walk, pool_swim, indoor_row, ... (list below)</span>
@@ -72,19 +72,19 @@
 }</pre>
 <h3>Rules the server checks</h3>
 <ul>
-  <li><code>sport</code> is one of <code>run</code>, <code>indoor_run</code>, <code>walk</code>, <code>hike</code>, <code>cycle</code>, <code>indoor_cycle</code>, <code>pool_swim</code>, <code>open_water_swim</code>, <code>indoor_row</code>, <code>hiit</code>, <code>elliptical</code> or <code>strength</code>. The Watch measures no distance for <code>hiit</code>, <code>elliptical</code> and <code>strength</code>, so their steps take time or open goals.</li>
+  <li><code>sport</code> is one of <code>run</code>, <code>indoor_run</code>, <code>walk</code>, <code>hike</code>, <code>cycle</code>, <code>indoor_cycle</code>, <code>pool_swim</code>, <code>open_water_swim</code>, <code>indoor_row</code>, <code>hiit</code>, <code>elliptical</code> or <code>strength</code>. The Watch doesn't measure distance for <code>hiit</code>, <code>elliptical</code> and <code>strength</code>, so their steps take time or open goals.</li>
   <li><code>name</code> is not empty and at most 40 characters.</li>
-  <li>At least one block, or a <code>pacer</code> (below). <code>repeat</code> from 1 to 99, each block with at least one step.</li>
+  <li>At least one block, or a <code>pacer</code> (see below). <code>repeat</code> is 1 to 99, and each block has at least one step.</li>
   <li><code>goal.type</code> is <code>time_s</code> or <code>distance_m</code> with a positive value, or <code>open</code> without one: an open step lasts until you tap on the Watch.</li>
-  <li><code>zone</code>, when given, is 1 to 5. These are the Watch's own heart-rate zones; the Watch alerts when you leave the zone.</li>
-  <li><code>pace_s_per_km</code>, on a run or ride step, is a pace range in seconds per km, fast end first: <code>[290, 310]</code> is 4:50 to 5:10 per km. The Watch taps when your current pace leaves it. A step has one alert, a zone or a pace. Walks, hikes and swims have no pace alerts on the Watch.</li>
-  <li><code>label</code> at most 40 characters. Write it as an instruction you can read on the wrist mid-length: "KICK on back, no board, hips up". The app truncates longer labels and logs it.</li>
-  <li><code>kind</code> is <code>work</code> or <code>recovery</code>. Rests are real rests.</li>
-  <li>Every violation is reported in one message, so the AI can fix them all at once.</li>
+  <li><code>zone</code>, when given, is 1 to 5. These are the Watch's own heart-rate zones, and the Watch alerts you when you leave the zone.</li>
+  <li><code>pace_s_per_km</code>, on a run or ride step, is a pace range in seconds per km, fast end first, so <code>[290, 310]</code> is 4:50 to 5:10 per km. The Watch taps when your current pace leaves that range. A step has one alert, either a zone or a pace. Walks, hikes and swims have no pace alerts on the Watch.</li>
+  <li><code>label</code> is at most 40 characters. Write it as an instruction you can read on your wrist in the middle of a length, like "KICK on back, no board, hips up". The app truncates longer labels and logs it.</li>
+  <li><code>kind</code> is <code>work</code> or <code>recovery</code>, and recovery steps are real rests.</li>
+  <li>The server reports every problem in one message, so your AI can fix them all at once.</li>
 </ul>
 
-<h2>Intervals at a pace</h2>
-<p>Six times 1 km at 10K pace with a pace alert, 90 seconds easy in between:</p>
+<h2>Run intervals with a pace alert</h2>
+<p>Six times 1 km at 10K pace with a pace alert, and 90 seconds easy in between:</p>
 <pre>{
   "name": "6 x 1k",
   "sport": "run",
@@ -95,10 +95,10 @@
     ]}
   ]
 }</pre>
-<p>For a ride, 30 to 33 km/h is <code>[109, 120]</code>. Pace alerts need the Health Access app 1.0.5 or later; an older app puts the steps on the Watch without them.</p>
+<p>For a ride, 30 to 33 km/h is <code>[109, 120]</code>. Pace alerts need the Health Access app 1.0.5 or later. An older app still puts the steps on the Watch, just without the alerts.</p>
 
-<h2>Strength and race day</h2>
-<p>A strength session is one open step per set, with the exercise, reps and weight in the label, and a timed rest. You tap when the set is done; the rest counts down.</p>
+<h2>Strength sessions and races</h2>
+<p>For a strength session, use one open step per set with the exercise, reps and weight in the label, and a timed rest. You tap when the set is done, then the rest counts down.</p>
 <pre>{
   "name": "Legs A",
   "sport": "strength",
@@ -109,7 +109,7 @@
     ]}
   ]
 }</pre>
-<p>For a race or a time trial, a run or cycle plan takes a <code>pacer</code> instead of steps: one distance in one time. The Watch shows whether you are ahead of or behind the even pace for the whole distance.</p>
+<p>For a race or a time trial, a run or cycle plan takes a <code>pacer</code> instead of steps: a distance and the time you want to cover it in. The Watch shows whether you're ahead of or behind the even pace for the whole distance.</p>
 <pre>{
   "name": "10K race",
   "sport": "run",
@@ -118,8 +118,8 @@
 }</pre>
 <p>Both need the Health Access app 1.0.5 or later.</p>
 
-<h2>A full example</h2>
-<p>The plan behind the example swim on the <a href="/docs/files">files page</a>, <code>plans/2026-05-13T19:02:11Z-s12.json</code> in the repository's <a href="/examples/README.md">synthetic example folder</a>: 1,200 m in six parts, about 36 minutes, as <code>push_plan</code> wrote it.</p>
+<h2>Full example: a pool swim plan</h2>
+<p>This is the plan behind the example swim on the <a href="/docs/files">files page</a>, <code>plans/2026-05-13T19:02:11Z-s12.json</code> in the repository's <a href="/examples/README.md">synthetic example folder</a>, as <code>push_plan</code> wrote it. It's 1,200 m in six parts, about 36 minutes.</p>
 <pre>{
   "schema": "healthaccess.plan.v1",
   "id": "2026-05-13T19:02:11Z-s12",
@@ -151,10 +151,10 @@
   "created_at": "2026-05-13T19:02:11Z",
   "scheduled_for": "2026-05-14T05:00:00Z"
 }</pre>
-<p>The <a href="/docs/prompts">swim idea</a> usually puts a two-minute time step first: the athlete starts the workout in the shower, so the Watch is already in swim mode at the pool edge and no length is lost to fumbling with a wet screen. This plan warms up over 200 m instead; both work.</p>
+<p>The <a href="/docs/prompts">swim idea</a> usually starts with a two-minute time step. You start the workout in the shower, so the Watch is already in swim mode at the pool edge and you don't lose a length fumbling with a wet screen. This plan warms up over 200 m instead, which works too.</p>
 
-<h2>What came back</h2>
-<p>The app's answer, <code>plans/2026-05-13T19:02:11Z-s12.status.json</code>, after WorkoutKit scheduled it for the next morning (<code>method: schedule</code>; a plan installed through Apple's sheet says <code>preview</code> and has no <code>scheduled_for</code>):</p>
+<h2>The status file the app writes back</h2>
+<p>This is the app's answer, <code>plans/2026-05-13T19:02:11Z-s12.status.json</code>, after WorkoutKit scheduled the plan for the next morning (<code>method: schedule</code>). A plan installed through Apple's sheet says <code>preview</code> and has no <code>scheduled_for</code>.</p>
 <pre>{
   "plan_id": "2026-05-13T19:02:11Z-s12",
   "state": "scheduled",
@@ -164,14 +164,14 @@
   "scheduled_for": "2026-05-14T05:00:00Z",
   "error": null
 }</pre>
-<p><code>workoutkit_id</code> is what links the finished swim back to this plan: the exported session on the files page carries <code>plan_ref</code> S12 and every step has its label back. If you start the plan from the Watch's own list, for example days after its slot, the Watch reports another id; the server then recognises the plan by its steps. <code>get_plan_status</code> returns the same fields; <code>list_plans</code> returns them for every plan in the folder, with planned distance and time.</p>
+<p>The <code>workoutkit_id</code> links the finished swim back to this plan, so the exported session on the files page carries <code>plan_ref</code> S12 and every step has its label back. If you start the plan from the Watch's own list, for example days after its slot, the Watch reports a different id, and the server then recognises the plan by its steps. <code>get_plan_status</code> returns the same fields, and <code>list_plans</code> returns them for every plan in the folder, along with the planned distance and time.</p>
 
-<h2>Limits, all Apple's</h2>
+<h2>Limits from Apple</h2>
 <ul>
-  <li><b>Pool length</b> cannot be set from a plan. WorkoutKit has no parameter for it; the Watch uses its own setting. The app shows <code>pool_length_m</code> as a reminder.</li>
+  <li><b>Pool length</b> can't be set from a plan. WorkoutKit has no parameter for it, so the Watch uses its own setting. The app shows <code>pool_length_m</code> as a reminder.</li>
   <li><b>Step names on the Watch</b> need iOS 18. On iOS 17 the workout installs without labels, and the app logs it.</li>
   <li><b>Labels</b> longer than 40 characters are cut.</li>
-  <li><b>Zone alerts</b> an activity does not support are dropped and logged.</li>
+  <li><b>Zone alerts</b> that an activity doesn't support are dropped and logged.</li>
   <li><b>Sports</b>: the twelve listed above. <code>hiit</code>, <code>elliptical</code> and <code>strength</code> take time or open goals.</li>
   <li><b>Pacer</b> plans work for outdoor runs and rides only.</li>
 </ul>
@@ -184,7 +184,7 @@
     <div><h4>Connect an AI</h4><ul><li><a href="/docs/claude-code">Claude Code</a></li><li><a href="/docs/claude-desktop">Claude Desktop</a></li><li><a href="/docs/cursor">Cursor</a></li><li><a href="/docs/chatgpt">ChatGPT</a></li><li><a href="/docs/local-models">Local models</a></li></ul></div>
     <div><h4>Reference</h4><ul><li><a href="/docs/files">The folder is the API</a></li><li><a href="/docs/plans">Plans and Put on Watch</a></li><li><a href="/docs/prompts">Ideas for your AI</a></li><li><a href="/ref/mcp.md">Tool reference</a></li><li><a href="/ref/schema.md">Data contract</a></li></ul></div>
     <div><h4>For AIs</h4><ul><li><a href="/llms.txt">llms.txt</a></li><li><a href="/llms-full.txt">llms-full.txt</a></li><li><a href="https://www.npmjs.com/package/healthaccess-mcp">npm package</a></li></ul></div>
-    <div><h4>About</h4><ul><li><a href="/docs/privacy">Privacy in plain words</a></li><li><a href="/privacy-policy">Privacy policy</a></li><li><a href="/support">Support</a></li><li><a href="/docs/compare">Compared with the others</a></li><li><a href="/docs/faq">Questions and answers</a></li><li><a href="/docs/health-auto-export-alternative">Alternative to Health Auto Export</a></li></ul></div>
+    <div><h4>About</h4><ul><li><a href="/docs/privacy">Privacy, explained</a></li><li><a href="/privacy-policy">Privacy policy</a></li><li><a href="/support">Support</a></li><li><a href="/docs/compare">How it compares</a></li><li><a href="/docs/faq">Questions and answers</a></li><li><a href="/docs/health-auto-export-alternative">Alternative to Health Auto Export</a></li></ul></div>
   </div>
   <p class="fine">Health Access MCP is made by Prinz Technology Consultancy, svetovanje na področju informacijskih tehnologij d.o.o. (Prinz Tech Consulting), Dunajska cesta 33, 1000 Ljubljana, Slovenia. Registration number 7326106000, VAT ID SI86067494, contact@prinz-tc.com. The source is on <a href="https://github.com/leonhardprinz/healthaccess-mcp">GitHub</a> under the MIT licence. Apple, Apple Watch, Apple Health and HealthKit are trademarks of Apple Inc.; this project is not affiliated with Apple.</p>
 </footer>

@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ideas for your AI: prompts for Health Access MCP</title>
-<meta name="description" content="Ideas for your AI: eleven prompts, suggestions only, that ship with Health Access MCP. Export: weekly check-in, explain my last session, sleep and recovery, trends, a summary for your coach. Plans: plan my next session or my week, change my plan, build up to a goal, for any sport.">
+<meta name="description" content="Eleven prompts that ship with Health Access MCP, as ideas for your AI. For reading your data: a weekly check-in, explain my last session, sleep and recovery, trends, a summary for your coach. For plans: plan my next session or my week, change my plan, build up to a goal, for any sport.">
 <link rel="canonical" href="https://healthaccessmcp.com/docs/prompts">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="Health Access MCP">
 <meta property="og:title" content="Ideas for your AI">
-<meta property="og:description" content="Eleven prompts for your AI in two groups, for any sport. Each asks first, reads second, writes last.">
+<meta property="og:description" content="Eleven prompts for your AI in two groups, for any sport. Each one asks you first, then reads your data, and only then writes anything.">
 <meta property="og:url" content="https://healthaccessmcp.com/docs/prompts">
 <meta property="og:image" content="https://healthaccessmcp.com/og.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -36,11 +36,11 @@
 <header class="hero">
   <span class="label">Reference</span>
   <h1>Ideas for your AI</h1>
-  <p class="answer">Eleven prompts in two groups, suggestions only. They are not part of the setup: use them, change them or ignore them. What you share with an AI, and what it tells you, is between you and that AI. Every prompt here asks before it reads data, and reads data before it writes anything. A plan written without asking how you feel is a guess with formatting.</p>
+  <p class="answer">Eleven prompts in two groups, suggestions only. You don't need them for the setup, so change them or ignore them as you like. What you share with an AI, and what it tells you, is between you and that AI. Each prompt has the AI ask you first, then read the data, and only then write anything, because a plan written without asking how you feel is mostly a guess.</p>
 </header>
 
 <main>
-<p class="small">Voice: plain, short. The AI talks to the athlete the way a good coach does. The <b>id</b> is the name the MCP server exposes the prompt under, so a client that lists prompts can pick it from a menu instead of pasting. The text below is the source of truth for both.</p>
+<p class="small">They're written short and plain, so the AI talks to you the way a good coach would. The <b>id</b> is the name the MCP server gives each prompt, so an app that lists prompts can offer it in a menu and you don't have to paste it. The menu and copy-paste both use the text below.</p>
 
 <h2 id="export">Export: understand what your Watch recorded</h2>
 
@@ -204,9 +204,9 @@
   </div>
 </article>
 
-<h2>Why they are shaped like this</h2>
-<p>Three reasons, each learned the hard way. Effort and heart rate disagree more often than you would think, and when they do, effort is the better signal, so the AI has to ask for it. A session written before asking about time, pool length and soreness is a session that gets skipped. And a plan file that appears in the app without a yes is a surprise, which is the one thing a coach must never be.</p>
-<p>The source file is <a href="/ref/prompts.md"><code>docs/prompts.md</code></a> in the repository. If a copy differs from it, the file is right.</p>
+<h2>Why they're written this way</h2>
+<p>There are three reasons, and I learned each of them the hard way. Effort and heart rate disagree more often than you'd think, and when they do, how hard it felt is the better signal, so the AI has to ask you. If the AI writes a session before asking how much time you have, how long the pool is and what's sore, you'll probably skip it. And a plan that turns up in the app before you've said yes is a surprise, and a good coach doesn't surprise you.</p>
+<p>The original is <a href="/ref/prompts.md"><code>docs/prompts.md</code></a> in the repository. If a copy ever differs from it, go with the file.</p>
 
 <div class="next"><b>Next:</b> <a href="/docs/plans">What push_plan writes</a> <a href="/docs/files">What the AI reads</a> <a href="/docs/claude-code">Connect Claude Code</a></div>
 </main>
@@ -216,7 +216,7 @@
     <div><h4>Connect an AI</h4><ul><li><a href="/docs/claude-code">Claude Code</a></li><li><a href="/docs/claude-desktop">Claude Desktop</a></li><li><a href="/docs/cursor">Cursor</a></li><li><a href="/docs/chatgpt">ChatGPT</a></li><li><a href="/docs/local-models">Local models</a></li></ul></div>
     <div><h4>Reference</h4><ul><li><a href="/docs/files">The folder is the API</a></li><li><a href="/docs/plans">Plans and Put on Watch</a></li><li><a href="/docs/prompts">Ideas for your AI</a></li><li><a href="/ref/mcp.md">Tool reference</a></li><li><a href="/ref/schema.md">Data contract</a></li></ul></div>
     <div><h4>For AIs</h4><ul><li><a href="/llms.txt">llms.txt</a></li><li><a href="/llms-full.txt">llms-full.txt</a></li><li><a href="https://www.npmjs.com/package/healthaccess-mcp">npm package</a></li></ul></div>
-    <div><h4>About</h4><ul><li><a href="/docs/privacy">Privacy in plain words</a></li><li><a href="/privacy-policy">Privacy policy</a></li><li><a href="/support">Support</a></li><li><a href="/docs/compare">Compared with the others</a></li><li><a href="/docs/faq">Questions and answers</a></li><li><a href="/docs/health-auto-export-alternative">Alternative to Health Auto Export</a></li></ul></div>
+    <div><h4>About</h4><ul><li><a href="/docs/privacy">Privacy, explained</a></li><li><a href="/privacy-policy">Privacy policy</a></li><li><a href="/support">Support</a></li><li><a href="/docs/compare">How it compares</a></li><li><a href="/docs/faq">Questions and answers</a></li><li><a href="/docs/health-auto-export-alternative">Alternative to Health Auto Export</a></li></ul></div>
   </div>
   <p class="fine">Health Access MCP is made by Prinz Technology Consultancy, svetovanje na področju informacijskih tehnologij d.o.o. (Prinz Tech Consulting), Dunajska cesta 33, 1000 Ljubljana, Slovenia. Registration number 7326106000, VAT ID SI86067494, contact@prinz-tc.com. The source is on <a href="https://github.com/leonhardprinz/healthaccess-mcp">GitHub</a> under the MIT licence. Apple, Apple Watch, Apple Health and HealthKit are trademarks of Apple Inc.; this project is not affiliated with Apple.</p>
 </footer>
