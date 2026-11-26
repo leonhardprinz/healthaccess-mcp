@@ -59,7 +59,7 @@ enum CloudKind: String, CaseIterable, Codable, Sendable, Identifiable {
     var isBeta: Bool { access == .signIn }
 
     /// Drives the app names even while this build cannot sign in to them, so people see they are planned.
-    static let announced: [CloudKind] = [.onedrive]
+    static let announced: [CloudKind] = [.onedrive, .box]
 
     /// How the user connects: a sign-in on the drive's own page, or an address and a password typed into the app.
     enum Access: Sendable { case signIn, form }
