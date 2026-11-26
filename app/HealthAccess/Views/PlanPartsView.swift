@@ -43,7 +43,7 @@ struct PlanPartsView: View {
                         Button("Preview on Watch") { model.requestPreview(item) }
                     }
                 } footer: {
-                    Text("Put on Watch schedules the session in the Workout app and confirms it arrived. The preview shows Apple's sheet; Add to Watch there cannot be confirmed by the app.")
+                    Text("Put on Watch schedules the session in the Workout app and confirms it arrived. The preview shows Apple's sheet. The app cannot confirm Add to Watch there.")
                 }
             } else {
                 Section("Invalid plan") {

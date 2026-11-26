@@ -24,7 +24,7 @@ enum Notifier {
     static func postCloudSignIn(drive: String) async {
         let content = UNMutableNotificationContent()
         content.title = "\(drive) needs a new sign-in"
-        content.body = "The upload has stopped. Open Health Access, Settings, Cloud copy."
+        content.body = "The upload has stopped. Open Health Access, Settings, Cloud upload."
         content.sound = .default
         content.threadIdentifier = "healthaccess.cloud"
         try? await UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: "cloud-\(drive)", content: content, trigger: nil))

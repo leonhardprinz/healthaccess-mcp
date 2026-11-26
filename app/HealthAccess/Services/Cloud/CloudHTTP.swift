@@ -35,7 +35,7 @@ struct CloudHTTP: Sendable {
         switch error.code {
         case .serverCertificateUntrusted, .serverCertificateHasBadDate, .serverCertificateHasUnknownRoot, .serverCertificateNotYetValid,
              .secureConnectionFailed, .clientCertificateRejected, .clientCertificateRequired:
-            return CloudError.unreachable("iOS does not trust the server's certificate. A self-made certificate does not work; inside your own network use http://, elsewhere a certificate from a known authority.")
+            return CloudError.unreachable("iOS does not trust the server's certificate. A self-made certificate does not work. Inside your own network, use http://. Elsewhere, the server needs a certificate from a known authority.")
         case .cannotFindHost, .dnsLookupFailed:
             return CloudError.unreachable("No server is known under that address.")
         case .cannotConnectToHost:

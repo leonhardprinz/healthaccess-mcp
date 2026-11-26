@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Settings → Cloud copy: one row per drive this build can sign in to.
+/// Settings → Cloud upload: one row per drive this build can sign in to.
 struct CloudSection: View {
     @Environment(AppModel.self) private var model
 
@@ -20,15 +20,15 @@ struct CloudSection: View {
                     }
                 }
             } header: {
-                SectionTitle("Cloud copy")
+                SectionTitle("Cloud upload")
             } footer: {
-                Text("For storage apps that can't be picked as a folder: Health Access uploads a copy of your folder to them itself, from this phone straight to your own account.")
+                Text("For storage apps that you can't pick as a folder. Health Access uploads your folder to them itself, from this phone straight to your own account.")
             }
         }
     }
 }
 
-/// Settings → Uploads: how the cloud copy may use the network. Shown once a drive is connected.
+/// Settings → Uploads: how the cloud upload may use the network. Shown once a drive is connected.
 struct CloudOptionsSection: View {
     @Environment(AppModel.self) private var model
 
@@ -38,13 +38,13 @@ struct CloudOptionsSection: View {
                 Toggle(isOn: Binding(get: { model.cloud.wifiOnly }, set: { model.cloud.wifiOnly = $0 })) {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Upload on Wi-Fi only")
-                        Text("Off: the cloud copy also uses mobile data.").font(.footnote).foregroundStyle(.secondary)
+                        Text("Off: uploads also use mobile data.").font(.footnote).foregroundStyle(.secondary)
                     }
                 }
             } header: {
                 SectionTitle("Uploads")
             } footer: {
-                Text("In Low Data Mode nothing is uploaded, whatever this says.")
+                Text("In Low Data Mode the app uploads nothing, whatever this switch says.")
             }
         }
     }
@@ -64,7 +64,7 @@ enum CloudCopy {
         if status.needsSignIn { return "\(kind.name) no longer accepts the sign-in. Connect again." }
         if status.busy {
             if let progress = status.progress, progress.total > 0 {
-                let first = progress.total > 200 ? " Keep the app open; what is left goes on when you come back or while the phone rests." : ""
+                let first = progress.total > 200 ? " Keep the app open. The rest goes up when you come back, or while the phone rests." : ""
                 return "Uploading \(progress.done) of \(progress.total) files.\(first)"
             }
             return "Checking \(kind.name)."
@@ -115,7 +115,7 @@ struct CloudView: View {
                 }
             } footer: {
                 Text(status.connected
-                     ? "Your files are in \(model.cloud.place(kind)). The folder on this phone stays the original; the upload runs after every sync."
+                     ? "Your files are in \(model.cloud.place(kind)). The folder on this phone stays the original. The upload runs after every sync."
                      : "A copy of your Health data folder goes into \(kind.place), after every sync." + (kind.access == .signIn && kind.folderOnly ? " Health Access can reach only that one folder in your \(kind.name)." : ""))
             }
 
@@ -224,7 +224,7 @@ struct CloudForm: View {
             SectionTitle(kind == .webdav ? "Your server" : "Your storage")
         } footer: {
             Text(kind == .webdav
-                 ? "The address of a folder on the server. Nextcloud shows it under Files → Settings → WebDAV. The app makes a Health Access folder inside it. Use https; plain http works only for a server in your own network."
+                 ? "The address of a folder on the server. Nextcloud shows it under Files → Settings → WebDAV. The app makes a Health Access folder inside it. Use https. Plain http works only for a server in your own network."
                  : "For Cloudflare R2, Backblaze B2, MinIO or Wasabi, put the service's S3 address into Endpoint. The key needs to read, write and list in this bucket only.")
         }
     }
@@ -238,7 +238,7 @@ struct CloudStatusRows: View {
         let shown = model.cloud.kinds.filter { model.cloud.state($0).connected }
         if shown.isEmpty {
             NavigationLink { CloudList() } label: {
-                InfoRow(symbol: "icloud.and.arrow.up", tint: .secondary, title: "Cloud copy",
+                InfoRow(symbol: "icloud.and.arrow.up", tint: .secondary, title: "Cloud upload",
                         line: "Off. For Google Drive, OneDrive, Dropbox, your own server and more.")
             }
         } else {
@@ -248,7 +248,7 @@ struct CloudStatusRows: View {
                 NavigationLink { CloudView(kind: kind) } label: {
                     InfoRow(symbol: trouble ? "exclamationmark.icloud" : status.busy ? "arrow.up.circle" : "checkmark.icloud",
                             tint: trouble ? .signal : status.busy ? .accentColor : .green,
-                            title: "Copy in \(kind.name)", line: status.lastError.map { status.busy ? CloudCopy.line(status, kind: kind) : $0 } ?? CloudCopy.line(status, kind: kind))
+                            title: "Upload to \(kind.name)", line: status.lastError.map { status.busy ? CloudCopy.line(status, kind: kind) : $0 } ?? CloudCopy.line(status, kind: kind))
                 }
             }
         }
@@ -260,7 +260,7 @@ struct CloudList: View {
     var body: some View {
         List { CloudSection() }
             .listStyle(.insetGrouped)
-            .navigationTitle("Cloud copy")
+            .navigationTitle("Cloud upload")
             .navigationBarTitleDisplayMode(.inline)
     }
 }

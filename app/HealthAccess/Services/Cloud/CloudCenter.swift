@@ -98,7 +98,7 @@ final class CloudCenter {
             let stored = try secrets()
             let base = try WebDAVDrive.validate(stored["address"] ?? "")
             let user = (stored["user"] ?? "").trimmingCharacters(in: .whitespaces)
-            guard !user.isEmpty, let password = stored["password"], !password.isEmpty else { throw CloudError.unexpected("A name and a password are needed.") }
+            guard !user.isEmpty, let password = stored["password"], !password.isEmpty else { throw CloudError.unexpected("Enter a user name and a password.") }
             return WebDAVDrive(http: CloudHTTP(session: session, tokens: BasicAuth(user: user, password: password)), base: base)
         case .s3:
             let target = try S3Target.make(try secrets())

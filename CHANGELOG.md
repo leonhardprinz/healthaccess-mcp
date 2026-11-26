@@ -4,26 +4,26 @@ Versions are one number for everything: the app's `MARKETING_VERSION`, the Rust 
 
 ## 1.1.0 (app build 31), unreleased: a copy in Google Drive, OneDrive, Dropbox, Box, pCloud, on a WebDAV server or in S3 storage, and plans back from there
 
-Not released. WebDAV is tested against a real server (the Apache that ships with macOS, through the unit tests and through the app in the simulator: 1,649 files up, a plan back). The S3 signature matches Amazon's published examples. Google Drive, OneDrive, Dropbox, Box and pCloud are tested against a stubbed network only; a run against the real services needs their client ids (see `app/README.md`, "Cloud copy").
+Not released. WebDAV is tested against a real server (the Apache that ships with macOS, through the unit tests and through the app in the simulator: 1,649 files up, a plan back). The S3 signature matches Amazon's published examples. Google Drive, OneDrive, Dropbox, Box and pCloud are tested against a stubbed network only; a run against the real services needs their client ids (see `app/README.md`, "Cloud upload").
 
 ### New
-- **Cloud copy (Settings).** The app uploads a copy of the folder to Google Drive, OneDrive or Dropbox itself, after a sign-in on the drive's own page. The folder picker cannot reach these storage apps, so this is the way to them. The folder you picked stays the original; after every sync the new and changed files go up, newest first, `index.json` and `briefing.md` last. A first upload of a long history runs while the app is open and picks up where it stopped. Nothing passes through a server of ours.
+- **Cloud upload (Settings).** The app uploads a copy of the folder to Google Drive, OneDrive or Dropbox itself, after a sign-in on the drive's own page. The folder picker cannot reach these storage apps, so this is the way to them. The folder you picked stays the original; after every sync the new and changed files go up, newest first, `index.json` and `briefing.md` last. A first upload of a long history runs while the app is open and picks up where it stopped. Nothing passes through a server of ours.
 - **Seven places.** Google Drive, OneDrive (personal and work accounts), Dropbox, Box and pCloud through a sign-in on their own page. Any WebDAV server (Nextcloud, ownCloud, a Synology or QNAP NAS, Koofr, Hetzner Storage Box and others) through its address, a name and a password. Any S3 storage (Amazon S3, Cloudflare R2, Backblaze B2, MinIO, Wasabi) through a bucket and a key pair. Several can be on at once. Not possible: MEGA and Proton Drive (no public API for an app like this one), iCloud Drive (pick it as the folder).
 - **A server in your own network** may be reached over plain http (`NSAllowsLocalNetworking`); everything else has to be https. iOS asks once for local network access.
 - **The app asks for one folder, not the drive.** Box is the exception: it has no permission for one folder, so the sign-in covers the account and the app says so before it. pCloud: an app with its own folder. WebDAV: the folder whose address you give. S3: give the key access to one bucket. Google: only the files the app created (`drive.file`). OneDrive: the app's own folder (`Files.ReadWrite.AppFolder`, Apps › Health Access). Dropbox: an app-folder app (Apps › Health Access). The sign-in is OAuth 2 with PKCE in the system sign-in sheet; the long-lived token is in the keychain.
 - **Plans come back.** On OneDrive, Dropbox, Box, pCloud, WebDAV and S3 a plan file that an AI puts into `plans/` there is brought to the phone on the next sync and shows up in the Import tab like any plan. Google shows an app only its own files, so there the AI edits `plans/inbox.json`, a file the app made for that (one plan, or a list). The inbox works on the other two as well.
-- **`README.md` in the cloud copy** tells an AI that reads the drive through its own connector what the files are and how to write a plan, with an example the app's own validator accepts.
+- **`README.md` in the uploaded folder** tells an AI that reads the drive through its own connector what the files are and how to write a plan, with an example the app's own validator accepts.
 - "What left this phone" lists every upload run by drive, with the number of files.
 
 ### Thought through before anyone had to ask
-- **No folder to pick? "Keep it on this iPhone."** The first steps and Settings offer a folder in the app's own storage (On My iPhone › Health Access in the Files app), for someone whose AI reads a cloud drive. The Export tab shows Cloud copy under the folder, and each connected drive with what it is doing.
+- **No folder to pick? "Keep it on this iPhone."** The first steps and Settings offer a folder in the app's own storage (On My iPhone › Health Access in the Files app), for someone whose AI reads a cloud drive. The Export tab shows Cloud upload under the folder, and each connected drive with what it is doing.
 - **A new connection starts from nothing.** Connecting again may mean another account or another server, so what the last one held is forgotten and the files already there are found by name. Before this, a reconnect to a different account could have skipped the upload.
 - **A sign-in that ran out says so.** The Export tab shows it, and a notification is posted once.
 - **A long first upload goes on with the app closed**, as a background processing task when the phone rests.
 - **Wi-Fi only** as a switch; Low Data Mode always holds uploads back.
 - **Files that iCloud moved off the phone** are asked back and uploaded when they arrive, and the count is shown. They are never taken for deleted.
 - **A plan the app cannot read gets a status file** with `failed` and the reason ("not a valid plan: …"), so an AI that only sees the drive learns why nothing happened. The note goes when the file is a valid plan again.
-- **The message for the AI** (Export → Your AI → Copy) names the cloud copy and tells an AI with a connector to start with `README.md`.
+- **The message for the AI** (Export → Your AI → Copy) names the uploaded folder and tells an AI with a connector to start with `README.md`.
 - **Errors say what is wrong**: an unknown address, a certificate iOS does not trust, http outside the local network, a refused name and password, a drive that keeps asking to slow down. A redirect to another host never carries the sign-in along.
 - **Names are made safe for every drive** (`: * ? " < > | \` become `_`), not only for OneDrive: the Windows sync of Dropbox, Box, pCloud and Nextcloud stumbles over them too.
 
@@ -34,7 +34,7 @@ Not released. WebDAV is tested against a real server (the Apache that ships with
 
 ### For developers
 - `Services/Cloud/`: `OAuth.swift`, `CloudHTTP.swift`, the three drives, `CloudMirror.swift` (state in Application Support, decisions in `CloudPlanner`). Unit tests in `HealthAccessTests` (69), run with `xcodebuild test`; `scripts/webdav-test-server.sh start` first, or the two live WebDAV tests are skipped.
-- Client ids come from `Resources/CloudConfig.plist` (gitignored; copy the example). Without the file Cloud copy offers WebDAV and S3 only.
+- Client ids come from `Resources/CloudConfig.plist` (gitignored; copy the example). Without the file Cloud upload offers WebDAV and S3 only.
 
 ## 1.0.6, never released on its own, part of 1.1.0: Google Drive and OneDrive can't be picked, and the app says so
 

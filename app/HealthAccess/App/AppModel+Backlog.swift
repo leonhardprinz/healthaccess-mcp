@@ -104,7 +104,7 @@ extension AppModel {
         }
         confirmation = Confirmation(
             title: "Import data since \(Format.date(from))",
-            detail: "About \(workouts.formatted()) workout\(workouts == 1 ? "" : "s") and up to \(newDays.formatted()) day\(newDays == 1 ? "" : "s"), newest first. Keep the app open and the phone unlocked while it runs; it carries on where it stopped if you leave. You can pause it at any time.",
+            detail: "About \(workouts.formatted()) workout\(workouts == 1 ? "" : "s") and up to \(newDays.formatted()) day\(newDays == 1 ? "" : "s"), newest first. Keep the app open and the phone unlocked while it runs. If you leave, it carries on where it stopped. You can pause it at any time.",
             confirmTitle: "Import") { [weak self] in
                 guard let self else { return }
                 if startDay < coverage {

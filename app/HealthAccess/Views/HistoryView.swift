@@ -38,7 +38,7 @@ struct HistoryView: View {
                 } header: {
                     SectionTitle("Importing")
                 } footer: {
-                    Text("Newest first, so the recent years are there early. Keep the app open and the phone unlocked: iOS locks Health with the phone. If you leave, it carries on where it stopped the next time you open the app. New workouts are written as always.")
+                    Text("Newest first, so the recent years are there early. Keep the app open and the phone unlocked: iOS locks Health with the phone. If you leave, it carries on where it stopped the next time you open the app. The app writes new workouts as always.")
                 }
             } else {
                 if settings.historyFinishedAt != nil {
@@ -72,7 +72,7 @@ struct HistoryView: View {
                 } footer: {
                     Text(settings.lastSync == nil
                          ? "Available after the first sync."
-                         : "You see how many workouts and days it is before anything is written. Files that already exist are kept. A year is usually 5 to 40 MB in your folder; GPS routes are the bulk of it.")
+                         : "You see how many workouts and days it is before the app writes anything. The app keeps files that already exist. A year is usually 5 to 40 MB in your folder. GPS routes are the bulk of it.")
                 }
             }
         }

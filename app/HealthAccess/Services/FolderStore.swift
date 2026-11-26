@@ -10,7 +10,7 @@ struct FolderStore: Sendable {
     static let inAppName = "Health Access"
 
     /// A folder in the app's own storage, shown in the Files app under On My iPhone › Health Access. For someone
-    /// who has no synced folder to pick: the files live here and a cloud copy carries them to the AI.
+    /// who has no synced folder to pick: the files live here and the cloud upload carries them to the AI.
     /// No bookmark: the app's own storage moves with every update, so the place is worked out each time.
     static func useAppFolder() throws -> FolderStore {
         let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
@@ -220,13 +220,13 @@ enum FolderPickerCopy {
     /// Google Drive and OneDrive do not (seen on iOS 27.2 with 1.0.5), and no setting on the phone changes it.
     /// Under the buttons of the onboarding's folder step: the way for someone whose storage cannot be picked.
     static var onboarding: String {
-        "Google Drive, OneDrive or Dropbox? They can't be picked here, because they don't let other apps open their folders. Keep the folder on this iPhone, then switch on Cloud copy in Settings: Health Access uploads to them itself."
+        "Google Drive, OneDrive or Dropbox? You can't pick them here, because they don't let other apps open their folders. Keep the folder on this iPhone. Then switch on Cloud upload in Settings, and Health Access uploads to them itself."
     }
 
     static var greyedOut: String {
         let base = "Greyed out in the picker? Google Drive and OneDrive don't let other apps open their folders. Nothing on your phone is set wrong."
         // Only promise the upload to them when this build can sign in there.
-        return base + " Cloud copy below uploads to them instead."
+        return base + " Cloud upload below sends your files to them instead."
     }
 }
 

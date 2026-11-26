@@ -103,7 +103,7 @@ struct OnboardingView: View {
 
     private var connect: some View {
         screen("Now connect your AI.",
-               "This app only writes the files. Copy the message and paste it to your AI. Claude or Cursor on your computer connect to the folder; ChatGPT works from the summary in the message.") {
+               "This app only writes the files. Copy the message and paste it to your AI. Claude or Cursor on your computer connect to the folder. ChatGPT works from the summary in the message.") {
             Text(PlansText.whereFrom)
                 .font(.footnote).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)

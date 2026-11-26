@@ -4,7 +4,7 @@
 <dict>
 	<!-- Copy this file to CloudConfig.plist (gitignored), fill in your own client ids, run `xcodegen generate` again.
 	     A drive without an id is not offered in the app. WebDAV and S3 need no id and are always offered.
-	     How to get the ids: app/README.md, "Cloud copy". -->
+	     How to get the ids: app/README.md, "Cloud upload". -->
 	<!-- Google Cloud → APIs & Services → Credentials → OAuth client ID, type iOS, bundle id com.healthaccessmcp.app. -->
 	<key>GoogleClientID</key>
 	<string>your-id.apps.googleusercontent.com</string>

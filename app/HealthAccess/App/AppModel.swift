@@ -19,7 +19,7 @@ final class AppModel {
     /// The support card on the Export tab and Restore purchases in Settings.
     let support = SupportStore(settings: AppSettings.shared)
     @ObservationIgnored let health = HealthService.shared
-    /// The cloud drives the app uploads a copy of the folder to (Settings → Cloud copy).
+    /// The cloud drives the app uploads a copy of the folder to (Settings → Cloud upload).
     let cloud = CloudCenter()
     @ObservationIgnored var cloudTask: Task<Void, Never>?
 
@@ -221,7 +221,7 @@ final class AppModel {
             return StatusLine(kind: .working, title: historyUnderWay ? "Importing older data" : "Filling in missing days", detail: backlogLine)
         }
         if settings.deferredSync {
-            return StatusLine(kind: .waiting, title: "Waiting for unlock", detail: "Health is locked. Files are written when you unlock.")
+            return StatusLine(kind: .waiting, title: "Waiting for unlock", detail: "Health is locked. The app writes the files when you unlock.")
         }
         if let syncError {
             return StatusLine(kind: .failed, title: "Sync failed", detail: syncError, action: ("Try again", .syncNow))
@@ -239,15 +239,15 @@ final class AppModel {
         return (info, entry)
     }
 
-    static let syncedExplainer = "Nothing to do. Your AI can read it as soon as the folder has synced to your computer; with iCloud Drive that is usually a minute or two."
+    static let syncedExplainer = "Nothing to do. Your AI can read it as soon as the folder has synced to your computer. With iCloud Drive that is usually a minute or two."
 
     /// One plain paragraph under the status tile: what happens on its own from here, and what needs you.
     var statusExplainer: String {
         if folder == nil || folderStale {
-            return "Nothing is written until you pick a folder. Pick one your computer can reach too, like iCloud Drive, so your AI can read it."
+            return "The app writes nothing until you pick a folder. Pick one your computer can reach too, like iCloud Drive, so your AI can read it."
         }
         if healthStatus == .notRequested {
-            return "Nothing is read until you allow Health access. You choose the types, and the app only reads; it never writes to Health."
+            return "The app reads nothing until you allow Health access. You choose the types. The app only reads. It never writes to Health."
         }
         if healthStatus == .unavailable {
             return "This device has no Health app, so there is nothing to export."
@@ -262,10 +262,10 @@ final class AppModel {
             return "Keep the app open and the phone unlocked while it writes the older files. If you leave, it carries on where it stopped the next time you open the app. New workouts are still written on their own."
         }
         if settings.deferredSync {
-            return "Your phone is locked, and iOS keeps Health data locked with it. The new files are written as soon as you unlock."
+            return "Your phone is locked, and iOS keeps Health data locked with it. The app writes the new files as soon as you unlock."
         }
         if syncError != nil {
-            return "Nothing new was written. Tap Try again. If it keeps failing, the sync log in Settings says why."
+            return "The app wrote nothing new. Tap Try again. If it keeps failing, the sync log in Settings says why."
         }
         return "Nothing to do. After every workout and every night's sleep, iOS wakes the app and it writes the new files into your folder, even when it is closed. It pauses while the phone is locked, and after you swipe the app away, until you open it again."
     }
@@ -434,10 +434,10 @@ final class AppModel {
     /// Picker result → one sentence → Confirm. Nothing is written before the user confirms.
     func requestFolder(_ url: URL, key: String = "folder") {
         let name = url.lastPathComponent
-        let old = folder == nil ? "" : " The old folder is left as it is."
+        let old = folder == nil ? "" : " The old folder stays as it is."
         confirmation = Confirmation(
             title: "Use \(name) as your Health data folder",
-            detail: "Your workouts and daily health data are written there, and your AI writes workout plans into its plans folder.\(old)",
+            detail: "The app writes your workouts and daily health data there, and your AI writes workout plans into its plans folder.\(old)",
             confirmTitle: "Use folder") { [weak self] in
                 guard let self else { return }
                 if self.setFolder(url) {
@@ -453,7 +453,7 @@ final class AppModel {
     func requestAppFolder(key: String = "folder") {
         confirmation = Confirmation(
             title: "Keep the folder on this iPhone",
-            detail: "Your workouts and daily health data are written into Health Access under On My iPhone in the Files app. A folder there reaches no computer on its own; switch on a cloud copy in Settings to carry it to your AI.",
+            detail: "The app writes your workouts and daily health data into Health Access, under On My iPhone in the Files app. A folder there reaches no computer on its own. To carry it to your AI, switch on Cloud upload in Settings.",
             confirmTitle: "Use this iPhone") { [weak self] in
                 guard let self else { return }
                 if self.setFolder(nil) {
@@ -895,7 +895,7 @@ final class AppModel {
         let days = settings.backfillDays
         confirmation = Confirmation(
             title: "Write the last \(days) days again",
-            detail: "Every session since then is read from Health once more. Files that already exist are kept, so ratings survive.",
+            detail: "The app reads every session since then from Health once more. It keeps files that already exist, so ratings survive.",
             confirmTitle: "Write again") { [weak self] in
                 guard let self else { return }
                 self.settings.resetAnchor()
@@ -909,7 +909,7 @@ final class AppModel {
     func requestDaysBackfill(days: Int = 30) {
         confirmation = Confirmation(
             title: "Write the last \(days) days",
-            detail: "One day file per day in days/ (and the vitals file of the last release). Days without values get no file; days that already match are left alone.",
+            detail: "One day file per day in days/ (and the vitals file of the last release). Days without values get no file. Days that already match stay as they are.",
             confirmTitle: "Write days") { [weak self] in
                 guard let self, let folder = self.folder else { return }
                 let today = Date()
@@ -1186,7 +1186,7 @@ final class AppModel {
         }
         confirmation = Confirmation(
             title: "Put new plans on your Watch automatically",
-            detail: "Every new plan your AI writes goes into the Watch's Workout app for the time in the plan, or the next morning at 10:00 when it has none. It happens the next time Health Access runs or iOS wakes it, usually within a few hours, and you get a notification for each one. Remove from Watch takes one off again. Plans already waiting are included.",
+            detail: "Every new plan your AI writes goes into the Watch's Workout app for the time in the plan. If the plan has no time, it goes there for the next morning at 10:00. It happens the next time Health Access runs or iOS wakes it, usually within a few hours, and you get a notification for each one. Remove from Watch takes one off again. This includes plans that are already waiting.",
             confirmTitle: "Turn on") { [weak self] in
                 guard let self else { return }
                 let auth = await PlanInstaller.authorize()
@@ -1235,7 +1235,7 @@ final class AppModel {
         let when = status.scheduledFor.map { " for \(Format.dayTime($0))" } ?? ""
         confirmation = Confirmation(
             title: "Remove \(doc.name) from your Watch",
-            detail: "This takes the workout\(when) out of the Watch's Workout app and marks plans/\(item.id).status.json as cancelled. The plan file stays; Put on Watch puts it back.",
+            detail: "This takes the workout\(when) out of the Watch's Workout app and marks plans/\(item.id).status.json as cancelled. The plan file stays. Put on Watch puts it back.",
             confirmTitle: "Remove") { [weak self] in
                 guard let self, let folder = self.folder else { return }
                 let key = "plan:\(item.id)"
@@ -1388,8 +1388,8 @@ final class AppModel {
         }
         let message = SetupMessage.text(for: folder, summary: summary, drives: cloud.connected.map { ($0.name, cloud.place($0)) })
         let carries = summary == nil
-            ? "There is no health data in it yet; after the first sync it also carries your summary, for ChatGPT and phone AIs."
-            : "ChatGPT and phone AIs cannot do that, so it also carries your summary for them: the last four weeks, recent workouts, vitals and the next planned workout."
+            ? "There is no health data in it yet. After the first sync it also carries your summary, for ChatGPT and phone AIs."
+            : "ChatGPT and phone AIs cannot do that, so it also carries your summary for them. The summary has the last four weeks, recent workouts, vitals and the next planned workout."
         confirmation = Confirmation(
             title: "Copy the message for your AI",
             detail: "One message for any AI. Claude or Cursor on your computer set up the connection from it (\(SetupMessage.command)) and read your folder from then on. \(carries) Copy puts it on the clipboard and then opens the share sheet.",

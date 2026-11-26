@@ -1,6 +1,6 @@
 import Foundation
 
-/// `README.md` in the cloud copy. An AI that reads the drive through its own connector has no MCP server to
+/// `README.md` in the uploaded folder. An AI that reads the drive through its own connector has no MCP server to
 /// tell it what the files are or what a plan looks like; this file does. Kept in step with docs/schema.md.
 enum PlanGuide {
     static func text(for kind: CloudKind) -> String {

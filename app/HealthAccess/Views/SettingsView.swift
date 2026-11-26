@@ -18,7 +18,7 @@ struct SettingsView: View {
                 Button { showPicker = true } label: {
                     VStack(alignment: .leading, spacing: 2) {
                         row("Health data", model.folder?.displayNameWithProvider ?? "None yet")
-                        Text("Your finished workouts and days are written here. Tap to change.").font(.footnote).foregroundStyle(.secondary)
+                        Text("The app writes your finished workouts and days here. Tap to change.").font(.footnote).foregroundStyle(.secondary)
                     }
                     .contentShape(Rectangle())
                 }
@@ -82,7 +82,7 @@ struct SettingsView: View {
             } header: {
                 SectionTitle("What gets exported")
             } footer: {
-                Text("Everything else with data is exported: \(HealthTypes.all.count) Health types.")
+                Text("The app exports everything else that has data: \(HealthTypes.all.count) Health types.")
             }
 
             Section {
@@ -223,7 +223,7 @@ struct WhatLeftView: View {
                 } header: {
                     Text("This session")
                 } footer: {
-                    Text("Uploads to a cloud drive you connected are listed by drive with the number of files; the files go to your own account there. Usage statistics, when on, are event names with counts, durations and the app and iOS versions, sent in batches by the PostHog SDK under a random install id: no health values, file names or folder paths.")
+                    Text("Each upload to a cloud drive you connected shows here by drive, with the number of files. The files go to your own account there. Usage statistics, when on, are event names with counts, durations and the app and iOS versions. The PostHog SDK sends them in batches under a random install id. They carry no health values, file names or folder paths.")
                 }
             }
         }

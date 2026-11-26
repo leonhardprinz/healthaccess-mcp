@@ -178,7 +178,7 @@ struct SupportCard: View {
                 case .loading:
                     Text("Loading prices…").font(.footnote).foregroundStyle(.secondary)
                 case .unavailable:
-                    Text("No prices right now; the App Store did not answer.").font(.footnote).foregroundStyle(.secondary)
+                    Text("No prices right now. The App Store did not answer.").font(.footnote).foregroundStyle(.secondary)
                 case .ready:
                     HStack(spacing: 8) {
                         if let card = store.card {

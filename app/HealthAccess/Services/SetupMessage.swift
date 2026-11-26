@@ -24,25 +24,25 @@ enum SetupMessage {
         if let folder {
             var hint = "If it cannot, the folder is called \"\(folder.displayName)\""
             if let path = folder.macPathHint { hint += " and is probably at \(path)" }
-            lines.append(hint + "; pass it with --dir.")
+            lines.append(hint + ". Pass it with --dir.")
         }
-        lines.append("Then list my last 5 workouts." + (summary == nil ? "" : " Ignore the summary below; the folder has everything."))
+        lines.append("Then list my last 5 workouts." + (summary == nil ? "" : " Ignore the summary below, because the folder has everything."))
         if !drives.isEmpty {
             // A third way in: an AI with its own connection to the drive the app uploads a copy to.
             let places = drives.map { "\($0.name) (\($0.place))" }.joined(separator: ", ")
             lines.append("")
             lines.append("If you can read my \(Format.list(drives.map(\.name))) through a connector:")
-            lines.append("A copy of the folder is there: \(places). Read README.md in it first, then briefing.md. README.md also says how to send me a workout plan." + (summary == nil ? "" : " Ignore the summary below; the folder has everything."))
+            lines.append("A copy of the folder is there: \(places). Read README.md in it first, then briefing.md. README.md also says how to send me a workout plan." + (summary == nil ? "" : " Ignore the summary below, because the folder has everything."))
         }
         lines.append("")
         lines.append("If you can do neither (ChatGPT without a connector, an AI app on a phone, a chat in a browser):")
         if let summary {
-            lines.append("Do not explain the setup. Tell me in one sentence that you work from the summary below, not a live connection, then ask me what I want to know. It is a snapshot; I can copy a new one in the Health Access app at any time.")
+            lines.append("Do not explain the setup. Tell me in one sentence that you work from the summary below, not a live connection, then ask me what I want to know. It is a snapshot. I can copy a new one in the Health Access app at any time.")
             lines.append("")
             lines.append("My summary:")
             lines.append(summary)
         } else {
-            lines.append("Do not explain the setup. Tell me in one sentence that you cannot run it, and that this message carries my summary for you once the app has synced: Health Access, Export, Your AI, Copy.")
+            lines.append("Do not explain the setup. Tell me in one sentence that you cannot run it. Tell me also that this message carries my summary once the app has synced, and where I copy it: Health Access, Export, Your AI, Copy.")
         }
         return lines.joined(separator: "\n")
     }

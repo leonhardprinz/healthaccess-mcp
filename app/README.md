@@ -185,7 +185,7 @@ The last card on the Export tab is the tip jar: `com.healthaccessmcp.app.support
 - The dedupe loser stays on disk (the app never deletes session files).
 - Catalog counts stop at 10,000 samples per type in 90 days (`capped: true`); heart rate and steps hit that on a Watch wearer.
 
-## Cloud copy (Google Drive, OneDrive, Dropbox)
+## Cloud upload (Google Drive, OneDrive, Dropbox)
 
 The iOS folder picker only offers storage apps that let other apps open their folders. Google Drive and OneDrive do not, so the app uploads a copy of the folder to them itself (`Services/Cloud/`). The picked folder stays the original; `CloudMirror` uploads what is new or changed after every sync and brings back plan files an AI left in the drive's `plans/` folder (on Google through `plans/inbox.json`, because `drive.file` shows an app only its own files).
 

@@ -38,7 +38,7 @@ struct SyncLogView: View {
             } header: {
                 Text("How files get written")
             } footer: {
-                Text("Files are written when you open the app, when a workout finishes and when the Watch hands last night's sleep to the phone, as long as the phone has been unlocked once since it started. iOS's own refresh comes on top when iOS decides; for a new app that can take days. To sync at a set moment, use the Shortcuts action Sync Health data, for example in an automation when Sleep Focus turns off. The status row counts the sessions listed, so a hidden duplicate is not counted. \(PlansText.whereFrom)")
+                Text("The app writes files when you open it, when a workout finishes and when the Watch hands last night's sleep to the phone. For that, the phone must have been unlocked once since it started. iOS's own refresh comes on top when iOS decides. For a new app that can take days. To sync at a set moment, use the Shortcuts action Sync Health data, for example in an automation when Sleep Focus turns off. The status row counts the sessions listed, so it does not count a hidden duplicate. \(PlansText.whereFrom)")
             }
 
             Section {
@@ -77,7 +77,7 @@ struct SyncLogView: View {
                     .font(.footnote)
                     .disabled(model.folder == nil || model.isSyncing)
             } footer: {
-                Text("Session files that already exist are never overwritten, so the Watch's ratings survive. Day files are rewritten only when a value changed. Days the app missed while it was closed are filled in on their own; for the years before, see Settings → Older data.")
+                Text("The app never overwrites session files that already exist, so the Watch's ratings survive. It rewrites a day file only when a value changed. It fills in the days it missed while it was closed. For the years before, see Settings → Older data.")
             }
         }
         .listStyle(.insetGrouped)

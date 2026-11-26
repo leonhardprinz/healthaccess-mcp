@@ -138,7 +138,7 @@ struct PlansView: View {
         }
         return waiting > 0
             ? "Each plan goes onto your Watch for the day and time it names, ready in the Workout app. With Automatic on, new plans get there without a tap."
-            : "Nothing waiting. When your AI writes a plan, you get a notification; tap Put on Watch here. With Automatic on, plans go onto your Watch without a tap."
+            : "Nothing waiting. When your AI writes a plan, you get a notification. Then tap Put on Watch here. With Automatic on, plans go onto your Watch without a tap."
     }
 
     /// Where plans stand: a green check when nothing waits, the count when plans wait for you, Pick folder when the

@@ -1,7 +1,7 @@
 import Foundation
 import UIKit
 
-/// The cloud copy: the app uploads the folder to Google Drive, OneDrive or Dropbox itself, because the folder
+/// Cloud upload: the app uploads the folder to Google Drive, OneDrive or Dropbox itself, because the folder
 /// picker cannot reach them, and brings back the plans an AI left there.
 extension AppModel {
     func requestCloudConnect(_ kind: CloudKind) {
@@ -46,7 +46,7 @@ extension AppModel {
     func requestCloudDisconnect(_ kind: CloudKind) {
         confirmation = Confirmation(
             title: "Disconnect \(kind.name)",
-            detail: "The upload stops and the sign-in is removed from this phone. The files already in your \(kind.name) stay there until you delete them there.",
+            detail: "The upload stops, and the app removes the sign-in from this phone. The files already in your \(kind.name) stay there until you delete them there.",
             confirmTitle: "Disconnect") { [weak self] in
                 guard let self else { return }
                 self.cloudTask?.cancel()

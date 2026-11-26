@@ -15,7 +15,7 @@ struct S3Target: Sendable, Equatable {
     static func make(_ fields: [String: String]) throws -> S3Target {
         func field(_ name: String) -> String { (fields[name] ?? "").trimmingCharacters(in: .whitespacesAndNewlines) }
         let bucket = field("bucket"), access = field("accessKey"), secret = field("secretKey")
-        guard !bucket.isEmpty, !access.isEmpty, !secret.isEmpty else { throw CloudError.unexpected("Bucket, access key and secret key are needed.") }
+        guard !bucket.isEmpty, !access.isEmpty, !secret.isEmpty else { throw CloudError.unexpected("Enter a bucket, an access key and a secret key.") }
         guard bucket.unicodeScalars.allSatisfy({ CharacterSet.alphanumerics.contains($0) || "-._".unicodeScalars.contains($0) }) else {
             throw CloudError.unexpected("That is not a bucket name.")
         }

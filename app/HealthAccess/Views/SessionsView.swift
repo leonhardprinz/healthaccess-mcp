@@ -15,7 +15,7 @@ struct SessionsView: View {
                     }
                 } footer: {
                     if let scan = model.indexScan, !scan.dropped.isEmpty {
-                        Text("\(scan.dropped.count) duplicate\(scan.dropped.count == 1 ? "" : "s") hidden by the dedupe rule; the files stay in the folder.")
+                        Text("\(scan.dropped.count) duplicate\(scan.dropped.count == 1 ? "" : "s") hidden as duplicates. The files stay in the folder.")
                     }
                 }
             } else {
