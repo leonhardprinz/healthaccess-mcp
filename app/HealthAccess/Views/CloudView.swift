@@ -84,7 +84,7 @@ struct CloudOptionsSection: View {
             } header: {
                 SectionTitle("Uploads")
             } footer: {
-                Text("In Low Data Mode the app uploads nothing, whatever this switch says.")
+                Text("In Low Data Mode, the app uploads nothing, whatever this switch says.")
             }
         }
     }
@@ -104,15 +104,15 @@ enum CloudCopy {
         if status.needsSignIn { return "\(kind.name) no longer accepts the sign-in. Connect again." }
         if status.busy {
             if let progress = status.progress, progress.total > 0 {
-                let first = progress.total > 200 ? " Keep the app open. The rest goes up when you come back, or while the phone rests." : ""
+                let first = progress.total > 200 ? " Keep the app open. The app uploads the rest when you come back, or while the phone rests." : ""
                 return "Uploading \(progress.done) of \(progress.total) files.\(first)"
             }
             return "Getting \(kind.name) ready. The upload starts in a few seconds."
         }
         var text = "\(status.files) file\(status.files == 1 ? "" : "s") in \(kind.name)."
         if let last = status.lastRun { text += " Last upload \(Format.dayTime(last))." }
-        if status.waiting > 0 { text += " \(status.waiting) more go with the next sync." }
-        if status.inICloud > 0 { text += " \(status.inICloud) file\(status.inICloud == 1 ? " is" : "s are") in iCloud only right now and go up once the phone has them." }
+        if status.waiting > 0 { text += " The app uploads \(status.waiting) more with the next sync." }
+        if status.inICloud > 0 { text += " \(status.inICloud) file\(status.inICloud == 1 ? " is" : "s are") in iCloud only right now. The app uploads \(status.inICloud == 1 ? "it" : "them") once the phone has \(status.inICloud == 1 ? "it" : "them")." }
         return text
     }
 
@@ -184,7 +184,7 @@ struct CloudView: View {
                 Section {
                     Button("Disconnect", role: .destructive) { model.requestCloudDisconnect(kind) }
                 } footer: {
-                    Text("Disconnecting leaves the files in your \(kind.name). The app never deletes them there, except a plan's status file that you undo here.")
+                    Text("If you disconnect, the files stay in your \(kind.name). The app never deletes them there, except a plan's status file that you undo here.")
                 }
             }
         }
@@ -268,7 +268,7 @@ struct CloudForm: View {
             }
             Button("Connect", action: connect).disabled(!complete)
             if !complete {
-                Text("Connect works once \(Format.list(missing, last: "and")) \(missing.count == 1 ? "is" : "are") filled in.")
+                Text("Fill in \(Format.list(missing, last: "and")) first. Then Connect works.")
                     .font(.footnote).foregroundStyle(.secondary)
             }
         } header: {

@@ -1,6 +1,6 @@
 # Health Access MCP, the whole thing in one file
 
-Written for an AI that has to install and use Health Access MCP without reading any other page. Version of this file: 2026-10-25. Canonical URL: https://healthaccessmcp.com/llms-full.txt
+Written for an AI that has to install and use Health Access MCP without reading any other page. Version of this file: 2026-11-26. Canonical URL: https://healthaccessmcp.com/llms-full.txt
 
 ## 1. What it is
 
@@ -9,7 +9,7 @@ Health Access is middleware. It does the one thing Apple requires a phone app fo
 Three parts:
 
 - The iPhone app, "Health Access" (iOS 17 or later). Three tabs: Export (reads HealthKit, writes `workouts/*.json`, `days/*.json`, `index.json`, `briefing.md`, `catalog.json`, `profile.json` into a folder the user picked), Import (puts AI-written workout plans onto the Apple Watch through WorkoutKit, by a tap or automatically, and writes `plans/*.status.json`), Settings. No server, no account. Free on the App Store since 2026-11-13: https://apps.apple.com/app/id6831916470
-- `healthaccess-mcp`, an MCP server over stdio (Rust, MIT). Reads the folder, writes `plans/<id>.json`, a small presence file under `mcp/clients/` and the two rating fields of a workout, nothing else. Thirteen tools, eleven prompts, three resources. Live on npm (1.0.4) and in the official MCP registry.
+- `healthaccess-mcp`, an MCP server over stdio (Rust, MIT). Reads the folder, writes `plans/<id>.json`, a small presence file under `mcp/clients/` and the two rating fields of a workout, nothing else. Thirteen tools, eleven prompts, three resources. Live on npm (1.1.0) and in the official MCP registry.
 - `healthaccess`, a command line with the same views (`list`, `show`, `summary`, `rate`, `plan push|status|list`, `day`, `days`, `catalog`, `profile`, `ecgs`, `briefing`, `prompts`, `doctor`). Live, in the same npm package: `npx -y -p healthaccess-mcp healthaccess <command>`.
 
 The folder is one the athlete picks in the iOS folder picker: iCloud Drive, SMB/NAS or On My iPhone. The picker only offers storage apps that let other apps open their folders. Google Drive and OneDrive can't be picked on an iPhone: they don't let other apps open their folders, they show up greyed out, and no setting on the phone changes that (seen on iOS 27.2). Other storage apps work only if they allow it. From app version 1.1.0 there is a second way, Cloud upload (Settings): the app uploads a copy of the folder itself to Google Drive (sign-in with access only to files the app creates; a new folder "Health Access" at the top level of My Drive, which the user may move), to any WebDAV server or to S3-compatible storage. The copy carries README.md for an AI that reads the drive through a connector. Plans come back: on WebDAV and S3 as files in plans/, on Google Drive through plans/inbox.json, a file the app created and the AI edits. OneDrive and Box are planned. The one rule: the computer where the AI runs must see the same folder. The server finds it on its own (section 4); `--dir` names it when the search does not.
@@ -22,7 +22,7 @@ Project history: the codename was "Tide" until 2026-10-25. Old identifiers are a
 
 Once, about five minutes, the user:
 1. Installs the app.
-2. Picks a folder (any Files provider) that syncs to the computer where the AI runs.
+2. Picks a folder (iCloud Drive or a network drive, see section 1) that syncs to the computer where the AI runs.
 3. Allows Health access (read only, chosen types) and notifications (one kind only: "Your AI wrote S27", when a plan file appears).
 4. Gives the MCP to the AI: pastes one paragraph, the AI sets itself up from this file.
 
@@ -294,12 +294,17 @@ All results are JSON text. Domain errors (unknown id, failed validation) come ba
 - `get_workout {id, include_hr_series?=false, include_laps?=true}` (read-only). The full workout document plus `summary`, `file` and `cardiac_cost` (`beats_per_100m`, `best_100_pace_s`, `avg_hr`, `basis`).
 - `get_vitals {days?=30}` (read-only). The vitals files of the last N days, oldest first, with `latest` and simple `averages`. Empty with a note until the app has written vitals.
 - `training_summary {weeks?=8}` (read-only). One entry per ISO week ending in the current week, empty weeks included: `sessions`, `duration_s`, `distance_m`, duration-weighted `avg_hr`, `z12_pct` (share of time in zones 1 and 2), `mean_effort` over rated sessions, `rated_sessions`, `cardiac_cost` (mean over swims), `by_sport`. Plus `cardiac_cost_trend` (one point per swim) and `notes` stating the heuristics. Cardiac cost = avg HR x best freestyle 100 m pace (s) / 60 = heart beats per 100 m; lower is better; compare sessions of similar structure.
+- `get_day {date}` (read-only). `days/<date>.json`: everything Health holds for one day, in groups (`activity`, `heart`, `respiratory`, `sleep`, `body`, `blood`, `mobility`, `hearing`, `nutrition`, `mind`, `symptoms`, `cycle`, `medications`, `hygiene`, `uv`, `wheelchair`, `audiogram`, `vision`). Returns `{file, day}`.
+- `get_days {from, to, groups?}` (read-only). The day files in a range (at most 366 days), oldest first. `groups` reduces every day to the named groups.
+- `get_catalog {}` (read-only). `catalog.json` as the app wrote it (every Health type, whether it has data, where it was exported) plus a coverage check.
+- `get_profile {}` (read-only). `profile.json`: `age`, `birth_year`, `biological_sex`, `blood_type`, `wheelchair_use`, `activity_move_mode`, `fitzpatrick_skin_type`.
+- `list_ecgs {}` (read-only). Every `ecg/<timestamp>.json`, newest first, with classification, average heart rate and the summary as written.
 - `rate_workout {id, effort, feel?}` (writes). Stores `effort` (1 to 10) and, when given, `feel` in the workout file; only those two keys change (atomic rewrite). Updates the matching `index.json` row if the index lists the workout. Omitting `feel` keeps the previous note. The AI must ask the athlete for the number, never guess it.
 - `push_plan {plan}` (writes). Validates a plan (section 10) and writes `plans/<id>.json` with `id = <RFC 3339 UTC seconds>-<slug(name)>`. Returns `id`, `file`, `path`, `planned_distance_m`, `planned_time_s`, the stored `plan` and a `next` hint. Every validation violation is reported in one message.
 - `get_plan_status {id}` (read-only). `{plan_id, state, at, error}` plus `method`, `workoutkit_id`, `scheduled_for` when present. `state`: `pending` | `scheduled` | `failed` | `cancelled`.
 - `list_plans {}` (read-only). Every plan in `plans/` with its state, planned distance and time, newest first.
 
-Resources: `healthaccess://index` (the deduplicated index), `healthaccess://workout/<id>` (one workout, heart-rate series included; template `healthaccess://workout/{id}`).
+Resources: `healthaccess://briefing` (the one-page summary, Markdown), `healthaccess://index` (the deduplicated index), `healthaccess://workout/<id>` (one workout, heart-rate series included; template `healthaccess://workout/{id}`).
 
 Prompts: the server exposes the eleven ideas of section 11 as MCP prompts under the ids given there. They are suggestions, not a step of the setup; the text works pasted as well.
 
@@ -328,7 +333,7 @@ What the AI passes to `push_plan` (the server fills `schema`, `id`, `created_at`
 ```
 
 Rules the server checks:
-- `sport` is one of `run`, `indoor_run`, `walk`, `hike`, `cycle`, `indoor_cycle`, `pool_swim`, `open_water_swim`, `indoor_row`, `hiit` or `elliptical`. `hiit` and `elliptical` take `time_s` goals only. `pool_length_m` is a reminder for pool swims; the Watch keeps its own pool length.
+- `sport` is one of `run`, `indoor_run`, `walk`, `hike`, `cycle`, `indoor_cycle`, `pool_swim`, `open_water_swim`, `indoor_row`, `hiit`, `elliptical` or `strength`. `hiit`, `elliptical` and `strength` take no distance goals (`time_s` or `open`). `pool_length_m` is a reminder for pool swims; the Watch keeps its own pool length.
 - `name` not empty, at most 40 characters. Use the next free S-number (S13 after S12 in the example folder).
 - At least one block; `repeat` 1 to 99; each block at least one step.
 - `goal.type` is `time_s` or `distance_m`, with a positive value.
@@ -545,7 +550,7 @@ Show the parts as a list. If I say yes, call `push_plan` with `scheduled_for`, t
 
 ## 14. Telemetry
 
-Off by default on both sides. The app sends nothing unless the user turns on usage statistics; then exactly `app_opened`, `export_completed {workout_count, duration_ms, trigger}`, `export_failed {error_domain, code}`, `plan_scheduled`, `plan_put_on_watch {method}`, `setup_message_copied`, `ai_connected {client}` (once per AI client, the kind from a fixed list), plus app and OS version and a random install id. The server sends nothing unless `telemetry = true` and a PostHog key are set in config.toml (or `--telemetry` is passed); then exactly `mcp_started {version}` and `mcp_tool_called {tool, duration_ms, ok, error_kind?}`. Never tool arguments, results, health values, file names or paths.
+Off by default on both sides. The app sends nothing unless the user turns on usage statistics; then exactly `app_opened`, `export_completed {workout_count, duration_ms, trigger}`, `export_failed {error_domain, code}`, `plan_scheduled`, `plan_put_on_watch {method}`, `setup_message_copied`, `ai_connected {client}` (once per AI client, the kind from a fixed list), plus app and OS version and a random install id. One exception from app version 1.1.0: when the user taps a planned drive (OneDrive, Box) in Settings → Cloud upload and confirms, the app sends one event, `drive_interest`, with the drive's name, the app version and the random install id, once per drive, also with usage statistics off. The server sends nothing unless `telemetry = true` and a PostHog key are set in config.toml (or `--telemetry` is passed); then exactly `mcp_started {version}` and `mcp_tool_called {tool, duration_ms, ok, error_kind?}`. Never tool arguments, results, health values, file names or paths.
 
 ## 15. Where to read more
 
@@ -553,5 +558,5 @@ Off by default on both sides. The app sends nothing unless the user turns on usa
 - Data contract, every field: https://healthaccessmcp.com/ref/schema.md
 - Ideas for your AI (the eleven prompts), source file: https://healthaccessmcp.com/ref/prompts.md
 - Synthetic example folder: https://healthaccessmcp.com/examples/README.md
-- Site: https://healthaccessmcp.com/ (pages: /docs/claude-code, /docs/claude-desktop, /docs/cursor, /docs/chatgpt, /docs/local-models, /docs/files, /docs/plans, /docs/prompts, /docs/privacy, /docs/compare)
+- Site: https://healthaccessmcp.com/ (pages: /docs/claude-code, /docs/claude-desktop, /docs/cursor, /docs/chatgpt, /docs/local-models, /docs/files, /docs/plans, /docs/cloud, /docs/prompts, /docs/privacy, /docs/faq, /docs/compare, /docs/health-auto-export-alternative)
 - License: MIT for the server and CLI. Apple, Apple Watch, Apple Health and HealthKit are trademarks of Apple Inc.; the project is not affiliated with Apple.

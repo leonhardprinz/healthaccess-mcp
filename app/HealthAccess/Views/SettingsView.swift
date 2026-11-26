@@ -206,7 +206,7 @@ struct WhatLeftView: View {
                          ? "Nothing yet this session. With usage statistics on, event names go to \(model.usageStatisticsHost) as they happen."
                          : "Nothing. Health Access has no server.")
                 } footer: {
-                    Text("Your health data goes only into the folder you picked. The folder's own sync (iCloud Drive, for example) is the provider's, not this app's.")
+                    Text("Your health data goes only into the folder you picked and, with Cloud upload on, to the drive you connected. A service such as iCloud Drive can copy the folder to your computer. That is the service's work, not this app's.")
                 }
             } else {
                 Section {

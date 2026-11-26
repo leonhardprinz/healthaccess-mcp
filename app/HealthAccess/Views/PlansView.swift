@@ -36,7 +36,7 @@ struct PlansView: View {
                         InfoRow(symbol: "applewatch", tint: .accentColor,
                                 title: "Automatic",
                                 line: model.settings.autoPutOnWatch
-                                    ? "New plans go on your Watch at their time."
+                                    ? "New plans go onto your Watch for the time in the plan."
                                     : "Off. You tap Put on Watch for each plan.")
                     }
                     if let result = model.results["auto"] { ResultLine(result: result, undoKey: "auto") }
@@ -86,7 +86,7 @@ struct PlansView: View {
                 if waiting.isEmpty && onWatch.isEmpty && earlier.isEmpty && invalid.isEmpty {
                     Section {
                         InfoRow(symbol: "tray", tint: .secondary, title: "No workout plans yet",
-                                line: "Ask your AI for a session. Say which day and time.")
+                                line: "Ask your AI for a workout plan. Say which day and time.")
                     } header: {
                         SectionTitle("Your workout plans")
                     }
@@ -128,13 +128,13 @@ struct PlansView: View {
     /// One plain paragraph under the tile: what happens to plans on their own, and what needs a tap.
     private var plansExplainer: String {
         if model.folder == nil || model.folderStale {
-            return "Your AI writes workout plans into a plans folder inside your Health Access folder. Pick that folder so the app can see them."
+            return "Your AI writes workout plans into a plans folder inside your Health data folder. Pick that folder so the app can see them."
         }
         let waiting = model.needsYou.filter { model.results["plan:\($0.id)"] == nil }.count
         if model.settings.autoPutOnWatch {
             return waiting > 0
-                ? "Automatic is on: these go onto your Watch by themselves the next time iOS wakes the app, usually within hours. Tap Put on Watch to do it now."
-                : "Automatic is on. New plans from your AI go onto your Watch by themselves, usually within hours, whenever iOS wakes the app or you open it."
+                ? "Automatic is on. These plans go onto your Watch by themselves the next time iOS wakes the app, usually within hours. Tap Put on Watch to do it now."
+                : "Automatic is on. When iOS wakes the app or you open it, new plans from your AI go onto your Watch by themselves. This usually happens within hours."
         }
         return waiting > 0
             ? "Each plan goes onto your Watch for the day and time it names, ready in the Workout app. With Automatic on, new plans get there without a tap."
@@ -171,7 +171,7 @@ struct AutoOfferLine: View {
     var body: some View {
         if model.autoOfferKey == key && !model.settings.autoPutOnWatch {
             HStack(spacing: 8) {
-                Text("Next plans can go on by themselves.").font(.footnote).foregroundStyle(.secondary)
+                Text("The next plans can go on by themselves.").font(.footnote).foregroundStyle(.secondary)
                 Spacer(minLength: 8)
                 Button("Turn on Automatic") { model.requestAutoPutOnWatch(true) }
                     .buttonStyle(.bordered)

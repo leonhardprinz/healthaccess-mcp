@@ -33,14 +33,14 @@ targets:
           UIImageName: LaunchMark
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         UIAppFonts: [IBMPlexSansCondensed-SemiBold.ttf, IBMPlexSansCondensed-Bold.ttf]
-        NSHealthShareUsageDescription: Health Access writes the Health data you allow into a folder you choose, as files for your AI or coach. Everything is optional, and nothing is sent to us.
-        NSHealthUpdateUsageDescription: Health Access never writes to Health. It only reads the data you allow; workout plans go to your Apple Watch through WorkoutKit.
+        NSHealthShareUsageDescription: Health Access writes the Health data you allow into a folder you choose, as files for your AI or coach. Everything is optional, and nothing goes to us.
+        NSHealthUpdateUsageDescription: Health Access never writes to Health. It only reads the data you allow. Workout plans go to your Apple Watch through WorkoutKit.
         UIBackgroundModes: [fetch, processing]
         UIFileSharingEnabled: true
         LSSupportsOpeningDocumentsInPlace: true
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
-        NSLocalNetworkUsageDescription: Health Access reaches a server in your own network only when you connect one in Settings, to upload a copy of your folder to it.
+        NSLocalNetworkUsageDescription: Health Access reaches a server in your own network only when you connect one in Settings. It then uploads a copy of your folder to that server.
         BGTaskSchedulerPermittedIdentifiers: [com.healthaccessmcp.app.export, com.healthaccessmcp.app.cloud]
     entitlements:
       path: HealthAccess/HealthAccess.entitlements
@@ -58,7 +58,7 @@ targets:
         CODE_SIGN_STYLE: Automatic
         DEVELOPMENT_TEAM: 72995T7U66
         MARKETING_VERSION: "1.1.0"
-        CURRENT_PROJECT_VERSION: "36"
+        CURRENT_PROJECT_VERSION: "37"
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         SWIFT_STRICT_CONCURRENCY: targeted

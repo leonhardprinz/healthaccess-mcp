@@ -278,7 +278,7 @@ struct FolderRow: View {
                     Image(systemName: "folder.badge.plus").foregroundStyle(Color.signal).font(.title3)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(model.folderStale ? "Folder moved" : "No folder yet").foregroundStyle(Color.primary)
-                        Text("Pick one that syncs to your computer.").font(.footnote).foregroundStyle(.secondary)
+                        Text("Pick one that reaches your computer.").font(.footnote).foregroundStyle(.secondary)
                     }
                     Spacer()
                     Text("Pick").foregroundStyle(Color.accentColor)

@@ -4,7 +4,7 @@ import AppIntents
 /// such as "When Sleep Focus turns off", so last night's sleep is in the folder at a known moment.
 struct SyncHealthDataIntent: AppIntent {
     static let title: LocalizedStringResource = "Sync Health data"
-    static let description = IntentDescription("Writes new workouts and today's and yesterday's health data, last night's sleep included, into your Health Access folder.")
+    static let description = IntentDescription("Writes new workouts and today's and yesterday's health data, last night's sleep included, into your Health data folder.")
     static let openAppWhenRun = false
 
     @MainActor

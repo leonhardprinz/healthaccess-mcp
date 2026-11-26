@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Privacy policy for Health Access MCP</title>
-<meta name="description" content="The formal GDPR privacy policy for the Health Access app, the healthaccess-mcp server, the healthaccess CLI and this website. Your health data stays on your devices and in the storage you chose. Effective 27 October 2026.">
+<meta name="description" content="The formal GDPR privacy policy for the Health Access app, the healthaccess-mcp server, the healthaccess CLI and this website. Your health data stays on your devices and in the storage you chose. Effective 26 November 2026.">
 <link rel="canonical" href="https://healthaccessmcp.com/privacy-policy">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="Health Access MCP">
@@ -124,7 +124,7 @@
 <p>The app keeps its settings, a link to your folder, a random install id and a sync log in its own storage on your iPhone. The sync log lists when the app woke and what it wrote. None of this is sent to us. iOS includes it in your device backup if you make one. Deleting the app deletes it.</p>
 
 <h2 id="usage-statistics">4. Usage statistics</h2>
-<p>Usage statistics tell us which features are used and whether they worked. They are off by default in the app and in the MCP server. Nothing is sent unless you turn them on.</p>
+<p>Usage statistics tell us which features are used and whether they worked. They are off by default in the app and in the MCP server. Nothing is sent unless you turn them on. The one exception is the single event <code>drive_interest</code>, described below, which the app sends only when you ask for a drive and confirm.</p>
 
 <h3 id="usage-app">In the app</h3>
 <p>You turn them on in Settings → Trust → Usage statistics and confirm in a dialog that names what is sent and where. From then on the app sends these events to PostHog:</p>
@@ -208,7 +208,7 @@
 
 <h2 id="recipients">9. Who receives data</h2>
 <ul>
-  <li><b>PostHog, Inc.</b>, as our processor: usage statistics, only if you turn them on.</li>
+  <li><b>PostHog, Inc.</b>, as our processor: usage statistics, only if you turn them on, and the single event <code>drive_interest</code>, only if you ask for a drive and confirm.</li>
   <li><b>Cloudflare, Inc.</b>, as our processor: the server logs of this website.</li>
   <li><b>Apple</b>, as the merchant: everything about a purchase, under Apple's own privacy policy.</li>
   <li><b>Our email provider</b>, as our processor: the email you send us.</li>
@@ -282,7 +282,7 @@
 
 <h2 id="contact">16. Contact</h2>
 <p>Privacy questions and requests: <a href="mailto:privacy@healthaccessmcp.com">privacy@healthaccessmcp.com</a>. By post: Prinz Technology Consultancy d.o.o., Dunajska cesta 33, 1000 Ljubljana, Slovenia. Help with the app or the server: <a href="/support">Support</a>.</p>
-<p class="small">Effective 27 October 2026.</p>
+<p class="small">Effective 26 November 2026.</p>
 
 <div class="next"><b>Next:</b> <a href="/docs/privacy">The plain-language version</a> <a href="/support">Support</a> <a href="/docs/files">What is in the folder</a></div>
 </main>

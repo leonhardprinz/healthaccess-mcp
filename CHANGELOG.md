@@ -2,7 +2,7 @@
 
 Versions are one number for everything: the app's `MARKETING_VERSION`, the Rust crates and the npm packages (`scripts/bump-version.sh`). The app's build number counts up on its own. Dates are Europe/Ljubljana.
 
-## 1.1.0 (app build 36), unreleased: Cloud upload to Google Drive, a WebDAV server or S3 storage, and plans back from there
+## 1.1.0 (app build 37), unreleased: Cloud upload to Google Drive, a WebDAV server or S3 storage, and plans back from there
 
 Not released. What the app offers in this version: Google Drive, any WebDAV server, any S3 storage. Google Drive is tested on a real iPhone against a real account (sign-in, first upload, the folder in My Drive). WebDAV is tested against a real server (the Apache that ships with macOS: unit tests, the simulator with 1,649 files up and a plan back, and a real iPhone over the local network). The S3 signature matches Amazon's published examples; a real upload to a bucket is not tested.
 
@@ -28,6 +28,7 @@ OneDrive and Box are shown greyed out as "Soon": a tap, after a confirmation, se
 - **A plan the app cannot read gets a status file** with `failed` and the reason ("not a valid plan: …"), so an AI that only sees the drive learns why nothing happened. The note goes when the file is a valid plan again.
 - **The message for the AI** (Export → Your AI → Copy) names the uploaded folder and tells an AI with a connector to start with `README.md`.
 - **Errors say what is wrong**: an unknown address, a certificate iOS does not trust, http outside the local network, a refused name and password, a drive that keeps asking to slow down. A redirect to another host never carries the sign-in along.
+- **A second plain-English pass over every string in the app and every page of the site.** One word for one thing (a recorded workout is a workout, a planned one a workout plan; the app uploads, it does not send or mirror; the folder is the Health data folder), shorter sentences, the condition before the instruction. The site and the store texts name what 1.1.0 offers; `llms-full.txt` lists all thirteen tools and twelve sports.
 - **Names are made safe for every drive** (`: * ? " < > | \` become `_`), not only for OneDrive: the Windows sync of Dropbox, Box, pCloud and Nextcloud stumbles over them too.
 
 ### Limits

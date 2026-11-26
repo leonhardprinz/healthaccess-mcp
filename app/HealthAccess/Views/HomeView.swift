@@ -164,7 +164,7 @@ struct SupportCard: View {
     @Environment(\.purchase) private var purchase
     @State private var busy = false
 
-    static let text = "Health Access is open source and privacy first: it unlocks your own health data into folders you own, nothing in between. The AI tokens that built it cost real money. Remove this card for good and help the dev recoup them, or buy a coffee and leave it."
+    static let text = "Health Access is open source and privacy first. It puts your own health data into folders you own, with nothing in between. The AI tokens that built it cost real money. Remove this card for good and help the developer pay for them, or buy a coffee and keep the card."
 
     var body: some View {
         let store = model.support
@@ -280,7 +280,7 @@ struct ConnectRow: View {
                     Image(systemName: "circle.dashed").foregroundStyle(Color.signal).font(.title3)
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Not connected")
-                        Text("Copy the message, paste it to your AI. It tells Claude, Cursor or ChatGPT what to do.")
+                        Text("Copy the message and paste it to your AI. It tells Claude, Cursor or ChatGPT what to do.")
                             .font(.footnote).foregroundStyle(.secondary)
                     }
                     Spacer(minLength: 0)
@@ -325,7 +325,7 @@ struct ClientsView: View {
                     }
                 }
             } footer: {
-                Text("From the handshake files the MCP writes into mcp/clients in your folder. An AI counts as connected when it was seen within 7 days.")
+                Text("The MCP server writes a small file for each AI into mcp/clients in your folder. This list comes from those files. An AI counts as connected when it was seen within 7 days.")
             }
         }
         .listStyle(.insetGrouped)

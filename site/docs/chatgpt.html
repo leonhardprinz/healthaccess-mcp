@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Does Health Access MCP work with ChatGPT? Apple Health in ChatGPT</title>
-<meta name="description" content="Through the files, yes. Through the MCP, not today: ChatGPT only connects to remote HTTPS MCP servers on some plans, and Health Access MCP runs on your Mac. Where things stand today, and the two ways that work.">
+<meta name="description" content="Through the files, yes. Through the MCP, not today. ChatGPT only connects to remote HTTPS MCP servers on some subscriptions, and Health Access MCP runs on your Mac. Where things stand today, and the two ways that work.">
 <link rel="canonical" href="https://healthaccessmcp.com/docs/chatgpt">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="Health Access MCP">
@@ -36,25 +36,26 @@
 <header class="hero">
   <span class="label">Connect an AI</span>
   <h1>Apple Health in ChatGPT</h1>
-  <p class="answer">Through the files, yes. Through the MCP, not today. ChatGPT connects to MCP servers at an HTTPS URL, on some plans only, and doesn't start a program on your Mac. Health Access MCP is a program that runs on your Mac. Here's where things stand and what works.</p>
+  <p class="answer">Through the files, yes. Through the MCP, not today. ChatGPT connects to MCP servers at an HTTPS URL, on some subscriptions only, and doesn't start a program on your Mac. Health Access MCP is a program that runs on your Mac. Here's where things stand and what works.</p>
 </header>
 
 <main>
 <h2>ChatGPT's MCP support as of October 2026</h2>
 <ul>
-  <li>ChatGPT can connect to custom MCP servers, but only remote ones with an HTTPS URL. It can't launch a local process over stdio, and that's how Health Access MCP (like every other local MCP server) talks to its client.</li>
-  <li>The plans that can add a custom MCP server have changed more than once since the feature came out in 2025. When I wrote this, OpenAI's help center listed it for Business and Enterprise/Edu workspaces, with a read-only version for Pro. <span class="tag confirm">to confirm</span> Check <a href="https://help.openai.com/en/articles/12584461-developer-mode-and-mcp-apps-in-chatgpt">OpenAI's article on developer mode and MCP in ChatGPT</a> before you plan around it.</li>
-  <li>Health Access MCP needs no changes for ChatGPT, because the server speaks standard MCP. If OpenAI adds local servers, you'd use the <a href="/docs/claude-desktop">Claude Desktop snippet</a>.</li>
+  <li>ChatGPT can connect to custom MCP servers, but only remote ones with an HTTPS URL. It can't start a local program over stdio, and that's how Health Access MCP (like every other local MCP server) talks to its client.</li>
+  <li>The ChatGPT subscriptions that can add a custom MCP server have changed more than once since the feature came out in 2025. When I wrote this, OpenAI's help center listed it for Business and Enterprise/Edu workspaces, with a read-only version for Pro. <span class="tag confirm">to confirm</span> Check <a href="https://help.openai.com/en/articles/12584461-developer-mode-and-mcp-apps-in-chatgpt">OpenAI's article on developer mode and MCP in ChatGPT</a> before you rely on it.</li>
+  <li>Health Access MCP needs no changes for ChatGPT, because the server speaks standard MCP. If OpenAI adds local servers, use the <a href="/docs/claude-desktop">Claude Desktop snippet</a>.</li>
 </ul>
 
 <h2>Path 1: use the files (works now)</h2>
 <p>Everything the MCP serves is a plain file in the folder your phone writes to, so you can upload it to ChatGPT.</p>
 <ol>
-  <li><b>The message from your phone.</b> In the app (1.0.3 and later), go to Export, Your AI, Copy. Every AI gets the same message. Claude and Cursor use it to set up the connection, and ChatGPT is told to work from the summary in it. Paste it into a chat, or pick ChatGPT in the share sheet that opens. It's a snapshot, so copy a new one after new workouts.</li>
-  <li><b>The briefing.</b> <code>briefing.md</code> is a one-page summary the app writes after every sync: last four weeks, recent sessions, vitals, the next planned session, open items. Upload it to a conversation, or add it to a ChatGPT project so every chat there starts with it. The command line gives you the same thing: run <code>healthaccess summary --weeks 4</code> and <code>healthaccess show &lt;id&gt;</code> and paste the output.</li>
+  <li><b>The message from your phone.</b> In the app (1.0.3 and later), go to Export, Your AI, Copy. Every AI gets the same message. Claude and Cursor use it to set up the connection, and it tells ChatGPT to work from the summary in it. Paste it into a chat, or pick ChatGPT in the share sheet that opens. It's a snapshot, so copy a new one after new workouts.</li>
+  <li><b>The briefing.</b> <code>briefing.md</code> is a one-page summary the app writes after every sync: last four weeks, recent sessions, vitals, the next planned session, open items. Upload it to a chat, or add it to a ChatGPT project so every chat there starts with it. The command line gives you the same thing: run <code>healthaccess summary --weeks 4</code> and <code>healthaccess show &lt;id&gt;</code> and paste the output.</li>
   <li><b>One session.</b> Upload <code>workouts/2026-05-14_0712_PoolSwim_7A1C3E90.json</code> (or any other workout file) and ask about it. The file has every interval, every length, the heart-rate series and your effort rating. <a href="/docs/files">What the fields mean.</a></li>
-  <li><b>A plan back to the Watch.</b> Ask ChatGPT to write the session in the <a href="/docs/plans">plan format</a> and save the JSON it gives you into <code>plans/</code>. The app offers "Put on Watch" within a minute. You don't need the MCP for this either, the app only needs the file.</li>
+  <li><b>A plan back to the Watch.</b> Ask ChatGPT to write the session in the <a href="/docs/plans">plan format</a> and save the JSON it gives you into <code>plans/</code>. The app offers "Put on Watch" within a minute. You don't need the MCP for this either, because the app only needs the file.</li>
 </ol>
+<p>From app version 1.1.0, you don't have to give ChatGPT the files by hand. Switch on Cloud upload in the app (Settings → Cloud upload), and the app uploads the folder to Google Drive. Then ChatGPT can read it there through its Google Drive connector. The folder starts with a <code>README.md</code> written for the AI. <a href="/docs/cloud">How Cloud upload works.</a></p>
 <p>A prompt to try:</p>
 <pre class="wrapcode">This is my training briefing from Health Access. Read it, then ask me how I slept and how motivated I feel. After my answers, tell me whether the numbers suggest I am overdoing it, as a hypothesis with your confidence, not a verdict.</pre>
 

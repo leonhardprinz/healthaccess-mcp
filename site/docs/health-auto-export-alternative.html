@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>A free, open source alternative to Health Auto Export for AI: Health Access MCP</title>
-<meta name="description" content="Health Access MCP is a free, open source way to get Apple Health and Apple Watch data to Claude, Cursor or ChatGPT, automatically, as JSON in your own folder. How it differs from Health Auto Export, and when Health Auto Export is the better choice.">
+<meta name="description" content="Health Access MCP is a free, open source way to get Apple Health and Apple Watch data to Claude, Cursor or ChatGPT. It works automatically, as JSON in your own folder. How it differs from Health Auto Export, and when Health Auto Export is the better choice.">
 <link rel="canonical" href="https://healthaccessmcp.com/docs/health-auto-export-alternative">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="Health Access MCP">
@@ -27,7 +27,7 @@
       "name": "Is Health Access MCP a free alternative to Health Auto Export?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes, for getting Apple Health and Apple Watch data to an AI. Health Access MCP is free and open source (MIT). It writes workouts and daily health data as JSON into a folder you choose, automatically after every workout, and a local MCP server lets Claude, Cursor or another AI read it. Health Auto Export is a free download with paid tiers; its automatic export is part of the paid Premium tier (checked on 16 Nov 2026)."
+        "text": "Yes, for getting Apple Health and Apple Watch data to an AI. Health Access MCP is free and open source (MIT). It writes workouts and daily health data as JSON into a folder you pick, automatically after every workout. A local MCP server lets Claude, Cursor or another AI read it. Health Auto Export is a free download with paid tiers. Its automatic export is part of the paid Premium tier (checked on 16 Nov 2026)."
       }
     },
     {
@@ -35,7 +35,7 @@
       "name": "What can Health Auto Export do that Health Access MCP cannot?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Health Auto Export exports more: 150 or more metrics as CSV, JSON, Markdown or GPX, to destinations such as a REST API, Home Assistant, MQTT, Google Drive, Dropbox, the iOS Calendar and email, and it has a Mac companion app. If you want your Health data in a spreadsheet or a home-automation system, it is the broader tool."
+        "text": "Health Auto Export exports more: 150 or more metrics as CSV, JSON, Markdown or GPX. It sends them to destinations such as a REST API, Home Assistant, MQTT, Google Drive, Dropbox, the iOS Calendar and email. It also has a Mac companion app. If you want your Health data in a spreadsheet or a home-automation system, it is the broader tool."
       }
     },
     {
@@ -68,7 +68,7 @@
 <header class="hero">
   <span class="label">About</span>
   <h1>A free, open source alternative to Health Auto Export</h1>
-  <p class="answer">If you want an AI to read your Apple Health and Apple Watch data, Health Access MCP does it for free. The iPhone app writes your workouts and daily health data as JSON into a folder you choose, automatically after every workout, and a local MCP server lets Claude, Cursor or another AI read it. The source is open under the MIT licence. Health Auto Export is the broader export tool and the better choice for some things, and this page says which.</p>
+  <p class="answer">If you want an AI to read your Apple Health and Apple Watch data, Health Access MCP does it for free. The iPhone app writes your workouts and daily health data as JSON into a folder you pick, automatically after every workout. A local MCP server lets Claude, Cursor or another AI read it. The source is open under the MIT licence. Health Auto Export is the broader export tool and the better choice for some things, and this page says which.</p>
 </header>
 
 <main>
@@ -77,13 +77,13 @@
 <table>
   <thead><tr><th></th><th>Health Access MCP</th><th>Health Auto Export</th></tr></thead>
   <tbody>
-    <tr><td><b>Price</b></td><td>Free. An optional tip in the app.</td><td>Free download; Basic $2.99 once; Premium $1.99 a month, $6.99 a year or $24.99 once (US App Store, 25 Oct 2026)</td></tr>
+    <tr><td><b>Price</b></td><td>Free. An optional tip in the app.</td><td>Free download. Basic $2.99 once. Premium $1.99 a month, $6.99 a year or $24.99 once (US App Store, 25 Oct 2026)</td></tr>
     <tr><td><b>Automatic export</b></td><td>Yes, after every workout, in the background, free</td><td>Part of the paid Premium tier (checked on 16 Nov 2026)</td></tr>
     <tr><td><b>Open source</b></td><td>Yes, MIT: app, MCP server and command line</td><td>No</td></tr>
-    <tr><td><b>Where your data goes</b></td><td>A folder you choose (iCloud Drive, a NAS, local). From app version 1.1.0 also an upload to Google Drive, a WebDAV server or S3 storage. No account with us, no server of ours.</td><td>Destinations you pick: iCloud Drive, Google Drive, Dropbox, REST API, Home Assistant, MQTT, iOS Calendar, email; a Mac companion app. No account.</td></tr>
-    <tr><td><b>Formats</b></td><td>JSON per workout and per day, an index, a one-page <code>briefing.md</code></td><td>CSV, JSON, Markdown, GPX; 150 or more metrics</td></tr>
-    <tr><td><b>For an AI</b></td><td>A local MCP server (thirteen tools) for Claude, Cursor, Codex and local models; the files also work without it</td><td>A built-in read-only MCP server queried over your network, per its listing</td></tr>
-    <tr><td><b>Workouts back to the Apple Watch</b></td><td>Yes: your AI writes a plan, the app puts it on the Watch with the step names, for twelve sports</td><td>No; its MCP server is read-only per its listing</td></tr>
+    <tr><td><b>Where your data goes</b></td><td>A folder you pick (iCloud Drive, a NAS, local). From app version 1.1.0 also an upload to Google Drive, a WebDAV server or S3 storage. No account with us, no server of ours.</td><td>Destinations you pick: iCloud Drive, Google Drive, Dropbox, REST API, Home Assistant, MQTT, iOS Calendar, email. Also a Mac companion app. No account.</td></tr>
+    <tr><td><b>Formats</b></td><td>JSON per workout and per day, an index, a one-page <code>briefing.md</code></td><td>CSV, JSON, Markdown, GPX. 150 or more metrics</td></tr>
+    <tr><td><b>For an AI</b></td><td>A local MCP server (thirteen tools) for Claude, Cursor, Codex and local models. The files also work without it</td><td>A built-in read-only MCP server queried over your network, per its listing</td></tr>
+    <tr><td><b>Workouts back to the Apple Watch</b></td><td>Yes: your AI writes a plan, the app puts it on the Watch with the step names, for twelve sports</td><td>No. Its MCP server is read-only per its listing</td></tr>
     <tr><td><b>Needs</b></td><td>iPhone with iOS 17 or later</td><td>See its App Store listing</td></tr>
   </tbody>
 </table>
@@ -93,7 +93,7 @@
 <p>When you want everything Apple Health holds in a spreadsheet, a dashboard or a home-automation system. It handles more metrics and formats and sends them to more places. It's also been on the App Store since 2016. Health Access MCP leaves all of that out on purpose.</p>
 
 <h2>When Health Access MCP is the better choice</h2>
-<p>When it's an AI that reads your data. The files have what an AI needs to coach you: every interval of a workout with its name, every pool length with stroke and SWOLF, heart rate every few seconds, and sleep, HRV and resting heart rate per day. The automatic export is free and the code is open. Of the two apps, it's the only one that sends a workout back to your Watch.</p>
+<p>When it's an AI that reads your data. The files have what an AI needs to coach you. That is every interval of a workout with its name, every pool length with stroke and SWOLF, heart rate every few seconds, and sleep, HRV and resting heart rate per day. The automatic export is free and the code is open. Of the two apps, it's the only one that sends a workout back to your Watch.</p>
 
 <h2>Set it up</h2>
 <ol>

@@ -38,7 +38,7 @@ enum CloudKind: String, CaseIterable, Codable, Sendable, Identifiable {
         case .box: return "All Files › Health Access"
         case .pcloud: return "the app's own folder in your pCloud"
         case .webdav: return "a Health Access folder on your server"
-        case .s3: return "your bucket, under the prefix you set"
+        case .s3: return "your bucket, under the folder you set"
         }
     }
 
@@ -68,7 +68,7 @@ enum CloudKind: String, CaseIterable, Codable, Sendable, Identifiable {
         case .box: return "at the top level of your Box (All Files)"
         case .pcloud: return "in the app's own place in your pCloud"
         case .webdav: return "inside the folder whose address you give"
-        case .s3: return "under the prefix you set in your bucket"
+        case .s3: return "under the folder you set in your bucket"
         }
     }
 
@@ -176,9 +176,9 @@ enum CloudError: LocalizedError, Sendable, Equatable {
         switch self {
         case .notConfigured: return "This build has no sign-in for that drive."
         case .notConnected: return "Not connected."
-        case .signInExpired: return "The sign-in ran out. Connect again."
+        case .signInExpired: return "The drive no longer accepts the sign-in. Connect again."
         case .cancelled: return "Sign-in cancelled."
-        case .offline: return "No connection. The upload runs again on the next sync."
+        case .offline: return "No connection. The upload runs again with the next sync."
         case .slowDown: return "The drive asked to slow down. The upload goes on with the next sync."
         case .waitingForWiFi: return "Waiting for Wi-Fi."
         case .unreachable(let text): return text

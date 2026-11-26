@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Apple Health in Cursor: Health Access MCP setup</title>
-<meta name="description" content="Add Health Access MCP to ~/.cursor/mcp.json and Cursor's agent can read your Apple Watch workouts and vitals, and write training plans back to the Watch.">
+<meta name="description" content="Add Health Access MCP to ~/.cursor/mcp.json. Then Cursor's agent can read your Apple Watch workouts and vitals and write workout plans back to the Watch.">
 <link rel="canonical" href="https://healthaccessmcp.com/docs/cursor">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="Health Access MCP">
 <meta property="og:title" content="Apple Health in Cursor">
-<meta property="og:description" content="Add one entry to ~/.cursor/mcp.json, and Cursor's agent can read your Apple Watch workouts and vitals and write plans back to the Watch.">
+<meta property="og:description" content="Add one entry to ~/.cursor/mcp.json. Then Cursor's agent can read your Apple Watch workouts and vitals and write plans back to the Watch.">
 <meta property="og:url" content="https://healthaccessmcp.com/docs/cursor">
 <meta property="og:image" content="https://healthaccessmcp.com/og.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -57,13 +57,13 @@
   }
 }</pre>
 <ul>
-  <li>The server looks in iCloud Drive, then Dropbox, Google Drive, OneDrive and Box, then <code>~/Documents</code>. To pick the folder yourself, add <code>"--dir", "/absolute/path/to/your folder"</code> to <code>args</code>.</li>
+  <li>The server looks for your folder on this computer: in iCloud Drive, then in the sync folders of Dropbox, Google Drive, OneDrive and Box, then in <code>~/Documents</code>. To pick the folder yourself, add <code>"--dir", "/absolute/path/to/your folder"</code> to <code>args</code>.</li>
   <li>If Cursor reports <code>spawn npx ENOENT</code>, put the full path from <code>which npx</code> into <code>command</code>.</li>
   <li>Cursor's settings also have an MCP section with an "add server" button that writes the same file, so you can use that instead.</li>
 </ul>
 
 <h2>Check that it works</h2>
-<p>In Cursor Settings, go to the MCP section. <code>healthaccess</code> should show a green dot and the thirteen tools. If the dot is red, run the command yourself in a terminal and read the error:</p>
+<p>In Cursor Settings, go to the MCP section. When it works, <code>healthaccess</code> shows a green dot and the thirteen tools. If the dot is red, run the command yourself in a terminal and read the error:</p>
 <pre>npx -y healthaccess-mcp --check</pre>
 
 <h2>A first prompt to try</h2>
@@ -72,7 +72,7 @@
 <p>Cursor asks before each tool call unless you allow the server. For more ideas, the <a href="/docs/prompts">prompts</a> work here unchanged.</p>
 
 <h2>Why use Cursor for this</h2>
-<p>You can open your Health Access folder in Cursor like any project. Then the agent has the MCP tools and the raw JSON side by side, so if you ask it to write a script over <code>workouts/*.json</code>, it can test the script on the real files. <a href="/docs/files">How the folder is laid out.</a></p>
+<p>You can open your Health Access folder in Cursor like any project. Then the agent has the MCP tools and the raw JSON side by side. If you ask it to write a script over <code>workouts/*.json</code>, it can test the script on the real files. <a href="/docs/files">How the folder is laid out.</a></p>
 
 <div class="next"><b>Next:</b> <a href="/docs/claude-code">Claude Code</a> <a href="/docs/local-models">Local models</a> <a href="/docs/files">What is in the folder</a> <a href="/ref/mcp.md">Tool reference</a></div>
 </main>

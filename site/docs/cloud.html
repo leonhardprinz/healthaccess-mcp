@@ -36,45 +36,45 @@
 <header class="hero">
   <span class="label">Reference</span>
   <h1>Apple Health to Google Drive or your own server</h1>
-<p class="lead">From app version 1.1.0. The iPhone's folder picker can't reach Google Drive, because it doesn't let other apps open its folders. So Health Access uploads a copy itself, after every sync, from your phone straight to your own account.</p>
+<p class="lead">From app version 1.1.0. The iPhone's folder picker can't reach Google Drive, because Google Drive doesn't let other apps open its folders. So Health Access uploads a copy itself, after every sync, from your iPhone straight to your own account.</p>
 </header>
 
 <main>
 <h2 id="where">Where a copy can go</h2>
 <table>
 <tr><th>Place</th><th>How you connect</th><th>Where the files land</th></tr>
-<tr><td>Google Drive</td><td>Sign in on Google's page</td><td>A new folder, Health Access, at the top level of My Drive. The app makes it and can reach only the files it created. You can move the folder inside Drive.</td></tr>
+<tr><td>Google Drive</td><td>Sign in on Google's page</td><td>A new folder, Health Access, at the top level of My Drive. The app makes it and can reach only the files it made. You can move the folder inside Drive.</td></tr>
 <tr><td>A WebDAV server: Nextcloud, ownCloud, a Synology or QNAP NAS, Koofr and others</td><td>Address, user name, password</td><td>A new folder, Health Access, inside the folder whose address you give</td></tr>
 <tr><td>S3 storage: Amazon S3, Cloudflare R2, Backblaze B2, MinIO, Wasabi</td><td>Bucket and a key pair</td><td>Under the folder (prefix) you set in the bucket</td></tr>
 </table>
-<p>Several can be on at once. OneDrive and Box are planned: in Settings, Cloud upload, tap one to tell us you want it. iCloud Drive needs none of this, because you pick it as the folder.</p>
+<p>You can switch on several at once. OneDrive and Box are planned. If you want one, tap it in Settings → Cloud upload to tell us. iCloud Drive needs none of this, because you pick it as the folder.</p>
 
 <h2 id="setup">Switch it on</h2>
 <ol>
   <li>If you have no folder yet, choose "Keep it on this iPhone" in the app's first steps. The files then live under On My iPhone › Health Access.</li>
-  <li>Settings → Cloud upload → your drive → Connect. You sign in on the drive's own page. The app never sees your password there.</li>
-  <li>Leave the app open for the first upload. A few years of data are a few thousand small files. What is left goes on when you come back, or while the phone rests.</li>
+  <li>Go to Settings → Cloud upload → your drive → Connect. For Google Drive, you sign in on Google's own page, and the app never sees your password. For a WebDAV server or S3 storage, you type the address and the password or keys into the app. They stay in the iPhone's keychain.</li>
+  <li>Leave the app open for the first upload. A few years of data are a few thousand small files. The app uploads the rest when you come back, or while the phone rests.</li>
 </ol>
-<p>After that the upload runs on its own after every sync. Settings → Uploads has an "Upload on Wi-Fi only" switch. In Low Data Mode the app uploads nothing.</p>
+<p>After that, the upload runs on its own after every sync. Settings → Uploads has an "Upload on Wi-Fi only" switch. In Low Data Mode the app uploads nothing.</p>
 
 <h2 id="ai">Let your AI read it</h2>
-<p>Connect your AI to the same drive (Claude, ChatGPT and others have a connector for Google Drive) and point it at the Health Access folder. The folder starts with a <code>README.md</code> written for the AI: what the files are, and how to write a workout plan. "Copy" under Your AI in the app gives you a message that says where the copy is.</p>
+<p>Connect your AI to the same drive and point it at the Health Access folder. Claude, ChatGPT and others have a connector for Google Drive. The folder starts with a <code>README.md</code> written for the AI. It says what the files are and how to write a workout plan. "Copy" under Your AI in the app gives you a message that says where the copy is.</p>
 
 <h2 id="plans">Workout plans back to your Watch</h2>
-<p>On a WebDAV server and on S3 storage the AI writes a plan file into <code>plans/</code>. The app brings it to the phone with the next sync and you find it in the Import tab, like any other plan.</p>
-<p>Google shows an app only the files that app made, so a new file from your AI stays invisible to Health Access. There the AI edits <code>plans/inbox.json</code>, a file the app made for exactly that. Your AI's Google Drive connector has to be able to change an existing file.</p>
-<p>A plan the app can't read gets a status file next to it with the reason, so the AI can see what to fix.</p>
+<p>On a WebDAV server and on S3 storage, the AI writes a plan file into <code>plans/</code>. The app brings it to the phone with the next sync, and you find it in the Import tab, like any other plan.</p>
+<p>Google shows an app only the files that app made, so a new file from your AI stays invisible to Health Access. On Google Drive, the AI edits <code>plans/inbox.json</code> instead. The app made that file for exactly this. Your AI's Google Drive connector must be able to change an existing file.</p>
+<p>If the app can't read a plan, it writes a status file next to it with the reason. Then the AI can see what to fix.</p>
 
 <h2 id="limits">What it doesn't do</h2>
 <ul>
   <li>It is a copy, not a sync in both directions. The folder on the phone stays the original. Only plans come back.</li>
-  <li>A file you delete on the phone stays on the drive. Disconnecting leaves the files there too. If you want them gone, delete the folder on the drive.</li>
-  <li>Names lose the characters <code>: * ? " &lt; &gt; | \</code> on the drive, because several drives and Windows refuse them. A plan called <code>…T16:02:07Z…</code> is <code>…T16_02_07Z…</code> there.</li>
-  <li>A server with a self-made certificate isn't accepted. Inside your own network <code>http://</code> works. iOS asks once for local network access.</li>
+  <li>A file you delete on the phone stays on the drive. If you disconnect, the files stay there too. If you want them gone, delete the folder on the drive.</li>
+  <li>File names lose the characters <code>: * ? " &lt; &gt; | \</code> on the drive, because several drives and Windows refuse them. A plan called <code>…T16:02:07Z…</code> is <code>…T16_02_07Z…</code> there.</li>
+  <li>The app doesn't accept a server with a self-made certificate. Inside your own network, <code>http://</code> works. iOS asks once for local network access.</li>
 </ul>
 
 <h2 id="privacy">Where the data goes</h2>
-<p>From your iPhone to the drive you connected, and nowhere else. There is no server of ours in between and we can't see your account. The sign-in is kept in the iPhone's keychain. Settings → What left this phone lists every upload run. Your drive's provider stores the files under your own contract with it.</p>
+<p>From your iPhone to the drive you connected, and nowhere else. There is no server of ours in between, and we can't see your account. The app keeps the sign-in in the iPhone's keychain. Settings → What left this phone lists every upload run. Your drive's provider stores the files under your own contract with it.</p>
 
 <div class="next"><b>Next:</b> <a href="/docs/files">What is in the folder</a> <a href="/docs/compare">How the others handle it</a> <a href="/docs/local-models">Keep it on your Mac with a local model</a></div>
 </main>

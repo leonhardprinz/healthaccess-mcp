@@ -24,7 +24,7 @@ enum Notifier {
     static func postCloudSignIn(drive: String) async {
         let content = UNMutableNotificationContent()
         content.title = "\(drive) needs a new sign-in"
-        content.body = "The upload has stopped. Open Health Access, Settings, Cloud upload."
+        content.body = "The upload stopped. Open Health Access, then Settings → Cloud upload."
         content.sound = .default
         content.threadIdentifier = "healthaccess.cloud"
         try? await UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: "cloud-\(drive)", content: content, trigger: nil))
@@ -34,7 +34,7 @@ enum Notifier {
     static func postPlanPrompt(planID: String, name: String) async {
         let content = UNMutableNotificationContent()
         content.title = "Your AI wrote \(oneLine(name, max: 40))"
-        content.body = "Open to put it on your Watch."
+        content.body = "Open the app to put it on your Watch."
         content.sound = .default
         content.categoryIdentifier = planCategory
         content.threadIdentifier = "healthaccess.plan"

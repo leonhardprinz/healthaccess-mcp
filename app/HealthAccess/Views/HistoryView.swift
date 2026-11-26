@@ -10,7 +10,7 @@ struct HistoryView: View {
         let settings = model.settings
         List {
             Section {
-                Text("Health Access writes your last \(settings.backfillDays) days when you set it up, and everything new from then on. Health itself often holds years more. Import them once, and your AI can read long-term trends: a season against the last one, resting heart rate over years, how your sleep changed.")
+                Text("Health Access writes your last \(settings.backfillDays) days when you set it up, and everything new from then on. Health itself often holds years more. Import them once, and your AI can read long-term trends. Examples: a season against the last one, resting heart rate over years, how your sleep changed.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
@@ -26,7 +26,7 @@ struct HistoryView: View {
                     } else if settings.historyPaused {
                         Text("Paused. \(remainingLine)").foregroundStyle(.secondary)
                     } else {
-                        Text(model.backlog.note ?? "Waiting. It carries on while the app is open and the phone unlocked.")
+                        Text(model.backlog.note ?? "Waiting. The import carries on while the app is open and the phone is unlocked.")
                             .foregroundStyle(.secondary)
                     }
                     LabeledContent("Written so far", value: writtenLine)
@@ -38,7 +38,7 @@ struct HistoryView: View {
                 } header: {
                     SectionTitle("Importing")
                 } footer: {
-                    Text("Newest first, so the recent years are there early. Keep the app open and the phone unlocked: iOS locks Health with the phone. If you leave, it carries on where it stopped the next time you open the app. The app writes new workouts as always.")
+                    Text("Newest first, so the recent years are there early. Keep the app open and the phone unlocked, because iOS locks Health with the phone. If you leave, the import carries on where it stopped the next time you open the app. The app writes new workouts as always.")
                 }
             } else {
                 if settings.historyFinishedAt != nil {
@@ -72,7 +72,7 @@ struct HistoryView: View {
                 } footer: {
                     Text(settings.lastSync == nil
                          ? "Available after the first sync."
-                         : "You see how many workouts and days it is before the app writes anything. The app keeps files that already exist. A year is usually 5 to 40 MB in your folder. GPS routes are the bulk of it.")
+                         : "Before the app writes anything, you see how many workouts and days it is. The app keeps files that already exist. A year is usually 5 to 40 MB in your folder. GPS routes take most of that space.")
                 }
             }
         }

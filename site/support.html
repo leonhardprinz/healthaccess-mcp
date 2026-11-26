@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Support for Health Access MCP: when something doesn't work</title>
-<meta name="description" content="What to check when Health Access MCP doesn't work: the sync log in the app, the doctor command on your computer, answers to common problems, what to put in a support mail, and refunds through Apple.">
+<meta name="description" content="What to check when Health Access MCP doesn't work: the sync log in the app and the doctor command on your computer. Also answers to common problems, what to put in a support email, and refunds through Apple.">
 <link rel="canonical" href="https://healthaccessmcp.com/support">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="Health Access MCP">
@@ -36,14 +36,14 @@
 <header class="hero">
   <span class="label">About</span>
   <h1>Something isn't working</h1>
-  <p class="answer">Most problems show up in two places, the sync log in the app and one command on your computer, so look there first. Below are short answers to the common problems. If none of them fits, write to <a href="mailto:support@healthaccessmcp.com">support@healthaccessmcp.com</a>.</p>
+  <p class="answer">Most problems show up in two places: the sync log in the app and one command on your computer. Look there first. Below are short answers to the common problems. If none of them fits, write to <a href="mailto:support@healthaccessmcp.com">support@healthaccessmcp.com</a>.</p>
 </header>
 
 <main>
 <h2 id="check-the-app">Check the app</h2>
 <ul>
-  <li><b>Settings → Trust → Sync log</b> lists every time the app woke and what it wrote. If a session is missing, you can see here whether the app ran and what it found. The small buttons at the bottom write the most recent days again.</li>
-  <li><b>Settings → Trust → What left this phone</b> lists every event the app sent in this session, with the host it went to. With usage statistics off, it says nothing left.</li>
+  <li><b>Settings → Privacy → Sync log</b> lists every time the app woke and what it wrote. If a workout is missing, you can see here whether the app ran and what it found. The small buttons at the bottom write the most recent days again.</li>
+  <li><b>Settings → Privacy → What left this phone</b> lists every event the app sent in this session, with the host (the address of the server) it went to. If usage statistics and Cloud upload are off, it says that nothing left.</li>
   <li><b>Settings → About</b> shows the app version and the build number in brackets.</li>
 </ul>
 
@@ -51,24 +51,24 @@
 <pre>npx -y -p healthaccess-mcp healthaccess doctor   <span class="c"># checks the folder: directories, index, every file, schema versions</span>
 npx -y healthaccess-mcp --check                  <span class="c"># prints the folder the server uses and whether usage statistics are on</span>
 npx -y healthaccess-mcp --version                <span class="c"># prints the server version</span></pre>
-<p>Add <code>--dir "&lt;path to the folder&gt;"</code> to any of them to point them at a folder. If you installed with <code>cargo</code>, leave out the <code>npx</code> part: <code>healthaccess doctor</code>, <code>healthaccess-mcp --check</code>, <code>healthaccess-mcp --version</code>. <code>doctor</code> ends with <code>healthy</code> when everything in the folder reads correctly, or with <code>PROBLEMS FOUND</code> and the reasons when it doesn't.</p>
+<p>To point one of these commands at a folder, add <code>--dir "&lt;path to the folder&gt;"</code> to it. If you installed with <code>cargo</code>, leave out the <code>npx</code> part: <code>healthaccess doctor</code>, <code>healthaccess-mcp --check</code>, <code>healthaccess-mcp --version</code>. If everything in the folder reads correctly, <code>doctor</code> ends with <code>healthy</code>. If not, it ends with <code>PROBLEMS FOUND</code> and the reasons.</p>
 
 <h2 id="common-problems">Common problems</h2>
 <div class="faq">
 <h3 id="greyed-out">Google Drive or OneDrive is greyed out in the folder picker</h3>
-<p>You haven't missed a step. When an app asks for a folder, iOS only offers storage apps that let other apps open their folders. iCloud Drive, On My iPhone and network drives do. Google Drive and OneDrive don't, so they show up greyed out for every app that asks for a folder, not only this one. Signing in again, switching them on in the Files app or restarting the phone doesn't change it. From app version 1.1.0, use Settings → Cloud upload instead: Health Access uploads your files to Google Drive itself, into a new folder called Health Access at the top level of your Drive. <a href="/docs/cloud">How it works.</a> OneDrive is planned; you can ask for it in the same place. Until then, pick a folder in iCloud Drive. It syncs to a Mac on its own and to a PC with iCloud for Windows.</p>
+<p>You haven't missed a step. When an app asks for a folder, iOS only offers storage apps that let other apps open their folders. iCloud Drive, On My iPhone and network drives do. Google Drive and OneDrive don't. So they show up greyed out for every app that asks for a folder, not only this one. Signing in again, switching them on in the Files app or restarting the phone doesn't change it. From app version 1.1.0, use Settings → Cloud upload instead. The app uploads your files to Google Drive itself. It makes a new folder called Health Access at the top level of My Drive. <a href="/docs/cloud">How it works.</a> OneDrive is planned. You can ask for it in the same place. Until then, pick a folder in iCloud Drive. It syncs to a Mac on its own and to a PC with iCloud for Windows.</p>
 
 <h3 id="not-connected">The app says "Not connected yet"</h3>
-<p>Your AI client hasn't started the MCP server yet. Clients start it when a new chat or session begins, so start one. The server then writes a small file into <code>mcp/clients/</code> in your folder. Once your folder provider has synced that file to the phone, the app shows the connection. The app checks again every time you bring it to the front, so switch to it after a minute. It also goes back to "Not connected yet" if your AI hasn't used the server for 7 days.</p>
+<p>Your AI client hasn't started the MCP server yet. The AI client is the AI app on your computer, for example Claude Desktop. The MCP server is the small program that lets your AI read the folder. An AI client starts the server when a new chat or session begins. So start a new chat. The server then writes a small file into <code>mcp/clients/</code> in your folder. Once iCloud Drive or your network drive has synced that file to the phone, the app shows the connection. The app checks again every time you bring it to the front, so switch to it after a minute. If your AI hasn't used the server for 7 days, the app also goes back to "Not connected yet".</p>
 
-<h3 id="no-new-sessions">No new sessions in the folder</h3>
-<p>Open the app once after the workout. The iPhone has to be unlocked, because Apple Health data can't be read while the phone is locked, so the app writes the files the next time you unlock it. Then your folder provider has to sync the files to your computer. On a Mac, iCloud Drive shows a cloud icon on files that aren't downloaded yet. If the sync log shows a run with nothing new, check that Health Access is allowed to read your workouts in Health → Sharing → Apps → Health Access.</p>
+<h3 id="no-new-sessions">No new workouts in the folder</h3>
+<p>Open the app once after the workout. The iPhone needs to be unlocked, because apps can't read Apple Health data while the phone is locked. So the app writes the files the next time you unlock the phone. Then iCloud Drive or your network drive needs to sync the files to your computer. On a Mac, iCloud Drive shows a cloud icon on files that aren't downloaded yet. If the sync log shows a sync with nothing new, open Health → Sharing → Apps → Health Access. Check there that Health Access is allowed to read your workouts.</p>
 
 <h3 id="plans-not-on-watch">Plans don't reach the Watch</h3>
-<p>Your AI writes the plan into the folder. It reaches the Watch when you open the app, tap Put on Watch on that plan and confirm, or on its own if you switched on "Put new plans on my Watch automatically" in the Import tab. Either way the plan file has to have synced to the phone first. Putting a workout on the Watch uses Apple's WorkoutKit and needs an Apple Watch paired with this iPhone. Settings → Watch sets what Put on Watch does: schedule the session, or open Apple's preview sheet. The preview sheet doesn't report back, so the app marks those plans as unconfirmed.</p>
+<p>Your AI writes the plan into the folder. First, the plan file needs to sync to the phone. Then the plan reaches the Watch when you open the app, tap Put on Watch on that plan and confirm. If you switched on "Put new plans on my Watch automatically" in the Import tab, the plan gets there on its own. To put a workout on the Watch, the app uses Apple's WorkoutKit. It needs an Apple Watch paired with this iPhone. Settings → Watch sets what Put on Watch does: schedule the workout, or open Apple's preview sheet. The preview sheet doesn't report back, so the app marks those plans as unconfirmed.</p>
 
 <h3 id="folder-not-found">The MCP server can't find the folder</h3>
-<p>Without <code>--dir</code>, the server looks for the folder in iCloud Drive, then in the other file providers, then in <code>~/Documents</code>. From 1.0.4 it also starts without a folder. Your AI is then told there's nothing to read yet, and the server looks again on every call. If it doesn't find one, or picks the wrong one, tell it where the folder is with <code>--dir "&lt;path to the folder&gt;"</code> in the arguments your AI client uses to start the server. On a Mac, a folder in iCloud Drive is at <code>~/Library/Mobile Documents/com~apple~CloudDocs/&lt;folder name&gt;</code>. Dropbox, Google Drive and OneDrive folders usually live under <code>~/Library/CloudStorage/</code>. For example:</p>
+<p>Without <code>--dir</code>, the server looks for the folder in iCloud Drive, then in other synced folders (Dropbox, Google Drive, OneDrive, Box), then in <code>~/Documents</code>. From server version 1.0.4, it also starts without a folder. The server then tells your AI that there's nothing to read yet, and it looks again every time your AI calls it. If the server doesn't find a folder, or picks the wrong one, tell it where the folder is. Add <code>--dir "&lt;path to the folder&gt;"</code> to the arguments your AI client uses to start the server. On a Mac, a folder in iCloud Drive is at <code>~/Library/Mobile Documents/com~apple~CloudDocs/&lt;folder name&gt;</code>. Dropbox, Google Drive and OneDrive folders are usually under <code>~/Library/CloudStorage/</code>. For example:</p>
 <pre>{
   "mcpServers": {
     "healthaccess": {
@@ -77,22 +77,22 @@ npx -y healthaccess-mcp --version                <span class="c"># prints the se
     }
   }
 }</pre>
-<p>Then start a new session in the client. <code>npx -y healthaccess-mcp --check</code> prints the folder the server uses and any other Health Access folders it found. Add <code>--dir "&lt;path&gt;"</code> to it to test a path. The pages under <a href="/docs/claude-code">Connect an AI</a> show where each client keeps these settings.</p>
+<p>Then start a new session in your AI client. <code>npx -y healthaccess-mcp --check</code> prints the folder the server uses and any other Health Access folders it found. To test a path, add <code>--dir "&lt;path&gt;"</code> to it. The pages under <a href="/docs/claude-code">Connect an AI</a> show where each client keeps these settings.</p>
 </div>
 
 <h2 id="write-to-us">Write to me</h2>
 <p>Write to <a href="mailto:support@healthaccessmcp.com">support@healthaccessmcp.com</a> and include:</p>
 <ul>
-  <li>your iOS version;</li>
-  <li>the app version and build, from Settings → About;</li>
-  <li>which AI client you use, with its version if you know it;</li>
-  <li>what you expected, and what happened instead;</li>
-  <li>the output of <code>npx -y -p healthaccess-mcp healthaccess doctor</code>.</li>
+  <li>your iOS version</li>
+  <li>the app version and build, from Settings → About</li>
+  <li>which AI client you use, with its version if you know it</li>
+  <li>what you expected, and what happened instead</li>
+  <li>the output of <code>npx -y -p healthaccess-mcp healthaccess doctor</code></li>
 </ul>
-<p>Please don't send me health data files from your folder. I don't need them to help you. The doctor output holds no health values, but it shows your folder's path and your computer's name and, where something failed, file names and Health data types. Remove anything you'd rather not share. How your mail is handled is in the <a href="/privacy-policy#email">privacy policy</a>.</p>
+<p>Please don't send me health data files from your folder. I don't need them to help you. The doctor output holds no health values. But it shows your folder's path and your computer's name. Where something failed, it also shows file names and Health data types. Remove anything you don't want to share. The <a href="/privacy-policy#email">privacy policy</a> says how I handle your email.</p>
 
 <h2 id="purchases">Purchases</h2>
-<p>The support card and the coffee are sold by Apple, so refunds go through Apple at <a href="https://reportaproblem.apple.com">reportaproblem.apple.com</a>. I can't see who bought anything and can't refund a purchase myself. On a new phone or after a reinstall, Settings → About → Restore purchases brings back a removed support card.</p>
+<p>The app offers two optional purchases: one removes the support card from the Export tab for good, and one is a coffee. Apple sells both, so refunds go through Apple at <a href="https://reportaproblem.apple.com">reportaproblem.apple.com</a>. I can't see who bought anything and can't refund a purchase myself. On a new phone or after a reinstall, tap Settings → About → Restore purchases. If you bought the removal, the support card then stays removed.</p>
 
 <h2 id="source-code">Source code</h2>
 <p>The source is public (MIT): <a href="https://github.com/leonhardprinz/healthaccess-mcp">github.com/leonhardprinz/healthaccess-mcp</a>. You can open issues there, or send an email.</p>

@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Privacy: where your Apple Health data goes with Health Access MCP</title>
-<meta name="description" content="Health Access MCP has no server and no account. Your data goes into the folder you picked and nowhere else. Nothing leaves the phone unless you turn usage statistics on, and then only the event names listed here.">
+<meta name="description" content="Health Access MCP has no server and no account. Your data goes into the folder you picked and, if you switch on Cloud upload, to a drive you connect. This page lists everything that leaves the phone.">
 <link rel="canonical" href="https://healthaccessmcp.com/docs/privacy">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="Health Access MCP">
 <meta property="og:title" content="Where does my data go?">
-<meta property="og:description" content="Into the folder you picked, and nowhere else. There's no server and no account. Here's exactly what leaves the phone.">
+<meta property="og:description" content="Into the folder you picked, and to a drive only if you connect one. There's no server and no account. Here's exactly what leaves the phone.">
 <meta property="og:url" content="https://healthaccessmcp.com/docs/privacy">
 <meta property="og:image" content="https://healthaccessmcp.com/og.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -36,7 +36,7 @@
 <header class="hero">
   <span class="label">About</span>
   <h1>Where does my data go?</h1>
-  <p class="answer">Into the folder you picked, and nowhere else. There's no server to send it to and no account to tie it to. The app has a screen called "What left this phone", and it stays empty unless you turn usage statistics on. If you do, only the events listed below leave the phone, and they never contain a health value.</p>
+  <p class="answer">Into the folder you picked. From app version 1.1.0, it also goes to a drive you connect, if you switch on Cloud upload. There's no server of mine to send it to and no account to tie it to. The app has a screen called "What left this phone". It stays empty unless you turn usage statistics on, use Cloud upload or ask for a planned drive (OneDrive or Box). Usage statistics send only the events listed below, and they never contain a health value.</p>
 </header>
 
 <main>
@@ -45,12 +45,14 @@
   <li><b>There's no server.</b> None of my code runs anywhere except on your phone and your computer. The MCP server is a program on your Mac that reads a folder, and it doesn't listen for any connections.</li>
   <li><b>There's no account.</b> You don't sign up for anything, so there's no account data that could leak, be sold or get lost.</li>
   <li><b>It can't write to Apple Health.</b> The app only asks to read, and only the types you tick. Plans go to the Watch through WorkoutKit, which is a separate permission and doesn't touch your health records.</li>
-  <li><b>Usage statistics are off by default.</b> They stay off until you flip the switch in Settings. No SDK in the app is configured to track you, and there's no advertising identifier and no crash reporting that carries data.</li>
+  <li><b>Usage statistics are off by default.</b> They stay off until you turn them on in Settings. No SDK in the app is configured to track you, and there's no advertising identifier and no crash reporting that carries data.</li>
 </ul>
 
 <h2>What leaves the phone</h2>
 <h3>1. Your files, to your own storage</h3>
-<p>The folder you picked syncs through the provider you chose, for example iCloud Drive or your NAS. It goes through your own account with them, under their terms, the same place your photos or documents already go. If you choose "On My iPhone", nothing leaves the phone at all, but then your AI on the computer can't reach the folder either. The files are plain JSON, so encrypt the folder if your provider offers it. The MCP server on your computer writes one small file into the same folder, <code>mcp/clients/&lt;id&gt;.json</code>: the client's name and version, your computer's name, a call count and the name of the last tool, so the app can show that an AI is connected. It never contains tool arguments or results.</p>
+<p>The folder you picked syncs through your storage provider, for example iCloud Drive or your NAS. It goes through your own account with them, under their terms. Your photos and documents already go to the same place. If you pick "On My iPhone", nothing leaves the phone at all, but then your AI on the computer can't reach the folder either. The files are plain JSON, so encrypt the folder if your provider offers it.</p>
+<p>From app version 1.1.0, you can switch on Cloud upload (Settings → Cloud upload). Then the app uploads the folder itself to Google Drive, a WebDAV server or S3 storage that you connect. The upload goes from your iPhone straight to your drive, and nothing passes through a server of mine. On Google Drive, the app can reach only the files it created. <a href="/docs/cloud">How Cloud upload works.</a></p>
+<p>The MCP server on your computer writes one small file into the same folder, <code>mcp/clients/&lt;id&gt;.json</code>. It holds the client's name and version, your computer's name, a call count and the name of the last tool. With it, the app can show that an AI is connected. It never contains tool arguments or results.</p>
 
 <h3>2. Usage statistics, only if you turn them on</h3>
 <p>They're off by default. When they're on, the app sends these events from the phone to PostHog, an analytics service:</p>
@@ -68,10 +70,11 @@
   </tbody>
 </table>
 </div>
-<p>Each event also carries the app version and build, the OS name and version, the device type (iPhone), the analytics SDK's name and version, and a random id created at install, which is neither your Apple ID nor your name. An allowlist strips everything else the SDK would normally attach (locale, time zone, network, screen size). No event ever contains a health value, a file name or a folder path. The event helpers in the code only accept numbers and fixed words, so a health value can't get in by accident.</p>
+<p>Each event also carries the app version and build, the OS name and version, the device type (iPhone), the analytics SDK's name and version, and a random id. The app creates that id at install, and it is neither your Apple ID nor your name. An allowlist (a fixed list of what may pass) strips everything else the SDK would normally attach (locale, time zone, network, screen size). No event ever contains a health value, a file name or a folder path. The event helpers in the code only accept numbers and fixed words, so a health value can't get in by accident.</p>
+<p>From app version 1.1.0, one event doesn't depend on that switch. If you tap OneDrive or Box in Settings → Cloud upload to ask for it, and you confirm, the app sends one anonymous <code>drive_interest</code> event. It doesn't turn usage statistics on.</p>
 
 <h3>3. The MCP server's own statistics, only if you turn them on</h3>
-<p>The server you get with <code>npx -y healthaccess-mcp</code> has none. None of the binaries I publish can send statistics: the ones on npm and in the release archives are all built without the HTTP client, and the npm binaries contain no network code at all. Only a build you make yourself from source with the default features can, and even then it stays off unless you set both <code>telemetry = true</code> and a PostHog key in <code>~/.config/healthaccess/config.toml</code> (or pass <code>--telemetry</code>). When it's on, two events go from your computer to the PostHog host you configured:</p>
+<p>The server you get with <code>npx -y healthaccess-mcp</code> has none. None of the binaries (the ready-built programs) I publish can send statistics. I build the ones on npm and in the release archives without the HTTP client, and the npm binaries contain no network code at all. Only a build you make yourself from source with the default features can send them. Even then, it stays off unless you set both <code>telemetry = true</code> and a PostHog key in <code>~/.config/healthaccess/config.toml</code> (or pass <code>--telemetry</code>). When it's on, two events go from your computer to the PostHog host you configured:</p>
 <div class="tablewrap">
 <table>
   <thead><tr><th>Event</th><th>Properties</th></tr></thead>
@@ -81,21 +84,21 @@
   </tbody>
 </table>
 </div>
-<p>The events also carry the server's name and version, the OS name, and an anonymous random id written to the config file on first use. They never contain tool arguments, results, workout contents, file names or paths. If you build from source and want no network code in it either, use <code>cargo install --path mcp --no-default-features</code>.</p>
+<p>The events also carry the server's name and version, the OS name, and an anonymous random id. The server writes that id to the config file on first use. The events never contain tool arguments, results, workout contents, file names or paths. If you build from source and want no network code in it either, use <code>cargo install --path mcp --no-default-features</code>.</p>
 
 <h3>4. Whatever you ask your AI to read</h3>
-<p>This one is up to you, and it's the biggest one. When you ask Claude, ChatGPT or Cursor about your swim, the session data the AI reads becomes part of that conversation and goes to that company's servers under their terms. This part depends on the AI you chose, not on this app. If you want the data to stay on your Mac, use a <a href="/docs/local-models">local model</a>. The MCP works the same either way.</p>
+<p>This one is up to you, and it's the biggest one. When you ask Claude, ChatGPT or Cursor about your swim, the AI reads the session data. That data becomes part of the conversation and goes to that company's servers under their terms. This part depends on the AI you picked, not on this app. If you want the data to stay on your Mac, use a <a href="/docs/local-models">local model</a>. The MCP works the same either way.</p>
 
 <h2>Where to check</h2>
 <ul>
-  <li><b>In the app:</b> Settings, Trust, "What left this phone", and the sync log, which lists every background wake and what it wrote.</li>
-  <li><b>On the computer:</b> <code>npx -y healthaccess-mcp --check</code> prints the telemetry state. The event lists above are in <code>Telemetry.swift</code> and <code>mcp/src/telemetry.rs</code>. The source is public on <a href="https://github.com/leonhardprinz/healthaccess-mcp">GitHub</a>.</li>
-  <li><b>This site</b> doesn't set cookies or run analytics, and it loads nothing from anyone but its own host. Even the typefaces are served from here.</li>
+  <li><b>In the app:</b> Settings, Privacy, "What left this phone", and the sync log, which lists every background wake and what it wrote.</li>
+  <li><b>On the computer:</b> <code>npx -y healthaccess-mcp --check</code> prints the telemetry state (telemetry is the usage statistics). The event lists above are in <code>Telemetry.swift</code> and <code>mcp/src/telemetry.rs</code>. The source is public on <a href="https://github.com/leonhardprinz/healthaccess-mcp">GitHub</a>.</li>
+  <li><b>This site</b> doesn't set cookies or run analytics, and it loads nothing from anyone but its own host. Even the typefaces come from here.</li>
   <li><b>The formal version</b> of all this, with the legal bases and your rights, is the <a href="/privacy-policy">privacy policy</a>.</li>
 </ul>
 
 <h2>Apple's part</h2>
-<p>Apple keeps Health data encrypted while the phone is locked, so the app can only export once the phone has been unlocked. The app's privacy manifest declares that it does no tracking, and the app has no entitlement to write to Health. Health records never go to iCloud through this app. Only the files you asked it to write go to the folder you chose.</p>
+<p>Apple keeps Health data encrypted while the phone is locked, so the app can only export after you unlock the phone. The app's privacy manifest declares that it does no tracking, and the app has no entitlement (a permission from Apple) to write to Health. Health records never go to iCloud through this app. Only the files you asked it to write go to the folder you picked.</p>
 
 <div class="next"><b>Next:</b> <a href="/docs/files">What is in the folder</a> <a href="/docs/compare">How the others handle it</a> <a href="/docs/local-models">Keep it on your Mac with a local model</a></div>
 </main>

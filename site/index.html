@@ -41,7 +41,7 @@
         "priceCurrency": "EUR"
       },
       "license": "https://opensource.org/license/mit",
-      "description": "Health Access MCP writes Apple Watch workouts and daily vitals as JSON into a folder the user chooses, automatically after every workout. A local MCP server lets Claude, Cursor or any AI read the folder, and AI-written training plans are put back onto the Apple Watch. No account, no server.",
+      "description": "Health Access MCP writes Apple Watch workouts and daily vitals as JSON into a folder the user picks, automatically after every workout. A local MCP server lets Claude, Cursor or any AI read the folder, and the app puts AI-written plans back onto the Apple Watch. No account, no server.",
       "featureList": [
         "Workouts as JSON with heart rate every few seconds, every interval with its name, every length with stroke and SWOLF",
         "Daily vitals: resting heart rate, HRV, sleep, weight, steps, VO2max",
@@ -63,7 +63,7 @@
           "name": "How do I get Apple Health data into Claude?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Install the Health Access app on your iPhone, pick a folder that syncs to your Mac (iCloud Drive or a NAS), and allow Health access. After every workout the app writes a JSON file into that folder. Then register the local MCP server with Claude Code (claude mcp add --scope user healthaccess -- npx -y healthaccess-mcp) or add it to Claude Desktop's config file. Claude can then list workouts, read a session, read vitals and write a plan. Without the MCP, the folder holds plain JSON and a one-page briefing.md that you can drop into a Claude Project."
+            "text": "Install the Health Access app on your iPhone. Pick a folder that syncs to your Mac (iCloud Drive or a network drive), and allow Health access. After every workout, the app writes a JSON file into that folder. Then register the MCP server once. For Claude Code, run claude mcp add --scope user healthaccess -- npx -y healthaccess-mcp. For Claude Desktop, add the server to its config file. Claude can then list workouts, read a session, read vitals and write a plan. Without the MCP server, the folder holds plain JSON and a one-page briefing.md that you can drop into a Claude Project."
           }
         },
         {
@@ -71,7 +71,7 @@
           "name": "Does it work with ChatGPT?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Through the files, yes. Through the MCP, not today: ChatGPT connects to MCP servers at an HTTPS URL, on some plans only, and does not start a program on your Mac. Health Access MCP runs on your Mac over stdio. So with ChatGPT you upload briefing.md or the workout JSON, or paste the output of the healthaccess command line. If OpenAI allows local servers later, the server is ready."
+            "text": "Through the files, yes. Through the MCP server, not today. ChatGPT connects to MCP servers at an HTTPS URL, and only with some ChatGPT subscriptions. It does not start a program on your Mac. The Health Access MCP server is a program that runs on your Mac and talks over stdio (standard input and output). So with ChatGPT, you upload briefing.md or the workout JSON, or you paste what the healthaccess command prints."
           }
         },
         {
@@ -79,7 +79,7 @@
           "name": "Where does my data go?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Into the folder you picked, and nowhere else. There is no server and no account. The folder syncs through the storage provider you chose, which is your account with them, not ours. Usage statistics are off until you turn them on, and when on they carry event names and counts, never a health value, a file name or a path."
+            "text": "Into the folder you picked, and from app version 1.1.0 into a drive you connect with Cloud upload. Nowhere else. We run no server, and there is no account. The folder syncs through the drive you put it on, with your own account there, not ours. Usage statistics are off unless you turn them on. Even then, they carry only event names and counts, never a health value, a file name or a path."
           }
         },
         {
@@ -87,7 +87,7 @@
           "name": "Why does it need my phone unlocked?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Apple only lets apps read Health data while the iPhone is unlocked. iOS wakes the app as soon as a workout is saved, but if the phone is locked in your bag the export waits until you unlock it again, and the app shows that it is waiting."
+            "text": "Apple only lets apps read Health data while the iPhone is unlocked. iOS wakes the app as soon as a workout is saved. But if the phone is locked in your bag, the export waits until you unlock it again. The app shows that it is waiting."
           }
         },
         {
@@ -95,7 +95,7 @@
           "name": "Can it write workouts to my Apple Watch?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Yes. Your AI calls push_plan, which writes plans/<id>.json into the folder. The app turns it into a WorkoutKit custom workout with the step names on your wrist and puts it on the Watch, either scheduled for a date or through Apple's Add to Watch sheet. It works for twelve sports, from running and cycling to pool swims and rowing. Limits: step labels under 40 characters, step names need iOS 18, and the Watch keeps its own pool length setting."
+            "text": "Yes. Your AI calls push_plan, which writes plans/<id>.json into the folder. The app turns it into a WorkoutKit custom workout with the step names on your wrist. Then it puts the workout on the Watch, scheduled for a date or through Apple's \"Add to Watch\" sheet. It works for twelve sports, from running and cycling to pool swims and rowing. Limits: step names stay under 40 characters and need iOS 18, and the Watch keeps its own pool length setting."
           }
         }
       ]
@@ -103,7 +103,7 @@
     {
       "@type": "VideoObject",
       "name": "How to give Claude your Apple Watch workouts (free, open source)",
-      "description": "A free iPhone app writes your Apple Watch workouts and daily health data as files into a folder you own; a local MCP server lets Claude, Cursor or another AI read them, and the workout your AI writes goes back onto your Watch.",
+      "description": "A free iPhone app writes your Apple Watch workouts and daily health data as files into a folder you own. A local MCP server lets Claude, Cursor or another AI read them. The workout your AI writes goes back onto your Watch.",
       "thumbnailUrl": "https://healthaccessmcp.com/img/video.jpg",
       "uploadDate": "2026-11-17",
       "duration": "PT44S",
@@ -131,7 +131,7 @@
 <header class="hero">
   <span class="label">Health Access MCP · Apple Health for AI</span>
   <h1>Your Apple Health data, for your AI.</h1>
-  <p class="dek">I built this because I was sending my AI screenshots of every swim. After every workout the app writes your Apple Watch workouts and health data as files into a folder you pick. Your AI reads them from there, through the MCP or just as plain files. And when it writes you the next session, one tap puts it on your Watch. Free, open source, no account, no server.</p>
+  <p class="dek">I built this because I was sending my AI screenshots of every swim. After every workout, the app writes your Apple Watch workouts and health data as files into a folder you pick. Your AI reads them from there, through the MCP server (a small program that lets an AI use a tool) or as plain files. And when your AI writes you the next session, one tap puts it on your Watch. Free, open source, no account, no server.</p>
   <p class="video"><a href="https://www.youtube.com/watch?v=nv4CvpBXArk"><img src="/img/video.jpg" width="1280" height="720" alt="Video, 44 seconds: from screenshots of every swim to an AI that reads the folder and puts the next session on the Watch"></a><br><a href="https://www.youtube.com/watch?v=nv4CvpBXArk">Watch the 44-second video on YouTube</a></p>
 </header>
 
@@ -140,9 +140,9 @@
   <h2>Who this is for</h2>
   <div class="grid two">
     <div class="note"><b>You train with an Apple Watch and use an AI as a coach.</b> Claude, Cursor, a local model, or ChatGPT through the files. You want it to see your real sessions, heart rate, sleep and weight, not just what you remember to type. That's the main use.</div>
-    <div class="note"><b>Or you have a human coach.</b> Share the same folder with them and they get the real splits instead of a screenshot.</div>
-    <div class="note"><b>Plans back to the Watch.</b> Your AI writes the session as a small JSON file and the app turns it into a custom workout, with the step names on your wrist. No importing files, nothing to set up on the Watch.</div>
-    <div class="note"><b>Not for charts.</b> The app has none, on purpose. Your AI is the one reading this data, so the work went into the files, the MCP and the docs, not into screens.</div>
+    <div class="note"><b>Or you have a human coach.</b> Share the same folder with them, and they get the real splits instead of a screenshot.</div>
+    <div class="note"><b>Plans back to the Watch.</b> Your AI writes the session as a small JSON file. The app turns it into a custom workout, with the step names on your wrist. No importing files, nothing to set up on the Watch.</div>
+    <div class="note"><b>Not for charts.</b> The app has none, on purpose. Your AI reads this data, so the work went into the files, the MCP server and the docs, not into screens.</div>
   </div>
 </section>
 
@@ -153,35 +153,35 @@
     <div class="step"><div class="who you">Once, about five minutes: you</div>
       <ol>
         <li>Install the app: <a href="https://apps.apple.com/app/id6831916470">Health Access MCP on the App Store</a>. <span class="tag live">Free</span></li>
-        <li>Pick a folder. iCloud Drive is the simple choice, and a network drive (NAS) works too. The only rule: your AI needs to reach the same folder, so pick one that syncs to the computer your AI runs on. Google Drive can't be picked as a folder, so from app version 1.1.0 the app uploads to it itself (<a href="/docs/cloud">Cloud upload</a>).</li>
-        <li>Allow Health access (read only, you pick the types) and notifications (just one kind, "Your AI wrote S27", when a plan arrives).</li>
-        <li>Connect your AI. You paste one paragraph and it sets itself up from these docs, see below.</li>
+        <li>Pick a folder. iCloud Drive is the simple choice, and a network drive (NAS) works too. The only rule: your AI needs to reach the same folder. So pick one that syncs to the computer your AI runs on. You can't pick Google Drive as a folder. From app version 1.1.0, the app uploads the folder to Google Drive itself (<a href="/docs/cloud">Cloud upload</a>).</li>
+        <li>Allow Health access (read only, you pick the types). Allow notifications too. There is one kind, "Your AI wrote S27", when a plan arrives.</li>
+        <li>Connect your AI. You paste one paragraph, and your AI sets itself up from these docs. See below.</li>
       </ol></div>
     <div class="step"><div class="who auto">After every workout: automatic</div>
       <ol>
         <li>You finish a workout on the Watch.</li>
-        <li>Next time your phone is unlocked, the app writes <code>workouts/2026-05-14_0712_PoolSwim_7A1C3E90.json</code> into the folder: distance, time, heart rate every few seconds, every interval with its name, every length with stroke and SWOLF. Runs, walks and hikes also get splits per km or mile. Sleep, resting heart rate, HRV and the rest of the day come once a day.</li>
+        <li>The next time you unlock your phone, the app writes <code>workouts/2026-05-14_0712_PoolSwim_7A1C3E90.json</code> into the folder. The file holds distance, time, heart rate every few seconds, every interval with its name, and every length with stroke and SWOLF. Runs, walks and hikes also get splits per km or mile. The app writes sleep, resting heart rate, HRV and the rest of the day once a day.</li>
         <li>The folder syncs to your computer.</li>
         <li>Your AI reads it. No app needed on that side.</li>
       </ol></div>
     <div class="step"><div class="who you">Sometimes, one tap: you</div>
       <ol>
-        <li>Rate the session on your Watch when it asks. How hard it felt is the one number the Watch can't measure for you. Apple exports your Effort score and the app picks it up, the app itself never asks.</li>
-        <li>When your AI has written a plan, tap "Put on Watch" in the Import tab. Or switch on "Put new plans on my Watch automatically" once and you don't even need that tap.</li>
+        <li>When your Watch asks, rate the session. How hard it felt is the one number the Watch can't measure for you. Apple exports your Effort score and the app picks it up. The app itself never asks.</li>
+        <li>When your AI has written a plan, tap "Put on Watch" in the Import tab. Or switch on "Put new plans on my Watch automatically" once, and you don't need that tap.</li>
       </ol></div>
     <div class="step"><div class="who ai">Whenever you ask: your AI</div>
       <ol>
-        <li>Reads sessions, vitals and trends through the MCP, or the JSON files directly. <a href="/docs/files">How the folder is laid out.</a></li>
+        <li>Reads sessions, vitals and trends through the MCP server, or reads the JSON files directly. <a href="/docs/files">How the folder is laid out.</a></li>
         <li>Writes <code>plans/S27.json</code>, which shows up in the app within a minute.</li>
-        <li>Also works without the MCP: the folder has <code>briefing.md</code>, a one-page summary any AI can read. Upload it to ChatGPT, drop it into a Claude Project or mail it to a coach.</li>
+        <li>Also works without the MCP server: the folder has <code>briefing.md</code>, a one-page summary any AI can read. Upload it to ChatGPT, drop it into a Claude Project or email it to a coach.</li>
       </ol></div>
   </div>
-  <p>Two limits, both from Apple. Health data can only be read while the phone is unlocked, so if you finish a workout with the phone in your bag, it exports the next time you unlock it. And the Watch keeps its own pool length setting, a plan can't change it.</p>
+  <p>Two limits, both from Apple. Apps can read Health data only while the phone is unlocked. So if you finish a workout with the phone in your bag, the app exports it the next time you unlock the phone. And the Watch keeps its own pool length setting. A plan can't change it.</p>
 </section>
 
 <section id="connect">
   <h2>Connect your AI</h2>
-  <p class="lede">The app only gets the data out, the MCP is what your AI actually works with. That's why the app's setup ends with this step, and why these docs are written so your AI can read them and set itself up.</p>
+  <p class="lede">The app only gets the data out. The MCP server is what your AI works with. That's why the app's setup ends with this step. It is also why I wrote these docs so that your AI can read them and set itself up.</p>
   <div class="grid">
     <div>
       <h3>Paste this to your AI</h3>
@@ -190,7 +190,7 @@ Docs for you: https://healthaccessmcp.com/llms.txt
 The server runs with: npx -y healthaccess-mcp
 It finds my Health Access folder on its own.
 Register it in this app, then list my last 5 workouts.</pre>
-      <p class="small">That's all the AI side needs, and it's the same for everyone. <a href="/llms.txt"><code>llms.txt</code></a> and <a href="/llms-full.txt"><code>llms-full.txt</code></a> have the setup per client, the file formats, the tools and the plan format. The app copies this paragraph for you, with your folder's name in it in case the search needs a hint.</p>
+      <p class="small">That's all the AI side needs, and it's the same for everyone. <a href="/llms.txt"><code>llms.txt</code></a> and <a href="/llms-full.txt"><code>llms-full.txt</code></a> have the setup per client (the AI app you use), the file formats, the tools and the plan format. The app copies this paragraph for you. It adds your folder's name, in case the search needs a hint.</p>
     </div>
     <div>
       <h3>Or by hand</h3>
@@ -203,7 +203,7 @@ Register it in this app, then list my last 5 workouts.</pre>
     }
   }
 }</pre>
-      <p class="small">The first line is for Claude Code, the second is the config entry for Claude Desktop, Cursor, LM Studio and most other apps. You need Node.js 18 or newer. The server looks for your folder in iCloud Drive, Dropbox, Google Drive, OneDrive, Box and <code>~/Documents</code>, or you point it there with <code>--dir</code>. Setup page per client: <a href="/docs/claude-code">Claude Code</a>, <a href="/docs/claude-desktop">Claude Desktop</a>, <a href="/docs/cursor">Cursor</a>, <a href="/docs/chatgpt">ChatGPT</a>, <a href="/docs/local-models">local models</a>.</p>
+      <p class="small">First, you need Node.js 18 or newer. The first line is for Claude Code. The second block is the config entry for Claude Desktop, Cursor, LM Studio and most other apps. On your computer, the server looks for your folder in iCloud Drive, in the Dropbox, Google Drive, OneDrive and Box sync folders, and in <code>~/Documents</code>. Or you point the server to the folder with <code>--dir</code>. Setup page per client: <a href="/docs/claude-code">Claude Code</a>, <a href="/docs/claude-desktop">Claude Desktop</a>, <a href="/docs/cursor">Cursor</a>, <a href="/docs/chatgpt">ChatGPT</a>, <a href="/docs/local-models">local models</a>.</p>
     </div>
   </div>
 
@@ -212,33 +212,33 @@ Register it in this app, then list my last 5 workouts.</pre>
   <table>
     <thead><tr><th>Tool</th><th>Does</th></tr></thead>
     <tbody>
-    <tr><td class="mono">list_workouts</td><td>Compact rows, newest first. One line per session, written for an LLM.</td></tr>
-    <tr><td class="mono">get_workout</td><td>One session in full: every interval with its name, pace and heart rate, zone seconds, lengths, splits and elevation for runs, recovery heart rate, your effort rating. The heart-rate series only if asked.</td></tr>
+    <tr><td class="mono">list_workouts</td><td>Compact rows, newest first. One line per session, written for an AI.</td></tr>
+    <tr><td class="mono">get_workout</td><td>One session in full: every interval with its name, pace and heart rate, zone seconds, lengths, splits and elevation for runs, recovery heart rate, your effort rating. It includes the heart-rate series only if the AI asks.</td></tr>
     <tr><td class="mono">get_vitals</td><td>Resting heart rate, HRV, sleep, weight, steps, VO2max by day.</td></tr>
     <tr><td class="mono">training_summary</td><td>Per week: volume, sessions, easy-zone share, mean effort, and the cardiac cost trend (beats per 100 m).</td></tr>
     <tr><td class="mono">rate_workout</td><td>Stores the effort you told the AI. The AI must ask you, never guess.</td></tr>
-    <tr><td class="mono">push_plan</td><td>Checks a session (labels under 40 characters, zones 1 to 5, or a pace range on runs and rides) and writes it to <code>plans/</code>. From there the app puts it on your Watch.</td></tr>
+    <tr><td class="mono">push_plan</td><td>Checks a plan (step names under 40 characters, zones 1 to 5, or a pace range on runs and rides) and writes it to <code>plans/</code>. From there, the app puts it on your Watch.</td></tr>
     <tr><td class="mono">get_plan_status</td><td>Whether the app has put a plan on the Watch yet: pending, scheduled, failed or cancelled.</td></tr>
     <tr><td class="mono">list_plans</td><td>Every plan in <code>plans/</code> with its state, newest first.</td></tr>
     </tbody>
   </table>
   </div>
-  <p class="small">Arguments, what each tool returns and how the derived numbers are calculated are in the <a href="/ref/mcp.md">tool reference</a>. The server also exposes the index and every workout as MCP resources (<code>healthaccess://index</code>, <code>healthaccess://workout/&lt;id&gt;</code>) and the same data through the <code>healthaccess</code> command line.</p>
+  <p class="small">The <a href="/ref/mcp.md">tool reference</a> has the arguments, what each tool returns and how the server calculates the derived numbers. The server also offers the index and every workout as MCP resources (<code>healthaccess://index</code>, <code>healthaccess://workout/&lt;id&gt;</code>). The <code>healthaccess</code> command line gives you the same data.</p>
 </section>
 
 <section id="app">
   <h2>The app, three tabs</h2>
-  <p class="lede">Export, Import, Settings. Each tab says in one line what it does, with a status that's green when nothing needs you. The screenshots use made-up example data.</p>
+  <p class="lede">Export, Import, Settings. Each tab says in one line what it does. Its status is green when nothing needs you. The screenshots use made-up example data.</p>
   <div class="shots">
-    <figure><img src="/img/app-export.jpg" width="603" height="1311" loading="lazy" alt="The Export tab: Up to date with a green check, the Health Access folder connected, Claude Code connected, automatic sync after every workout."><figcaption><b>Export your Apple Health data.</b> Workouts and daily data, written as files into your folder after every workout. Your AI's connection shows here.</figcaption></figure>
-    <figure><img src="/img/app-plans.jpg" width="603" height="1311" loading="lazy" alt="The Import tab: an AI-written run waiting with Put on Watch, a swim already scheduled on the Watch with Remove from Watch."><figcaption><b>Import workout plans.</b> Plans your AI wrote, each with its day and time. One tap puts one on the Watch, or switch on Automatic.</figcaption></figure>
-    <figure><img src="/img/app-settings.jpg" width="603" height="1311" loading="lazy" alt="The Settings tab: the Health data folder and the Workout plans folder, Health access, notifications, what gets exported."><figcaption><b>Settings.</b> The two folders, permissions, what gets exported, and "What left this phone", which stays empty because there is no server.</figcaption></figure>
+    <figure><img src="/img/app-export.jpg" width="603" height="1311" loading="lazy" alt="The Export tab: Up to date with a green check, the Health Access folder connected, Claude Code connected, automatic sync after every workout."><figcaption><b>Export your Apple Health data.</b> After every workout, the app writes workouts and daily data as files into your folder. Your AI's connection shows here.</figcaption></figure>
+    <figure><img src="/img/app-plans.jpg" width="603" height="1311" loading="lazy" alt="The Import tab: an AI-written run waiting with Put on Watch, a swim already scheduled on the Watch with Remove from Watch."><figcaption><b>Import workout plans.</b> Plans your AI wrote, each with its day and time. One tap puts a plan on the Watch. Or switch on Automatic.</figcaption></figure>
+    <figure><img src="/img/app-settings.jpg" width="603" height="1311" loading="lazy" alt="The Settings tab: the Health data folder and the Workout plans folder, Health access, notifications, what gets exported."><figcaption><b>Settings.</b> The two folders, permissions, what the app exports, and "What left this phone". That list stays empty until you switch on usage statistics or, from app version 1.1.0, Cloud upload.</figcaption></figure>
   </div>
 </section>
 
 <section id="prompts">
   <h2>Ideas for your AI</h2>
-  <p class="lede">Eleven prompts in two groups. They're just suggestions, you don't need them for the setup. None of them assumes a sport, the AI asks. Each one has the AI ask you first, then read the data, then act, because a plan written without asking how you feel is mostly a guess. <a href="/docs/prompts">Full text of all eleven.</a></p>
+  <p class="lede">Eleven prompts (ready-made requests for your AI) in two groups. They're suggestions. You don't need them for the setup. None of them assumes a sport. The AI asks. Each one has the AI ask you first, then read the data, then act. A plan that an AI writes without asking how you feel is mostly a guess. <a href="/docs/prompts">Full text of all eleven.</a></p>
   <h3>Export: understand what your Watch recorded</h3>
   <div class="grid">
     <div class="prompt"><h3>Weekly check-in</h3>
@@ -250,7 +250,7 @@ Register it in this app, then list my last 5 workouts.</pre>
     <div class="prompt"><h3>How am I sleeping and recovering?</h3>
       <div class="q">Asks how rested you feel and what changed lately. Reads four weeks of sleep, heart and breathing next to your training days. Points out one pattern and one thing to try.</div></div>
     <div class="prompt"><h3>What changed over the last months?</h3>
-      <div class="q">Asks what you hoped to improve. Compares the first and the last four of twelve weeks: three things that moved and one that didn't.</div></div>
+      <div class="q">Asks what you hoped to improve. Compares the first four and the last four of twelve weeks. Names three things that moved and one that didn't.</div></div>
     <div class="prompt"><h3>Prepare this for my coach or doctor</h3>
       <div class="q">Asks who it is for and what they care about. Writes a one-page summary from the files, ready to send, without a diagnosis.</div></div>
   </div>
@@ -276,8 +276,8 @@ Register it in this app, then list my last 5 workouts.</pre>
   <table>
     <thead><tr><th>Product</th><th>Where your data lives</th><th>Account</th><th>Plans back to the Watch</th><th>Open source</th></tr></thead>
     <tbody>
-    <tr><td><b>Health Access MCP</b></td><td>A folder you choose, on your own storage</td><td>None</td><td>Yes (WorkoutKit)</td><td>Yes, MIT (server and CLI)</td></tr>
-    <tr><td>Health Auto Export</td><td>Destinations you pick (files, REST, MQTT) plus a read-only MCP server over your network</td><td>None</td><td>No; its MCP server is read-only per its listing</td><td>No</td></tr>
+    <tr><td><b>Health Access MCP</b></td><td>A folder you pick, on your own storage</td><td>None</td><td>Yes (WorkoutKit)</td><td>Yes, MIT (server and CLI)</td></tr>
+    <tr><td>Health Auto Export</td><td>Destinations you pick (files, REST, MQTT) plus a read-only MCP server over your network</td><td>None</td><td>No. Its MCP server is read-only per its listing</td><td>No</td></tr>
     <tr><td>Health.md</td><td>Destinations you pick (Obsidian vault, iCloud Drive, Dropbox, a Mac), as Markdown, CSV or JSON</td><td>None</td><td class="unk">Not found in its listing</td><td>Yes, AGPL-3.0</td></tr>
     <tr><td>HealthPipe</td><td>Their servers in Germany</td><td>Yes, Sign in with Apple</td><td>No, read-only</td><td class="unk">Not stated</td></tr>
     <tr><td>Health MCP: Private Sync</td><td>Their encrypted cloud with a trusted execution environment</td><td>Yes</td><td class="unk">Not found in its listing</td><td class="unk">Not stated</td></tr>
@@ -290,15 +290,15 @@ Register it in this app, then list my last 5 workouts.</pre>
 <section id="faq" class="faq">
   <h2>Common questions</h2>
   <h3>How do I get Apple Health data into Claude?</h3>
-  <p>Install the Health Access app on your iPhone, pick a folder that syncs to your Mac, allow Health access. After every workout the app writes a JSON file into that folder. Then register the server once: <code>claude mcp add --scope user healthaccess -- npx -y healthaccess-mcp</code> for <a href="/docs/claude-code">Claude Code</a>, or the JSON snippet for <a href="/docs/claude-desktop">Claude Desktop</a>. Claude can then list workouts, read a session, read vitals and write a plan. Without the MCP, the folder holds plain JSON and a one-page <code>briefing.md</code> you can drop into a Claude Project.</p>
+  <p>Install the Health Access app on your iPhone. Pick a folder that syncs to your Mac (iCloud Drive or a network drive), and allow Health access. After every workout, the app writes a JSON file into that folder. Then register the MCP server once. For <a href="/docs/claude-code">Claude Code</a>, run <code>claude mcp add --scope user healthaccess -- npx -y healthaccess-mcp</code>. For <a href="/docs/claude-desktop">Claude Desktop</a>, add the server to its config file. Claude can then list workouts, read a session, read vitals and write a plan. Without the MCP server, the folder holds plain JSON and a one-page <code>briefing.md</code> that you can drop into a Claude Project.</p>
   <h3>Does it work with ChatGPT?</h3>
-  <p>Through the files, yes. Through the MCP, not today. ChatGPT connects to MCP servers at an HTTPS URL, on some plans only, and does not start a program on your Mac. Health Access MCP is a program that runs on your Mac and talks over stdio. So with ChatGPT you upload the briefing or the workout JSON, or paste what the <code>healthaccess</code> command prints. <a href="/docs/chatgpt">What is true today, and the two paths.</a></p>
+  <p>Through the files, yes. Through the MCP server, not today. ChatGPT connects to MCP servers at an HTTPS URL, and only with some ChatGPT subscriptions. It does not start a program on your Mac. The Health Access MCP server is a program that runs on your Mac and talks over stdio (standard input and output). So with ChatGPT, you upload <code>briefing.md</code> or the workout JSON, or you paste what the <code>healthaccess</code> command prints. <a href="/docs/chatgpt">What is true today, and the two paths.</a></p>
   <h3>Where does my data go?</h3>
-  <p>Into the folder you picked, and nowhere else. There's no server and no account. The folder syncs through the storage you picked, with your own account there, not ours. Usage statistics are off unless you turn them on, and even then they only carry event names and counts, never a health value, a file name or a path. <a href="/docs/privacy">The exact event names.</a></p>
+  <p>Into the folder you picked, and from app version 1.1.0 into a drive you connect with Cloud upload. Nowhere else. We run no server, and there is no account. The folder syncs through the drive you put it on, with your own account there, not ours. Usage statistics are off unless you turn them on. Even then, they carry only event names and counts, never a health value, a file name or a path. <a href="/docs/privacy">The exact event names.</a></p>
   <h3>Why does it need my phone unlocked?</h3>
-  <p>Apple only lets apps read Health data while the iPhone is unlocked. iOS wakes the app as soon as a workout is saved, but if the phone is locked in your bag the export waits until you unlock it again, and the app shows that it's waiting.</p>
+  <p>Apple only lets apps read Health data while the iPhone is unlocked. iOS wakes the app as soon as a workout is saved. But if the phone is locked in your bag, the export waits until you unlock it again. The app shows that it is waiting.</p>
   <h3>Can it write workouts to my Apple Watch?</h3>
-  <p>Yes. Your AI calls <code>push_plan</code>, which writes <code>plans/&lt;id&gt;.json</code> into the folder. The app turns it into a WorkoutKit custom workout with the step names on your wrist and puts it on the Watch, scheduled for a date or through Apple's "Add to Watch" sheet. It works for twelve sports, from running and cycling to pool swims and rowing. Limits: step labels under 40 characters, step names need iOS 18, and the Watch keeps its own pool length setting. <a href="/docs/plans">The plan format and the flow.</a></p>
+  <p>Yes. Your AI calls <code>push_plan</code>, which writes <code>plans/&lt;id&gt;.json</code> into the folder. The app turns it into a WorkoutKit custom workout with the step names on your wrist. Then it puts the workout on the Watch, scheduled for a date or through Apple's "Add to Watch" sheet. It works for twelve sports, from running and cycling to pool swims and rowing. Limits: step names stay under 40 characters and need iOS 18, and the Watch keeps its own pool length setting. <a href="/docs/plans">The plan format and the flow.</a></p>
   <p><a href="/docs/faq">More questions and answers</a></p>
 </section>
 </main>
@@ -306,7 +306,7 @@ Register it in this app, then list my last 5 workouts.</pre>
 <footer class="site">
   <div class="cols">
     <div><h4>Connect an AI</h4><ul><li><a href="/docs/claude-code">Claude Code</a></li><li><a href="/docs/claude-desktop">Claude Desktop</a></li><li><a href="/docs/cursor">Cursor</a></li><li><a href="/docs/chatgpt">ChatGPT</a></li><li><a href="/docs/local-models">Local models</a></li></ul></div>
-    <div><h4>Reference</h4><ul><li><a href="/docs/files">The folder is the API</a></li><li><a href="/docs/plans">Plans and Put on Watch</a></li><li><a href="/docs/prompts">Ideas for your AI</a></li><li><a href="/ref/mcp.md">Tool reference</a></li><li><a href="/ref/schema.md">Data contract</a></li></ul></div>
+    <div><h4>Reference</h4><ul><li><a href="/docs/files">The folder is the API</a></li><li><a href="/docs/plans">Plans and Put on Watch</a></li><li><a href="/docs/cloud">Cloud upload</a></li><li><a href="/docs/prompts">Ideas for your AI</a></li><li><a href="/ref/mcp.md">Tool reference</a></li><li><a href="/ref/schema.md">Data contract</a></li></ul></div>
     <div><h4>For AIs</h4><ul><li><a href="/llms.txt">llms.txt</a></li><li><a href="/llms-full.txt">llms-full.txt</a></li><li><a href="https://www.npmjs.com/package/healthaccess-mcp">npm package</a></li></ul></div>
     <div><h4>About</h4><ul><li><a href="/docs/privacy">Privacy, explained</a></li><li><a href="/privacy-policy">Privacy policy</a></li><li><a href="/support">Support</a></li><li><a href="/docs/compare">How it compares</a></li><li><a href="/docs/faq">Questions and answers</a></li><li><a href="/docs/health-auto-export-alternative">Alternative to Health Auto Export</a></li></ul></div>
   </div>

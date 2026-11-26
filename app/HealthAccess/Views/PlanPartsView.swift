@@ -14,7 +14,7 @@ struct PlanPartsView: View {
                     Text(doc.summaryLine).font(.body.monospacedDigit())
                     if let notes = doc.notes, !notes.isEmpty { Text(notes).font(.subheadline).foregroundStyle(.secondary) }
                     if let pool = doc.poolLengthM {
-                        Text("Pool length \(safeInt(pool) ?? 0) m: set it on the Watch, the plan cannot.").font(.footnote).foregroundStyle(.secondary)
+                        Text("Pool length \(safeInt(pool) ?? 0) m. Set it on the Watch, because the plan cannot.").font(.footnote).foregroundStyle(.secondary)
                     }
                     if let by = doc.createdBy { Text("Written by \(by)").font(.footnote).foregroundStyle(.secondary) }
                 } header: {
@@ -36,14 +36,14 @@ struct PlanPartsView: View {
                         ResultLine(result: result, undoKey: key)
                     } else {
                         if let status = item.status, status.state == "scheduled" {
-                            Text(status.method == "preview" ? "Added via preview (unconfirmed)." : "On your Watch for \(status.scheduledFor.map(Format.dayTime) ?? "its time").")
+                            Text(status.method == "preview" ? "Added through Apple's preview, not confirmed." : "On your Watch for \(status.scheduledFor.map(Format.dayTime) ?? "its time").")
                                 .font(.subheadline).foregroundStyle(.secondary)
                         }
                         Button("Put on Watch") { model.requestPutOnWatch(item) }
                         Button("Preview on Watch") { model.requestPreview(item) }
                     }
                 } footer: {
-                    Text("Put on Watch schedules the session in the Workout app and confirms it arrived. The preview shows Apple's sheet. The app cannot confirm Add to Watch there.")
+                    Text("Put on Watch schedules the workout in the Workout app and confirms that it arrived. The preview shows Apple's sheet. The app cannot confirm Add to Watch there.")
                 }
             } else {
                 Section("Invalid plan") {

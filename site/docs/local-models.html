@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Apple Health with local models: Ollama, LM Studio, Goose, Codex CLI and Health Access MCP</title>
-<meta name="description" content="Any MCP host that launches a stdio server can read your Apple Watch workouts through Health Access MCP. Configs for LM Studio, Goose and Codex CLI, and for Ollama the way without MCP: the files and the healthaccess command line.">
+<meta name="description" content="Any MCP host that starts a stdio server can read your Apple Watch workouts through Health Access MCP. Configs for LM Studio, Goose and Codex CLI, and for Ollama the way without MCP: the files and the healthaccess command line.">
 <link rel="canonical" href="https://healthaccessmcp.com/docs/local-models">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="Health Access MCP">
 <meta property="og:title" content="Apple Health with local models">
-<meta property="og:description" content="Any MCP host that launches a stdio server works. Configs for LM Studio and Goose, and how to use Ollama without MCP.">
+<meta property="og:description" content="Any MCP host that starts a stdio server works. Configs for LM Studio and Goose, and how to use Ollama without MCP.">
 <meta property="og:url" content="https://healthaccessmcp.com/docs/local-models">
 <meta property="og:image" content="https://healthaccessmcp.com/og.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -36,16 +36,16 @@
 <header class="hero">
   <span class="label">Connect an AI</span>
   <h1>Apple Health with local models</h1>
-  <p class="answer">Any MCP host that can launch a program on your computer works. You give it the command <code>npx -y healthaccess-mcp</code>. A plain model runner like Ollama has no MCP host built in, so there you use the files or the command line instead. With a local model, nothing leaves your Mac.</p>
+  <p class="answer">An MCP host is an app that starts MCP servers for a model. Any MCP host that can start a program on your computer works. You give it the command <code>npx -y healthaccess-mcp</code>. A plain model runner like Ollama has no MCP host built in, so there you use the files or the command line instead. With a local model, nothing leaves your Mac.</p>
 </header>
 
 <main>
 <h2>The command every host needs</h2>
 <pre>npx -y healthaccess-mcp</pre>
-<p>It runs over stdio and needs no environment variables. The server finds your Health Access folder on its own (iCloud Drive, then the other file providers, then <code>~/Documents</code>). To pick it yourself, add <code>--dir "/absolute/path"</code>. You need Node.js 18 or newer for <code>npx</code>, and a GUI app that doesn't see your shell's PATH needs the full path from <code>which npx</code>. To build from source instead, run <code>cargo install --path mcp --locked</code> in the repository.</p>
+<p>It runs over stdio and needs no environment variables. The server finds your Health Access folder on its own (iCloud Drive, then the sync folders of Dropbox, Google Drive, OneDrive and Box, then <code>~/Documents</code>). To pick it yourself, add <code>--dir "/absolute/path"</code>. You need Node.js 18 or newer for <code>npx</code>. A GUI app that doesn't see your shell's PATH needs the full path from <code>which npx</code>. To build from source instead, run <code>cargo install --path mcp --locked</code> in the repository.</p>
 
 <h2>LM Studio</h2>
-<p>LM Studio can host MCP servers since version 0.3.17 and uses the same <code>mcp.json</code> format as Cursor. In the right sidebar, open the <b>Program</b> tab, then <b>Install</b>, then <b>Edit mcp.json</b>, and add:</p>
+<p>From version 0.3.17, LM Studio can host MCP servers. It uses the same <code>mcp.json</code> format as Cursor. In the right sidebar, open the <b>Program</b> tab, then <b>Install</b>, then <b>Edit mcp.json</b>, and add:</p>
 <pre>{
   "mcpServers": {
     "healthaccess": {
@@ -77,7 +77,7 @@
 command = "npx"
 args = ["-y", "healthaccess-mcp"]
 startup_timeout_sec = 60</pre>
-<p class="small">By default Codex gives a server 10 seconds to start. The first start downloads the server from npm, so 60 gives it enough time, and later starts take well under a second. To check, run <code>codex mcp list</code>, or <code>/mcp</code> inside a Codex session. Codex uses OpenAI's cloud models unless you point it at a local one, so whatever it reads from the folder goes to that model's provider.</p>
+<p class="small">By default, Codex gives a server 10 seconds to start. The first start downloads the server from npm, so 60 seconds gives it enough time. Later starts take well under a second. To check, run <code>codex mcp list</code>, or <code>/mcp</code> inside a Codex session. Codex uses OpenAI's cloud models unless you point it at a local one. So whatever it reads from the folder goes to that model's provider.</p>
 
 <h2>Any other MCP host</h2>
 <p>If the host has a config file with <code>mcpServers</code>, copy the <a href="/docs/claude-desktop">Claude Desktop snippet</a>. If it asks for a command and arguments, the command is <code>npx</code> and the arguments are <code>-y</code> and <code>healthaccess-mcp</code>. The server identifies itself as <code>healthaccess-mcp</code> and lists thirteen tools.</p>
@@ -85,7 +85,7 @@ startup_timeout_sec = 60</pre>
 <h2>Ollama and other plain model runners, without MCP</h2>
 <p>Your training data is all in plain files, so any model that can read text can read it. There are two ways:</p>
 <ol>
-  <li><b>The briefing.</b> <code>briefing.md</code>, one page the app writes after every sync, fits any context window.</li>
+  <li><b>The briefing.</b> <code>briefing.md</code>, one page the app writes after every sync, fits any context window (the amount of text a model can read at once).</li>
   <li><b>The command line.</b> <code>healthaccess</code> prints the same views the MCP serves, as tables or as JSON with <code>--json</code>. It's in the same npm package (<code>npm install -g healthaccess-mcp</code> puts both on your PATH). Pipe the output into the model:
 <pre>healthaccess summary --weeks 4 --json \
   | ollama run llama3.2 "This is my swimming and rowing training summary by week. In five sentences, what changed over the four weeks, and what would you ask me before suggesting anything?"
@@ -93,7 +93,7 @@ startup_timeout_sec = 60</pre>
 healthaccess show 7A1C3E90 --json \
   | ollama run llama3.2 "Explain this swim session to me in plain words: the parts, where the heart rate went, anything odd."</pre></li>
 </ol>
-<p class="small">You can get a plan back to the Watch without the MCP too. Have the model write the <a href="/docs/plans">plan JSON</a>, then run <code>healthaccess plan push session.json</code>, which validates it and puts it into <code>plans/</code>. The app shows "Put on Watch" within a minute.</p>
+<p class="small">You can get a plan back to the Watch without the MCP too. Have the model write the <a href="/docs/plans">plan JSON</a>, then run <code>healthaccess plan push session.json</code>. The command checks the plan and puts it into <code>plans/</code>. The app shows "Put on Watch" within a minute.</p>
 
 <h2>A first prompt to try</h2>
 <pre class="wrapcode">List my last 5 workouts, one line each. Pick the one you would most want to know more about and tell me why, in two sentences. Then ask me how it felt.</pre>

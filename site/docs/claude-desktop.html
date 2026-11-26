@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Apple Health in Claude Desktop: Health Access MCP setup</title>
-<meta name="description" content="Add seven lines to claude_desktop_config.json and Claude Desktop can read your Apple Watch workouts and vitals through Health Access MCP, and write plans back to the Watch.">
+<meta name="description" content="Add seven lines to claude_desktop_config.json. Then Claude Desktop can read your Apple Watch workouts and vitals through Health Access MCP and write plans back to the Watch.">
 <link rel="canonical" href="https://healthaccessmcp.com/docs/claude-desktop">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="Health Access MCP">
 <meta property="og:title" content="Apple Health in Claude Desktop">
-<meta property="og:description" content="Add seven lines to claude_desktop_config.json, and Claude Desktop can read your Apple Watch workouts and vitals and write plans back to the Watch.">
+<meta property="og:description" content="Add seven lines to claude_desktop_config.json. Then Claude Desktop can read your Apple Watch workouts and vitals and write plans back to the Watch.">
 <meta property="og:url" content="https://healthaccessmcp.com/docs/claude-desktop">
 <meta property="og:image" content="https://healthaccessmcp.com/og.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -36,7 +36,7 @@
 <header class="hero">
   <span class="label">Connect an AI</span>
   <h1>Apple Health in Claude Desktop</h1>
-  <p class="answer">You add seven lines to Claude Desktop's config file. You don't have to type a path, because the server finds your Health Access folder on its own. Restart Claude and it can read your Watch data.</p>
+  <p class="answer">You add seven lines to Claude Desktop's config file. You don't have to type a path, because the server finds your Health Access folder on its own. After you restart Claude, it can read your Watch data.</p>
 </header>
 
 <main>
@@ -59,13 +59,13 @@
   }
 }</pre>
 <ul>
-  <li>The server looks for your folder in iCloud Drive, then Dropbox, Google Drive, OneDrive and Box, then <code>~/Documents</code>. To pick it yourself, add <code>"--dir", "/Users/&lt;you&gt;/…/your folder"</code> to <code>args</code>. The path has to be absolute, because <code>~</code> isn't expanded here.</li>
+  <li>The server looks for your folder on this computer: in iCloud Drive, then in the sync folders of Dropbox, Google Drive, OneDrive and Box, then in <code>~/Documents</code>. To pick it yourself, add <code>"--dir", "/Users/&lt;you&gt;/…/your folder"</code> to <code>args</code>. The path must be absolute, because nothing expands <code>~</code> here.</li>
   <li>If Claude reports <code>spawn npx ENOENT</code>, it can't see your shell's PATH. Run <code>which npx</code> in Terminal and put that full path into <code>command</code>.</li>
   <li>Quit Claude Desktop completely and start it again. It only reads the config when it starts.</li>
 </ul>
 
 <h2>Check that it works</h2>
-<p>In a new conversation, open the attachments menu at the bottom left of the input box, then <b>Connectors</b>. <code>healthaccess</code> should be listed with its tools. If it isn't, run these:</p>
+<p>In a new conversation, open the attachments menu at the bottom left of the input box, then <b>Connectors</b>. When it works, <code>healthaccess</code> is in the list with its tools. If it isn't, run these:</p>
 <pre>npx -y healthaccess-mcp --check     <span class="c"># prints the folder it found and where from</span>
 tail -n 40 ~/Library/Logs/Claude/mcp-server-healthaccess.log</pre>
 
@@ -74,7 +74,8 @@ tail -n 40 ~/Library/Logs/Claude/mcp-server-healthaccess.log</pre>
 <p>Claude Desktop asks for permission the first time each tool runs. For more ideas, you can paste any of the <a href="/docs/prompts">prompts</a> here as they are.</p>
 
 <h2>Use it without the MCP</h2>
-<p>You can also add files to a Claude Project. Drop <code>briefing.md</code> from the folder into a project and every conversation in it starts with your last four weeks. The workout JSON files work the same way, one file per session.</p>
+<p>You can also add files to a Claude Project. If you drop <code>briefing.md</code> from the folder into a project, every conversation in it starts with your last four weeks. The workout JSON files work the same way, one file per session.</p>
+<p>From app version 1.1.0, there is one more way. Switch on Cloud upload in the app, and the app uploads the folder to Google Drive. Then Claude can read it through its Google Drive connector, even where Claude can't start a local program. <a href="/docs/cloud">How Cloud upload works.</a></p>
 
 <div class="next"><b>Next:</b> <a href="/docs/claude-code">Claude Code</a> <a href="/docs/cursor">Cursor</a> <a href="/docs/prompts">Ideas for your AI</a> <a href="/ref/mcp.md">Tool reference</a></div>
 </main>

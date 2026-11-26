@@ -99,7 +99,7 @@ extension AppModel {
         let from = DayRanges.date(startDay).addingTimeInterval(-12 * 3600)
         let workouts = (try? await health.workouts(from: from, before: upper).count) ?? 0
         guard newDays > 0 || workouts > 0 else {
-            results["history"] = ActionResult(kind: .done, text: "Nothing older to import: your folder already goes back as far as that.", at: Date())
+            results["history"] = ActionResult(kind: .done, text: "Nothing older to import. Your folder already goes back that far.", at: Date())
             return
         }
         confirmation = Confirmation(

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Apple Health and AI, questions and answers: Health Access MCP</title>
-<meta name="description" content="Short answers to what people ask about Apple Health and AI: is there an MCP server for Apple Health, how Claude or ChatGPT can read Apple Watch workouts, how an AI-written workout gets onto the Watch, what it costs and where the data goes.">
+<meta name="description" content="Short answers to what people ask about Apple Health and AI. Is there an MCP server for Apple Health? How can Claude or ChatGPT read Apple Watch workouts? How does an AI-written workout get onto the Watch? What does it cost, and where does the data go?">
 <link rel="canonical" href="https://healthaccessmcp.com/docs/faq">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="Health Access MCP">
@@ -27,7 +27,7 @@
       "name": "Is there an MCP server for Apple Health?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. Health Access MCP is a free iPhone app plus a local MCP server. The app writes your Apple Watch workouts and daily health data as JSON into a folder you pick, and npx -y healthaccess-mcp lets Claude, Cursor or any other MCP client read that folder. It's listed in the official MCP registry as com.healthaccessmcp/healthaccess-mcp."
+        "text": "Yes. Health Access MCP is a free iPhone app plus a local MCP server. The app writes your Apple Watch workouts and daily health data as JSON into a folder you pick. Then npx -y healthaccess-mcp lets Claude, Cursor or any other MCP client read that folder. It's listed in the official MCP registry as com.healthaccessmcp/healthaccess-mcp."
       }
     },
     {
@@ -43,7 +43,7 @@
       "name": "How do I export Apple Health data as JSON automatically?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "The app does it in the background after every workout and after every night's sleep, so there's no shortcut to run and no export button to press. You get one file per workout and one file per day, and the folder stays up to date on its own. Apple only lets apps read Health while the iPhone is unlocked, so if you finish a workout with the phone in your bag, it's written the next time you unlock it. If you want it to sync at a set time, the Shortcuts action Sync Health data works in an automation, for example when Sleep Focus turns off. What the files look like."
+        "text": "The app does it in the background after every workout and after every night's sleep. There's no shortcut to run and no export button to press. You get one file per workout and one file per day, and the folder stays up to date on its own. Apple only lets apps read Health while the iPhone is unlocked. So if you finish a workout with the phone in your bag, the app writes it the next time you unlock the phone. If you want it to sync at a set time, the Shortcuts action Sync Health data works in an automation, for example when Sleep Focus turns off. What the files look like."
       }
     },
     {
@@ -59,7 +59,7 @@
       "name": "Does it work with Cursor, Codex, LM Studio or Ollama?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes, with any client that can launch a local MCP server over stdio. Ollama doesn't launch MCP servers itself, so there you give the model the files or the output of the healthaccess command line. You'll find the config for Cursor, Codex CLI, LM Studio and Goose on the setup pages for Cursor and local models."
+        "text": "Yes, with any client that can start a local MCP server over stdio. Ollama doesn't start MCP servers itself, so there you give the model the files or the output of the healthaccess command line. You'll find the config for Cursor, Codex CLI, LM Studio and Goose on the setup pages for Cursor and local models."
       }
     },
     {
@@ -67,7 +67,7 @@
       "name": "Do I need a Mac?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "No. The server has prebuilt binaries for macOS, Linux and Windows. The only rule is that the computer your AI runs on can see the folder the phone writes to, for example through iCloud Drive (there is iCloud for Windows too) or a NAS. If you have no computer at all, paste the message the app copies into any AI chat on your phone. It includes your summary."
+        "text": "No. The server has prebuilt binaries for macOS, Linux and Windows. The only rule is that the computer your AI runs on can see the folder the phone writes to. That works, for example, through iCloud Drive (there is iCloud for Windows too) or a NAS. If you have no computer at all, paste the message the app copies into any AI chat on your phone. It includes your summary."
       }
     },
     {
@@ -83,7 +83,7 @@
       "name": "How far back does the data go?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "As far back as your Apple Health data goes. The first sync writes the last 60 days, and under Settings, Older data in the app you can import 12 months, 3 years or everything."
+        "text": "As far back as your Apple Health data goes. The first sync writes the last 60 days. Under Settings, Older data in the app, you can import 12 months, 3 years or everything."
       }
     },
     {
@@ -91,7 +91,7 @@
       "name": "Can an AI write a workout and put it on my Apple Watch?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. Your AI writes a plan, and the app turns it into a custom workout on your Watch for the time the plan says, with the step names on your wrist. That takes one tap in the app, or none once you switch on \"Put new plans on my Watch automatically\". Step names need iOS 18. Plans and Put on Watch."
+        "text": "Yes. Your AI writes a plan. The app turns it into a custom workout on your Watch for the time the plan says, with the step names on your wrist. That takes one tap in the app, or none once you switch on \"Put new plans on my Watch automatically\". Step names need iOS 18. Plans and Put on Watch."
       }
     },
     {
@@ -99,7 +99,7 @@
       "name": "Which sports does it work for?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Reading works for every workout type Apple Health stores. Plans go to the Watch for twelve sports: run, indoor run, walk, hike, cycle, indoor cycle, pool swim, open-water swim, indoor row, HIIT, elliptical and strength. HIIT, elliptical and strength use time goals or open steps that you end with a tap, one per strength set. Run and ride steps can have a pace alert, and for a race, a run or ride can be a pacer, where you set one distance and one time."
+        "text": "Reading works for every workout type Apple Health stores. Plans go to the Watch for twelve sports: run, indoor run, walk, hike, cycle, indoor cycle, pool swim, open-water swim, indoor row, HIIT, elliptical and strength. HIIT, elliptical and strength use time goals or open steps that you end with a tap, one per strength set. Run and ride steps can have a pace alert. For a race, a run or ride can be a pacer, where you set one distance and one time."
       }
     },
     {
@@ -107,7 +107,7 @@
       "name": "Can I use Claude as a swim or running coach with my Apple Watch?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes, that's what I built it for. The AI reads what you actually did, step by step, with pace and heart rate for each interval, asks you how it felt, and writes the next session onto your Watch. It comes with eleven prompts, from a weekly check-in to a plan for the week. It never rates a session for you, and anything that points to illness is a question for a doctor. Ideas for your AI."
+        "text": "Yes, that's what I built it for. The AI reads what you actually did, step by step, with pace and heart rate for each interval. It asks you how it felt and writes the next session onto your Watch. It comes with eleven prompts, from a weekly check-in to a plan for the week. It never rates a session for you, and anything that points to illness is a question for a doctor. Ideas for your AI."
       }
     },
     {
@@ -115,7 +115,7 @@
       "name": "Can I turn a workout from my coach or a training app into an Apple Watch workout?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. Paste or describe the workout and say when you'll do it. The AI turns it into a plan the Watch can run, with a warm-up, the repeated parts and a cool-down, each step with a distance or a time. It also tells you what it had to change."
+        "text": "Yes. Paste or describe the workout and say when you'll do it. The AI turns it into a plan the Watch can run, with a warm-up, the repeated parts and a cool-down. Each step has a distance or a time. It also tells you what it had to change."
       }
     },
     {
@@ -123,7 +123,7 @@
       "name": "Is there a free alternative to Health Auto Export?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes. If you want to get your Apple Health data to an AI, Health Access MCP is one. It's free and open source under the MIT licence, and it writes your workouts and daily data as JSON into a folder you pick, automatically after every workout. Health Auto Export is a free download, but its automatic export is part of the paid Premium tier (checked on 16 Nov 2026). It does offer more formats and destinations. Of the two, only Health Access MCP puts the workouts your AI writes back on the Apple Watch. The two side by side."
+        "text": "Yes. If you want to get your Apple Health data to an AI, Health Access MCP is one. It's free and open source under the MIT licence. It writes your workouts and daily data as JSON into a folder you pick, automatically after every workout. Health Auto Export is a free download, but its automatic export is part of the paid Premium tier (checked on 16 Nov 2026). It does offer more formats and destinations. Of the two, only Health Access MCP puts the workouts your AI writes back on the Apple Watch. The two side by side."
       }
     },
     {
@@ -147,7 +147,7 @@
       "name": "Where does my health data go?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Into the folder you picked, and nowhere else. There's no server and no account, so we can't see your data. Usage statistics are off until you turn them on, and they never include a health value. Whatever your AI reads is covered by that AI's own privacy terms. More on privacy."
+        "text": "Into the folder you picked. If you switch on Cloud upload (from app version 1.1.0), the app also uploads it to the drive you connect. There's no server of ours and no account, so we can't see your data. Usage statistics are off until you turn them on, and they never include a health value. Whatever your AI reads is covered by that AI's own privacy terms. More on privacy."
       }
     },
     {
@@ -163,7 +163,7 @@
       "name": "Why isn't my last workout in the folder yet?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Most likely your phone was locked. Apple only lets apps read Health data while the iPhone is unlocked, so the export waits until you next unlock it and then runs on its own. If it still doesn't show up, the sync log in the app tells you why. Support."
+        "text": "Most likely your phone was locked. Apple only lets apps read Health data while the iPhone is unlocked. So the export waits until you next unlock it and then runs on its own. If it still doesn't show up, the sync log in the app tells you why. Support."
       }
     },
     {
@@ -179,7 +179,7 @@
       "name": "Can I export Apple Health data to Google Drive or OneDrive?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Google Drive: yes, from app version 1.1.0. You can't pick it as the folder, because it doesn't let other apps open its folders. So the app uploads your files itself: Settings, Cloud upload, Google Drive, sign in. It makes a new folder called Health Access at the top level of your Drive. A WebDAV server (Nextcloud, a NAS) and S3 storage work the same way. OneDrive is planned, and you can ask for it in the app."
+        "text": "Google Drive: yes, from app version 1.1.0. You can't pick it as the folder, because Google Drive doesn't let other apps open its folders. So the app uploads your files itself. Go to Settings, Cloud upload, Google Drive and sign in. It makes a new folder called Health Access at the top level of your Drive. A WebDAV server (Nextcloud, a NAS) and S3 storage work the same way. OneDrive is planned, and you can ask for it in the app. How Cloud upload works."
       }
     }
   ]
@@ -204,52 +204,52 @@
 <header class="hero">
   <span class="label">Questions and answers</span>
   <h1>Apple Health and AI, questions and answers</h1>
-  <p class="answer">Health Access MCP gives your AI your Apple Watch workouts and daily health data as files in a folder you own, and puts the workouts it writes back on your Watch. It's free and open source. Below are short answers, each with a link to the page that has the details.</p>
+  <p class="answer">Health Access MCP gives your AI your Apple Watch workouts and daily health data as files in a folder you own. It also puts the workouts your AI writes on your Watch. It's free and open source. Below are short answers, each with a link to the page that has the details.</p>
 </header>
 
 <main class="faq">
 <h2>Getting your data to an AI</h2>
 <h3>Is there an MCP server for Apple Health?</h3>
-<p>Yes. Health Access MCP is a free iPhone app plus a local MCP server. The app writes your Apple Watch workouts and daily health data as JSON into a folder you pick, and <code>npx -y healthaccess-mcp</code> lets Claude, Cursor or any other MCP client read that folder. It's listed in the official MCP registry as <code>com.healthaccessmcp/healthaccess-mcp</code>.</p>
+<p>Yes. Health Access MCP is a free iPhone app plus a local MCP server. The app writes your Apple Watch workouts and daily health data as JSON into a folder you pick. Then <code>npx -y healthaccess-mcp</code> lets Claude, Cursor or any other MCP client read that folder. It's listed in the official MCP registry as <code>com.healthaccessmcp/healthaccess-mcp</code>.</p>
 <h3>How do I give Claude access to my Apple Watch workouts?</h3>
 <p>Install the app, pick a folder that syncs to your computer, and register the server once. In Claude Code that's one command, <code>claude mcp add --scope user healthaccess -- npx -y healthaccess-mcp</code>. In Claude Desktop it's seven lines in the config file. Or paste the message the app copies for you (Export, Your AI, Copy) into Claude and it sets itself up. Setup guides for <a href="/docs/claude-code">Claude Code</a> and <a href="/docs/claude-desktop">Claude Desktop</a>.</p>
 <h3>How do I export Apple Health data as JSON automatically?</h3>
-<p>The app does it in the background after every workout and after every night's sleep, so there's no shortcut to run and no export button to press. You get one file per workout and one file per day, and the folder stays up to date on its own. Apple only lets apps read Health while the iPhone is unlocked, so if you finish a workout with the phone in your bag, it's written the next time you unlock it. If you want it to sync at a set time, the Shortcuts action Sync Health data works in an automation, for example when Sleep Focus turns off. <a href="/docs/files">What the files look like.</a></p>
+<p>The app does it in the background after every workout and after every night's sleep. There's no shortcut to run and no export button to press. You get one file per workout and one file per day, and the folder stays up to date on its own. Apple only lets apps read Health while the iPhone is unlocked. So if you finish a workout with the phone in your bag, the app writes it the next time you unlock the phone. If you want it to sync at a set time, the Shortcuts action Sync Health data works in an automation, for example when Sleep Focus turns off. <a href="/docs/files">What the files look like.</a></p>
 <h3>Can ChatGPT read my Apple Health data?</h3>
 <p>Yes, as text or files, but not through the MCP server. Copy the message from the app (Export, Your AI, Copy) and paste it into ChatGPT. It includes a summary of your last four weeks. ChatGPT can't start a program on your computer, so it can't run a local MCP server. <a href="/docs/chatgpt">What works with ChatGPT today.</a></p>
 <h3>Does it work with Cursor, Codex, LM Studio or Ollama?</h3>
-<p>Yes, with any client that can launch a local MCP server over stdio. Ollama doesn't launch MCP servers itself, so there you give the model the files or the output of the <code>healthaccess</code> command line. You'll find the config for Cursor, Codex CLI, LM Studio and Goose on the setup pages for <a href="/docs/cursor">Cursor</a> and <a href="/docs/local-models">local models</a>.</p>
+<p>Yes, with any client that can start a local MCP server over stdio. Ollama doesn't start MCP servers itself, so there you give the model the files or the output of the <code>healthaccess</code> command line. You'll find the config for Cursor, Codex CLI, LM Studio and Goose on the setup pages for <a href="/docs/cursor">Cursor</a> and <a href="/docs/local-models">local models</a>.</p>
 <h3>Do I need a Mac?</h3>
-<p>No. The server has prebuilt binaries for macOS, Linux and Windows. The only rule is that the computer your AI runs on can see the folder the phone writes to, for example through iCloud Drive (there is iCloud for Windows too) or a NAS. If you have no computer at all, paste the message the app copies into any AI chat on your phone. It includes your summary.</p>
+<p>No. The server has prebuilt binaries for macOS, Linux and Windows. The only rule is that the computer your AI runs on can see the folder the phone writes to. That works, for example, through iCloud Drive (there is iCloud for Windows too) or a NAS. If you have no computer at all, paste the message the app copies into any AI chat on your phone. It includes your summary.</p>
 <h3>What does my AI get to see?</h3>
 <p>It sees every workout, with heart rate every few seconds, every interval with its name and, for swims, every length with stroke and SWOLF. For each day it gets sleep with its stages, resting heart rate, HRV, VO2max, steps, rings, weight and every other Health group that has data. And a one-page <code>briefing.md</code> sums up the last four weeks. <a href="/docs/files">The folder layout.</a></p>
 <h3>How far back does the data go?</h3>
-<p>As far back as your Apple Health data goes. The first sync writes the last 60 days, and under Settings, Older data in the app you can import 12 months, 3 years or everything.</p>
+<p>As far back as your Apple Health data goes. The first sync writes the last 60 days. Under Settings, Older data in the app, you can import 12 months, 3 years or everything.</p>
 <h2>Training with an AI</h2>
 <h3>Can an AI write a workout and put it on my Apple Watch?</h3>
-<p>Yes. Your AI writes a plan, and the app turns it into a custom workout on your Watch for the time the plan says, with the step names on your wrist. That takes one tap in the app, or none once you switch on "Put new plans on my Watch automatically". Step names need iOS 18. <a href="/docs/plans">Plans and Put on Watch.</a></p>
+<p>Yes. Your AI writes a plan. The app turns it into a custom workout on your Watch for the time the plan says, with the step names on your wrist. That takes one tap in the app, or none once you switch on "Put new plans on my Watch automatically". Step names need iOS 18. <a href="/docs/plans">Plans and Put on Watch.</a></p>
 <h3>Which sports does it work for?</h3>
-<p>Reading works for every workout type Apple Health stores. Plans go to the Watch for twelve sports: run, indoor run, walk, hike, cycle, indoor cycle, pool swim, open-water swim, indoor row, HIIT, elliptical and strength. HIIT, elliptical and strength use time goals or open steps that you end with a tap, one per strength set. Run and ride steps can have a pace alert, and for a race, a run or ride can be a pacer, where you set one distance and one time.</p>
+<p>Reading works for every workout type Apple Health stores. Plans go to the Watch for twelve sports: run, indoor run, walk, hike, cycle, indoor cycle, pool swim, open-water swim, indoor row, HIIT, elliptical and strength. HIIT, elliptical and strength use time goals or open steps that you end with a tap, one per strength set. Run and ride steps can have a pace alert. For a race, a run or ride can be a pacer, where you set one distance and one time.</p>
 <h3>Can I use Claude as a swim or running coach with my Apple Watch?</h3>
-<p>Yes, that's what I built it for. The AI reads what you actually did, step by step, with pace and heart rate for each interval, asks you how it felt, and writes the next session onto your Watch. It comes with eleven prompts, from a weekly check-in to a plan for the week. It never rates a session for you, and anything that points to illness is a question for a doctor. <a href="/docs/prompts">Ideas for your AI.</a></p>
+<p>Yes, that's what I built it for. The AI reads what you actually did, step by step, with pace and heart rate for each interval. It asks you how it felt and writes the next session onto your Watch. It comes with eleven prompts, from a weekly check-in to a plan for the week. It never rates a session for you, and anything that points to illness is a question for a doctor. <a href="/docs/prompts">Ideas for your AI.</a></p>
 <h3>Can I turn a workout from my coach or a training app into an Apple Watch workout?</h3>
-<p>Yes. Paste or describe the workout and say when you'll do it. The AI turns it into a plan the Watch can run, with a warm-up, the repeated parts and a cool-down, each step with a distance or a time. It also tells you what it had to change.</p>
+<p>Yes. Paste or describe the workout and say when you'll do it. The AI turns it into a plan the Watch can run, with a warm-up, the repeated parts and a cool-down. Each step has a distance or a time. It also tells you what it had to change.</p>
 <h2>Privacy and price</h2>
 <h3>Is there a free alternative to Health Auto Export?</h3>
-<p>Yes. If you want to get your Apple Health data to an AI, Health Access MCP is one. It's free and open source under the MIT licence, and it writes your workouts and daily data as JSON into a folder you pick, automatically after every workout. Health Auto Export is a free download, but its automatic export is part of the paid Premium tier (checked on 16 Nov 2026). It does offer more formats and destinations. Of the two, only Health Access MCP puts the workouts your AI writes back on the Apple Watch. <a href="/docs/health-auto-export-alternative">The two side by side.</a></p>
+<p>Yes. If you want to get your Apple Health data to an AI, Health Access MCP is one. It's free and open source under the MIT licence. It writes your workouts and daily data as JSON into a folder you pick, automatically after every workout. Health Auto Export is a free download, but its automatic export is part of the paid Premium tier (checked on 16 Nov 2026). It does offer more formats and destinations. Of the two, only Health Access MCP puts the workouts your AI writes back on the Apple Watch. <a href="/docs/health-auto-export-alternative">The two side by side.</a></p>
 <h3>How can I export Apple Health data for free?</h3>
 <p>There are three ways. Apple's Health app exports everything by hand as one large XML file (tap your picture, then Export All Health Data). Health Access MCP exports automatically, one JSON file per workout and per day, and it's free and open source. Other free tools exist too, each with its own trade-offs, and <a href="/docs/compare">the comparison lists them</a>.</p>
 <h3>Is it free?</h3>
 <p>Yes. The app is free on the App Store and the server is free and open source under the MIT licence. There's no subscription and no account. The only thing you can pay for is an optional tip in the app. <a href="https://apps.apple.com/app/id6831916470">Health Access on the App Store.</a></p>
 <h3>Where does my health data go?</h3>
-<p>Into the folder you picked, and nowhere else. There's no server and no account, so we can't see your data. Usage statistics are off until you turn them on, and they never include a health value. Whatever your AI reads is covered by that AI's own privacy terms. <a href="/docs/privacy">More on privacy.</a></p>
+<p>Into the folder you picked. If you switch on Cloud upload (from app version 1.1.0), the app also uploads it to the drive you connect. There's no server of ours and no account, so we can't see your data. Usage statistics are off until you turn them on, and they never include a health value. Whatever your AI reads is covered by that AI's own privacy terms. <a href="/docs/privacy">More on privacy.</a></p>
 <h3>Is it open source?</h3>
 <p>Yes. The app, the MCP server and the command line are on GitHub under the MIT licence, and the npm binaries contain no network code. <a href="https://github.com/leonhardprinz/healthaccess-mcp">Source on GitHub.</a></p>
 <h2>Limits</h2>
 <h3>Why isn't my last workout in the folder yet?</h3>
-<p>Most likely your phone was locked. Apple only lets apps read Health data while the iPhone is unlocked, so the export waits until you next unlock it and then runs on its own. If it still doesn't show up, the sync log in the app tells you why. <a href="/support">Support.</a></p>
+<p>Most likely your phone was locked. Apple only lets apps read Health data while the iPhone is unlocked. So the export waits until you next unlock it and then runs on its own. If it still doesn't show up, the sync log in the app tells you why. <a href="/support">Support.</a></p>
 <h3>Can I export Apple Health data to Google Drive or OneDrive?</h3>
-<p>Google Drive: yes, from app version 1.1.0. You can't pick it as the folder, because it doesn't let other apps open its folders. So the app uploads your files itself: Settings, Cloud upload, Google Drive, sign in. It makes a new folder called Health Access at the top level of your Drive. A WebDAV server (Nextcloud, a NAS) and S3 storage work the same way. OneDrive is planned, and you can ask for it in the app. <a href="/docs/cloud">How Cloud upload works.</a></p>
+<p>Google Drive: yes, from app version 1.1.0. You can't pick it as the folder, because Google Drive doesn't let other apps open its folders. So the app uploads your files itself. Go to Settings, Cloud upload, Google Drive and sign in. It makes a new folder called Health Access at the top level of your Drive. A WebDAV server (Nextcloud, a NAS) and S3 storage work the same way. OneDrive is planned, and you can ask for it in the app. <a href="/docs/cloud">How Cloud upload works.</a></p>
 <h3>Does it work on Android or without an Apple Watch?</h3>
 <p>There's no Android version. The app needs an iPhone with iOS 17 or later. It exports whatever is in Apple Health, whichever app or device saved it there. Only putting a plan on your wrist needs an Apple Watch.</p>
 

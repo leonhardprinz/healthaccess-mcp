@@ -227,14 +227,14 @@ enum FolderPickerCopy {
         }
         let them = drives.count == 1 ? "it" : "them"
         let they = drives.count == 1 ? "it doesn't" : "they don't"
-        return "\(Format.list(drives))? You can't pick \(them) here, because \(they) let other apps open \(drives.count == 1 ? "its" : "their") folders. Keep the folder on this iPhone. Then switch on Cloud upload in Settings, and Health Access uploads to \(them) itself."
+        return "\(Format.list(drives))? You can't pick \(them) here, because \(they) let other apps open \(drives.count == 1 ? "its" : "their") folders. Keep the folder on this iPhone. Then switch on Cloud upload in Settings, and Health Access uploads the folder to \(them)."
     }
 
     static var greyedOut: String {
         let base = "Greyed out in the picker? Google Drive and OneDrive don't let other apps open their folders. Nothing on your phone is set wrong."
         // Only promise the upload to them when this build can sign in there.
         let drives = CloudConfig.shared.kinds.filter { $0 == .google || $0 == .onedrive }.map(\.name)
-        return drives.isEmpty ? base : base + " Cloud upload below sends your files to \(Format.list(drives, last: "and")) instead."
+        return drives.isEmpty ? base : base + " With Cloud upload below, the app uploads your files to \(Format.list(drives, last: "and")) instead."
     }
 }
 

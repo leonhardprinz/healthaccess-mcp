@@ -7,10 +7,10 @@ extension AppModel {
     func requestCloudConnect(_ kind: CloudKind) {
         let reach = kind.folderOnly
             ? "The app can reach only that one folder there."
-            : "\(kind.name) has no permission for one folder only: the sign-in covers your whole \(kind.name), and the app uses only its own folder."
+            : "\(kind.name) has no permission for one folder only. The sign-in covers your whole \(kind.name), but the app uses only its own folder."
         confirmation = Confirmation(
             title: "Upload a copy to \(kind.name)",
-            detail: "You sign in on \(kind.name)'s own page. The app then makes a new folder, Health Access, \(kind.newFolderWhere). You can move it there later. After every sync this phone sends the files of your Health data folder straight into it. Nothing goes to us. \(reach)",
+            detail: "You sign in on \(kind.name)'s own page. The app then makes a new folder, Health Access, \(kind.newFolderWhere). You can move it there later. After every sync, this phone uploads the files of your Health data folder straight into it. Nothing goes to us. \(reach)",
             confirmTitle: "Sign in") { [weak self] in
                 await self?.connectCloud(kind, fields: nil)
             }
@@ -21,7 +21,7 @@ extension AppModel {
         confirmation = Confirmation(
             title: "Upload a copy to your \(kind.name)",
             detail: (kind == .s3 ? "The app puts the files under the folder you set in your bucket." : "The app makes a new folder, Health Access, \(kind.newFolderWhere).")
-                + " After every sync this phone sends the files of your Health data folder straight there. Nothing goes to us. The password or key stays in this phone's keychain.",
+                + " After every sync, this phone uploads the files of your Health data folder straight there. Nothing goes to us. The password or key stays in this phone's keychain.",
             confirmTitle: "Connect") { [weak self] in
                 await self?.connectCloud(kind, fields: fields)
             }
@@ -64,7 +64,7 @@ extension AppModel {
         let host = Telemetry.shared.hostName ?? "PostHog"
         confirmation = Confirmation(
             title: "Ask for \(kind.name)",
-            detail: "This sends one message to \(host): that someone wants \(kind.name), with the app version and a random install id. Nothing about you and no health data. You find it under What left this phone.",
+            detail: "This sends one message to \(host). It says that someone wants \(kind.name), with the app version and a random install id. It has nothing about you and no health data. You find it under What left this phone.",
             confirmTitle: "Send") { [weak self] in
                 guard let self else { return }
                 guard let request = DriveInterest.request(host: config.host, token: config.token, installID: self.settings.installID, drive: kind,

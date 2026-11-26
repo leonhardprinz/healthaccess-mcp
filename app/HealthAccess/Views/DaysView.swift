@@ -12,7 +12,7 @@ struct DaysView: View {
                 Section { ProgressView() }
             } else if days.isEmpty {
                 Section {
-                    Text("No day files yet. The app writes them on every check, for every day Health has values. Settings → Older data imports the years before.")
+                    Text("No day files yet. The app writes them with every sync, for every day Health has values. Settings → Older data imports the years before.")
                         .foregroundStyle(.secondary)
                 }
             } else {

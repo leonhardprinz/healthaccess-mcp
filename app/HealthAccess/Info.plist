@@ -35,11 +35,11 @@
 		<true/>
 	</dict>
 	<key>NSHealthShareUsageDescription</key>
-	<string>Health Access writes the Health data you allow into a folder you choose, as files for your AI or coach. Everything is optional, and nothing is sent to us.</string>
+	<string>Health Access writes the Health data you allow into a folder you choose, as files for your AI or coach. Everything is optional, and nothing goes to us.</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>Health Access never writes to Health. It only reads the data you allow; workout plans go to your Apple Watch through WorkoutKit.</string>
+	<string>Health Access never writes to Health. It only reads the data you allow. Workout plans go to your Apple Watch through WorkoutKit.</string>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>Health Access reaches a server in your own network only when you connect one in Settings, to upload a copy of your folder to it.</string>
+	<string>Health Access reaches a server in your own network only when you connect one in Settings. It then uploads a copy of your folder to that server.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>IBMPlexSansCondensed-SemiBold.ttf</string>

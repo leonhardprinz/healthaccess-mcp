@@ -18,8 +18,8 @@ struct PromptsView: View {
                 }
             } footer: {
                 Text(group == .export
-                     ? "Each one makes your AI ask first, then read what your Watch recorded, then explain it. Suggestions only. What you share with an AI, and what it tells you, is between you and that AI."
-                     : "Each one makes your AI ask first, including when you will train, then write sessions that show up in the Import tab. Any sport the Watch can run. Suggestions only.")
+                     ? "Each prompt makes your AI ask first. Then the AI reads what your Watch recorded and explains it. Suggestions only. What you share with an AI, and what it tells you, is between you and that AI."
+                     : "Each prompt makes your AI ask first, also when you will train. Then the AI writes workout plans, and they show up in the Import tab. This works for any sport the Watch can run. Suggestions only.")
             }
         }
         .listStyle(.insetGrouped)

@@ -65,7 +65,7 @@ struct OnboardingView: View {
 
     private var folder: some View {
         screen("Pick a folder",
-               "iCloud Drive is the simple choice: it syncs to a Mac or PC on its own. A network drive works too. Pick a folder that reaches the computer where your AI runs.") {
+               "iCloud Drive is the simple choice, because it reaches a Mac or PC on its own. A network drive works too. Pick a folder that reaches the computer where your AI runs.") {
             if let result = model.results["folder"] ?? model.storedFolderResult {
                 ResultLine(result: result, undoKey: "folder").padding(.bottom, 4)
             }
@@ -86,7 +86,7 @@ struct OnboardingView: View {
 
     private var health: some View {
         screen("Allow Health access",
-               "Read only, you choose the types. Notifications are for one thing: telling you when your AI wrote a plan.") {
+               "Read only. You choose the types. Notifications are for one thing: to tell you when your AI wrote a plan.") {
             if !model.settings.healthAuthRequested {
                 primary("Allow Health access") { Task { await model.requestHealthAccess() } }
             } else if !model.settings.notificationsRequested {

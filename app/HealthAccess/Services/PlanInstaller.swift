@@ -280,17 +280,17 @@ enum PlanInstaller {
 
     /// Schedules on the Watch. Returns an error message, or nil on success (verified against the scheduler's list).
     static func schedule(_ plan: WorkoutPlan, at date: Date) async -> String? {
-        guard isSupported else { return "WorkoutKit scheduling is not supported on this iPhone (is a Watch paired?)" }
+        guard isSupported else { return "WorkoutKit scheduling does not work on this iPhone. Check that a Watch is paired." }
         let auth = await authorize()
-        guard auth.authorized else { return "WorkoutKit authorization is \(auth.description)" }
+        guard auth.authorized else { return "WorkoutKit permission is \(auth.description)" }
         let existing = await WorkoutScheduler.shared.scheduledWorkouts
         if existing.contains(where: { $0.plan.id == plan.id }) { return nil }
         if existing.count >= WorkoutScheduler.maxAllowedScheduledWorkoutCount {
-            return "the Watch already has \(existing.count) scheduled workouts (limit \(WorkoutScheduler.maxAllowedScheduledWorkoutCount)); remove one in the Workout app"
+            return "The Watch already has \(existing.count) scheduled workouts (limit \(WorkoutScheduler.maxAllowedScheduledWorkoutCount)). Remove one in the Workout app."
         }
         let components = Calendar.autoupdatingCurrent.dateComponents(in: .autoupdatingCurrent, from: date)
         await WorkoutScheduler.shared.schedule(plan, at: components)
-        return await isScheduled(plan.id) ? nil : "schedule() returned but the plan is not in the scheduler's list"
+        return await isScheduled(plan.id) ? nil : "WorkoutKit took the plan, but the plan is not in its list of scheduled workouts."
     }
 
     /// Undo of "Put on Watch": takes the plan off the Watch's schedule again.

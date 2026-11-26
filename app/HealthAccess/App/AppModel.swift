@@ -155,12 +155,12 @@ final class AppModel {
     var usageStatisticsAvailable: Bool { Telemetry.shared.isAvailable }
     var usageStatisticsHost: String { Telemetry.shared.hostName ?? "PostHog" }
 
-    /// "14 files · 13 listed · 1 duplicate hidden by the dedupe rule"
+    /// "14 files · 13 listed · 1 duplicate hidden"
     var sessionFilesLine: String {
         guard let scan = indexScan else { return "\(sessionCount) listed" }
         let files = scan.entries.count + scan.dropped.count + scan.skipped.count
         var parts = ["\(files) file\(files == 1 ? "" : "s")", "\(scan.entries.count) listed"]
-        if !scan.dropped.isEmpty { parts.append("\(scan.dropped.count) duplicate\(scan.dropped.count == 1 ? "" : "s") hidden by the dedupe rule") }
+        if !scan.dropped.isEmpty { parts.append("\(scan.dropped.count) duplicate\(scan.dropped.count == 1 ? "" : "s") hidden") }
         if !scan.skipped.isEmpty { parts.append("\(scan.skipped.count) unreadable") }
         return parts.joined(separator: " · ")
     }
@@ -207,7 +207,7 @@ final class AppModel {
             return StatusLine(kind: .failed, title: "No Health on this device", detail: "Health Access needs an iPhone with the Health app.")
         }
         if notificationStatus == .notDetermined {
-            return StatusLine(kind: .needs, title: "Notifications off", detail: "Needed for one thing: telling you when your AI wrote a plan.", action: ("Allow notifications", .allowNotifications))
+            return StatusLine(kind: .needs, title: "Notifications off", detail: "The app needs them for one thing: to tell you when your AI wrote a plan.", action: ("Allow notifications", .allowNotifications))
         }
         if notificationStatus == .denied {
             return StatusLine(kind: .needs, title: "Notifications off", detail: "Turn them on in Settings to hear when your AI wrote a plan.", action: ("Open Settings", .openSystemSettings))
@@ -239,7 +239,7 @@ final class AppModel {
         return (info, entry)
     }
 
-    static let syncedExplainer = "Nothing to do. Your AI can read it as soon as the folder has synced to your computer. With iCloud Drive that is usually a minute or two."
+    static let syncedExplainer = "Nothing to do. Your AI can read it as soon as the folder reaches your computer. With iCloud Drive, that usually takes a minute or two."
 
     /// One plain paragraph under the status tile: what happens on its own from here, and what needs you.
     var statusExplainer: String {
@@ -256,10 +256,10 @@ final class AppModel {
             return "Exports work without notifications. They only tell you when your AI wrote a workout plan."
         }
         if isSyncing {
-            return "Writing files now. If you leave before it is done, it carries on the next time the app runs."
+            return "The app writes files now. If you leave before it is done, it carries on the next time the app runs."
         }
         if backlog.running {
-            return "Keep the app open and the phone unlocked while it writes the older files. If you leave, it carries on where it stopped the next time you open the app. New workouts are still written on their own."
+            return "Keep the app open and the phone unlocked while it writes the older files. If you leave, it carries on where it stopped the next time you open the app. The app still writes new workouts on its own."
         }
         if settings.deferredSync {
             return "Your phone is locked, and iOS keeps Health data locked with it. The app writes the new files as soon as you unlock."
@@ -267,7 +267,7 @@ final class AppModel {
         if syncError != nil {
             return "The app wrote nothing new. Tap Try again. If it keeps failing, the sync log in Settings says why."
         }
-        return "Nothing to do. After every workout and every night's sleep, iOS wakes the app and it writes the new files into your folder, even when it is closed. It pauses while the phone is locked, and after you swipe the app away, until you open it again."
+        return "Nothing to do. After every workout and every night's sleep, iOS wakes the app, even when it is closed. Then the app writes the new files into your folder. It pauses while the phone is locked. After you swipe the app away, it pauses until you open it again."
     }
 
     private var lastCheckLine: String {
@@ -405,7 +405,7 @@ final class AppModel {
         let fresh = settings.lastSync.map { Date().timeIntervalSince($0) < 60 } ?? false
         var ok = fresh
         if !fresh { ok = await runSync(trigger: .shortcut) }
-        if settings.deferredSync { return "Health is locked. Unlock your iPhone and Health Access writes the files on its own." }
+        if settings.deferredSync { return "Health is locked. When you unlock your iPhone, Health Access writes the files on its own." }
         if !ok { return syncError.map { "Sync failed: \($0)" } ?? "Sync failed. The sync log in the app says why." }
         return "Synced: \(settings.lastSyncSummary.components(separatedBy: " · ").first ?? "done")."
     }
@@ -713,7 +713,7 @@ final class AppModel {
             settings.lastSync = Date()
             settings.deferredSync = false
             syncError = nil
-            settings.lastSyncSummary = "\(newCount) new session\(newCount == 1 ? "" : "s"), \(daysWritten) day file\(daysWritten == 1 ? "" : "s"), \(vitalsWritten) vitals · \(trigger.label) · \(ms) ms"
+            settings.lastSyncSummary = "\(newCount) new workout\(newCount == 1 ? "" : "s"), \(daysWritten) day file\(daysWritten == 1 ? "" : "s"), \(vitalsWritten) vitals · \(trigger.label) · \(ms) ms"
             log("sync done: \(settings.lastSyncSummary)", tag)
             Telemetry.shared.capture(.exportCompleted(workoutCount: newCount, durationMs: ms, trigger: trigger.rawValue))
             rescanPlans()
@@ -895,7 +895,7 @@ final class AppModel {
         let days = settings.backfillDays
         confirmation = Confirmation(
             title: "Write the last \(days) days again",
-            detail: "The app reads every session since then from Health once more. It keeps files that already exist, so ratings survive.",
+            detail: "The app reads every workout since then from Health once more. It keeps files that already exist, so ratings survive.",
             confirmTitle: "Write again") { [weak self] in
                 guard let self else { return }
                 self.settings.resetAnchor()
@@ -930,7 +930,7 @@ final class AppModel {
     func requestCatalog() {
         confirmation = Confirmation(
             title: "Write the catalog again",
-            detail: "Counts the last 90 days of every Health type this build knows (\(HealthTypes.all.count) plus the special ones) and writes catalog.json. Takes a moment.",
+            detail: "The app counts the last 90 days of every Health type this build knows (\(HealthTypes.all.count) plus the special ones) and writes catalog.json. This takes a moment.",
             confirmTitle: "Write catalog") { [weak self] in
                 guard let self, let folder = self.folder else { return }
                 await self.writeCatalog(folder: folder, tag: .sync)
@@ -1135,8 +1135,8 @@ final class AppModel {
         var sentence: String {
             switch source {
             case .plan: return "For \(Format.dayTime(date)), the time in the plan."
-            case .noTime: return "For \(Format.dayTime(date)), the next morning: the plan has no time."
-            case .passed: return "For \(Format.dayTime(date)), the next morning: the plan's time has passed."
+            case .noTime: return "For \(Format.dayTime(date)), the next morning, because the plan has no time."
+            case .passed: return "For \(Format.dayTime(date)), the next morning, because the plan's time has passed."
             }
         }
     }
@@ -1186,7 +1186,7 @@ final class AppModel {
         }
         confirmation = Confirmation(
             title: "Put new plans on your Watch automatically",
-            detail: "Every new plan your AI writes goes into the Watch's Workout app for the time in the plan. If the plan has no time, it goes there for the next morning at 10:00. It happens the next time Health Access runs or iOS wakes it, usually within a few hours, and you get a notification for each one. Remove from Watch takes one off again. This includes plans that are already waiting.",
+            detail: "Every new plan your AI writes goes into the Watch's Workout app for the time in the plan. If the plan has no time, it goes there for the next morning at \(settings.putOnWatchHour):00. This happens the next time Health Access runs or iOS wakes it, usually within a few hours. You get a notification for each plan. Remove from Watch takes a plan off again. This includes plans that are already waiting.",
             confirmTitle: "Turn on") { [weak self] in
                 guard let self else { return }
                 let auth = await PlanInstaller.authorize()
@@ -1309,7 +1309,7 @@ final class AppModel {
         guard let doc = item.doc else { return }
         confirmation = Confirmation(
             title: "Open Apple's preview of \(doc.name)",
-            detail: "Add to Watch there puts the workout in the Workout app without a date. Apple does not report back, so when the preview closes Health Access writes plans/\(item.id).status.json as added via preview, unconfirmed.",
+            detail: "Add to Watch there puts the workout in the Workout app without a date. Apple does not report back. So when the preview closes, Health Access writes plans/\(item.id).status.json as added through preview, not confirmed.",
             confirmTitle: "Open preview") { [weak self] in
                 guard let self else { return }
                 Telemetry.shared.capture(.planPutOnWatch(method: "preview"))
@@ -1324,9 +1324,9 @@ final class AppModel {
     private func preparePreview(_ item: PlanItem) async -> Bool {
         guard let folder, let doc = item.doc else { return false }
         do {
-            guard PlanInstaller.isSupported else { throw HealthAccessError("WorkoutKit is not supported on this iPhone (is a Watch paired?)") }
+            guard PlanInstaller.isSupported else { throw HealthAccessError("WorkoutKit does not work on this iPhone. Check that a Watch is paired.") }
             let auth = await PlanInstaller.authorize()
-            guard auth.authorized else { throw HealthAccessError("WorkoutKit authorization is \(auth.description)") }
+            guard auth.authorized else { throw HealthAccessError("WorkoutKit permission is \(auth.description)") }
             let built = try PlanInstaller.build(doc)
             for warning in built.warnings { log("plan \(doc.name): \(warning)", .plan) }
             previewing = PreviewSession(item: item, plan: built.plan)
@@ -1355,7 +1355,7 @@ final class AppModel {
             Notifier.clearPlanPrompt(planID: session.item.id)
             log("plan \(doc.name) added via preview (unconfirmed)", .plan)
             Telemetry.shared.capture(.planScheduled)
-            results[key] = ActionResult(kind: .done, text: "Added via preview (unconfirmed). Check the Workout app on your Watch.", at: Date())
+            results[key] = ActionResult(kind: .done, text: "Added through Apple's preview, not confirmed. Check the Workout app on your Watch.", at: Date())
             offerUndo(key: key) { [weak self] in await self?.undoStatus(session.item, key: key) }
         } catch {
             fail("status write failed: \(error.localizedDescription)")
@@ -1388,7 +1388,7 @@ final class AppModel {
         }
         let message = SetupMessage.text(for: folder, summary: summary, drives: cloud.connected.map { ($0.name, cloud.place($0)) })
         let carries = summary == nil
-            ? "There is no health data in it yet. After the first sync it also carries your summary, for ChatGPT and phone AIs."
+            ? "There is no health data in it yet. After the first sync, it also carries your summary, for ChatGPT and phone AIs."
             : "ChatGPT and phone AIs cannot do that, so it also carries your summary for them. The summary has the last four weeks, recent workouts, vitals and the next planned workout."
         confirmation = Confirmation(
             title: "Copy the message for your AI",
@@ -1447,7 +1447,7 @@ final class AppModel {
         let host = Telemetry.shared.hostName ?? "PostHog"
         confirmation = Confirmation(
             title: "Send usage statistics",
-            detail: "Which features you use and whether they worked go to \(host) under a random install id. Never a health value, never a file name, never a folder path.",
+            detail: "The app sends which features you use and whether they worked to \(host), under a random install id. It never sends a health value, a file name or a folder path.",
             confirmTitle: "Send") { [weak self] in
                 self?.setTelemetry(true)
             }
