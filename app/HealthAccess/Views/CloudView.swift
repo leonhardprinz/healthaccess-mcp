@@ -11,7 +11,7 @@ struct CloudSection: View {
                     NavigationLink { CloudView(kind: kind) } label: {
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(kind.name).foregroundStyle(.primary)
+                                CloudName(kind: kind)
                                 if let covers = kind.covers { Text(covers).font(.footnote).foregroundStyle(.secondary) }
                             }
                             Spacer()
@@ -19,10 +19,39 @@ struct CloudSection: View {
                         }
                     }
                 }
+                // Named, but not usable in this build: the sign-in for it does not exist yet.
+                ForEach(CloudKind.announced.filter { !model.cloud.config.offers($0) }) { kind in
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            CloudName(kind: kind)
+                            Text("Not ready in this version.").font(.footnote).foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        Text("Soon").foregroundStyle(.secondary)
+                    }
+                    .opacity(0.6)
+                }
             } header: {
                 SectionTitle("Cloud upload")
             } footer: {
                 Text("For storage apps that you can't pick as a folder. Health Access uploads your folder to them itself, from this phone straight to your own account.")
+            }
+        }
+    }
+}
+
+/// A drive's name, with "Beta" behind it while the upload to it is new.
+struct CloudName: View {
+    let kind: CloudKind
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Text(kind.name).foregroundStyle(.primary)
+            if kind.isBeta {
+                Text("BETA").font(.caption2.weight(.semibold)).foregroundStyle(.secondary)
+                    .padding(.horizontal, 5).padding(.vertical, 1)
+                    .overlay(Capsule().stroke(Color.secondary.opacity(0.5)))
+                    .accessibilityLabel("Beta")
             }
         }
     }
@@ -239,7 +268,7 @@ struct CloudStatusRows: View {
         if shown.isEmpty {
             NavigationLink { CloudList() } label: {
                 InfoRow(symbol: "icloud.and.arrow.up", tint: .secondary, title: "Cloud upload",
-                        line: "Off. For Google Drive, OneDrive, Dropbox, your own server and more.")
+                        line: "Off. For \(Format.list(model.cloud.kinds.map(\.name), last: "and")).")
             }
         } else {
             ForEach(shown) { kind in

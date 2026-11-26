@@ -220,13 +220,21 @@ enum FolderPickerCopy {
     /// Google Drive and OneDrive do not (seen on iOS 27.2 with 1.0.5), and no setting on the phone changes it.
     /// Under the buttons of the onboarding's folder step: the way for someone whose storage cannot be picked.
     static var onboarding: String {
-        "Google Drive, OneDrive or Dropbox? You can't pick them here, because they don't let other apps open their folders. Keep the folder on this iPhone. Then switch on Cloud upload in Settings, and Health Access uploads to them itself."
+        // Name only the drives this build can really upload to.
+        let drives = CloudConfig.shared.kinds.filter { $0.access == .signIn }.map(\.name)
+        guard !drives.isEmpty else {
+            return "Google Drive or OneDrive? You can't pick them here, because they don't let other apps open their folders. Use iCloud Drive. Or keep the folder on this iPhone and upload it to your own server in Settings."
+        }
+        let them = drives.count == 1 ? "it" : "them"
+        let they = drives.count == 1 ? "it doesn't" : "they don't"
+        return "\(Format.list(drives))? You can't pick \(them) here, because \(they) let other apps open \(drives.count == 1 ? "its" : "their") folders. Keep the folder on this iPhone. Then switch on Cloud upload in Settings, and Health Access uploads to \(them) itself."
     }
 
     static var greyedOut: String {
         let base = "Greyed out in the picker? Google Drive and OneDrive don't let other apps open their folders. Nothing on your phone is set wrong."
         // Only promise the upload to them when this build can sign in there.
-        return base + " Cloud upload below sends your files to them instead."
+        let drives = CloudConfig.shared.kinds.filter { $0 == .google || $0 == .onedrive }.map(\.name)
+        return drives.isEmpty ? base : base + " Cloud upload below sends your files to \(Format.list(drives, last: "and")) instead."
     }
 }
 
