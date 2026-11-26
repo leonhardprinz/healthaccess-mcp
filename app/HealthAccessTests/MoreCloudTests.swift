@@ -415,6 +415,23 @@ final class ComplicationTests: XCTestCase {
         XCTAssertEqual(puts, [], "and the two do not overwrite each other on every run")
     }
 
+    func testAskingForADriveSendsOneSmallEventAndNothingElse() throws {
+        let request = try XCTUnwrap(DriveInterest.request(host: "https://eu.i.posthog.com/", token: "phc_test", installID: "11111111-2222-3333-4444-555555555555",
+                                                          drive: .onedrive, version: "1.1.0", build: "34"))
+        XCTAssertEqual(request.url?.absoluteString, "https://eu.i.posthog.com/i/v0/e/")
+        XCTAssertEqual(request.httpMethod, "POST")
+        let body = try XCTUnwrap(JSONSerialization.jsonObject(with: try XCTUnwrap(request.httpBody)) as? [String: Any])
+        XCTAssertEqual(Set(body.keys), ["api_key", "event", "distinct_id", "properties"])
+        XCTAssertEqual(body["event"] as? String, "drive_interest")
+        XCTAssertEqual(body["distinct_id"] as? String, "11111111-2222-3333-4444-555555555555")
+        let properties = try XCTUnwrap(body["properties"] as? [String: Any])
+        XCTAssertEqual(Set(properties.keys), ["drive", "$app_version", "$app_build", "$lib", "$process_person_profile", "$geoip_disable"])
+        XCTAssertEqual(properties["drive"] as? String, "onedrive")
+        XCTAssertEqual(properties["$process_person_profile"] as? Bool, false)
+        XCTAssertEqual(properties["$geoip_disable"] as? Bool, true)
+        XCTAssertNil(DriveInterest.request(host: "http://example.com", token: "t", installID: "i", drive: .onedrive, version: "1", build: "1"), "never over plain http")
+    }
+
     func testTheMessageForTheAINamesTheCloudCopy() {
         let plain = SetupMessage.text(for: nil, summary: nil)
         XCTAssertFalse(plain.contains("connector:"))

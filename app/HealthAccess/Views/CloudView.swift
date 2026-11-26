@@ -21,15 +21,26 @@ struct CloudSection: View {
                 }
                 // Named, but not usable in this build: the sign-in for it does not exist yet.
                 ForEach(CloudKind.announced.filter { !model.cloud.config.offers($0) }) { kind in
-                    HStack {
-                        VStack(alignment: .leading, spacing: 2) {
-                            CloudName(kind: kind)
-                            Text("Not ready in this version.").font(.footnote).foregroundStyle(.secondary)
+                    let key = "interest:\(kind.rawValue)"
+                    let asked = model.results[key]?.kind == .done || DriveInterest.wasSent(kind)
+                    let canAsk = model.usageStatisticsAvailable && !asked
+                    Button { model.requestDriveInterest(kind) } label: {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                CloudName(kind: kind)
+                                Text(asked ? "Not ready yet. You asked for it."
+                                     : canAsk ? "Not ready yet. Tap to tell the developer you want it."
+                                     : "Not ready in this version.")
+                                    .font(.footnote).foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Text(asked ? "Asked" : "Soon").foregroundStyle(.secondary)
                         }
-                        Spacer()
-                        Text("Soon").foregroundStyle(.secondary)
+                        .contentShape(Rectangle())
                     }
-                    .opacity(0.6)
+                    .buttonStyle(.plain)
+                    .disabled(!canAsk)
+                    if let result = model.results[key] { ResultLine(result: result, undoKey: key) }
                 }
             } header: {
                 SectionTitle("Cloud upload")

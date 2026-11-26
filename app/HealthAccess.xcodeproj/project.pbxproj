@@ -74,6 +74,7 @@
 		C3D282016E6303296A049935 /* AppModel+Cloud.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6450D63E1E2292C3FE72664A /* AppModel+Cloud.swift */; };
 		CA436D6278B9E0D04CFE1383 /* AppModel+Backlog.swift in Sources */ = {isa = PBXBuildFile; fileRef = A07BBDE31D98E2854A983A50 /* AppModel+Backlog.swift */; };
 		CC9230B40A57E7C030AA9A89 /* CatalogBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CD4F70D172FCFD51FEA0DB6 /* CatalogBuilder.swift */; };
+		CC937CF7F933C39D70236C60 /* DriveInterest.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA725DC8468744DEE2CB31C4 /* DriveInterest.swift */; };
 		CD39179E34A721F69F41F48E /* ActivityMapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8878247CB4260BBCB3E1139A /* ActivityMapping.swift */; };
 		CFE47AF657E54A4A7074D01E /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D1AFDDE5C4CFCEE4971A85 /* AppSettings.swift */; };
 		D707D1751FE91519B5BE9833 /* Telemetry.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0CDE67D1E67403E3F816C32 /* Telemetry.swift */; };
@@ -156,6 +157,7 @@
 		98067AB607CFA4AD967C455D /* HealthQueries.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthQueries.swift; sourceTree = "<group>"; };
 		A07BBDE31D98E2854A983A50 /* AppModel+Backlog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppModel+Backlog.swift"; sourceTree = "<group>"; };
 		A24CDE279777926B5B0FE222 /* IndexBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndexBuilder.swift; sourceTree = "<group>"; };
+		AA725DC8468744DEE2CB31C4 /* DriveInterest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriveInterest.swift; sourceTree = "<group>"; };
 		AD25E2A91DF039308CF4D5FC /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
 		B12BDA95DC1262C04DD88346 /* FolderStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderStore.swift; sourceTree = "<group>"; };
 		B37670290ACD50F2E747406B /* CloudCenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudCenter.swift; sourceTree = "<group>"; };
@@ -303,6 +305,7 @@
 				F94BFF2638759E6B2ABEAAF6 /* CloudMirror.swift */,
 				36FA808A2B8E6756D4D75FE4 /* CloudTypes.swift */,
 				CBFA6D34A0EAF2263A3CCBF0 /* CloudXML.swift */,
+				AA725DC8468744DEE2CB31C4 /* DriveInterest.swift */,
 				EF96CF07AA23090DB454B5E7 /* Dropbox.swift */,
 				7D9C6B352512E1055B60D1ED /* GoogleDrive.swift */,
 				4D743BC6E831E6A1BEF804E1 /* OAuth.swift */,
@@ -502,6 +505,7 @@
 				0FDD936AFAFD571A03AF70CD /* DayRanges.swift in Sources */,
 				4EA39878F0F9751D10A94204 /* DaysView.swift in Sources */,
 				4086662DE49686FB73B72311 /* DiskLog.swift in Sources */,
+				CC937CF7F933C39D70236C60 /* DriveInterest.swift in Sources */,
 				5E77E26EE1EA4E9D9743A115 /* Dropbox.swift in Sources */,
 				27A6534BFBA5353211D44670 /* ECGExporter.swift in Sources */,
 				1A439A151C66B326C2462A99 /* FolderStore.swift in Sources */,

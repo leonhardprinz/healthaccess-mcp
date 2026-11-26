@@ -56,6 +56,29 @@ extension AppModel {
             }
     }
 
+    /// A drive that is named but not ready: one tap, one confirmation, one event to the developer.
+    func requestDriveInterest(_ kind: CloudKind) {
+        let key = "interest:\(kind.rawValue)"
+        guard let config = Telemetry.shared.config, !DriveInterest.wasSent(kind) else { return }
+        let host = Telemetry.shared.hostName ?? "PostHog"
+        confirmation = Confirmation(
+            title: "Ask for \(kind.name)",
+            detail: "This sends one message to \(host): that someone wants \(kind.name), with the app version and a random install id. Nothing about you and no health data. You find it under What left this phone.",
+            confirmTitle: "Send") { [weak self] in
+                guard let self else { return }
+                guard let request = DriveInterest.request(host: config.host, token: config.token, installID: self.settings.installID, drive: kind,
+                                                          version: HealthAccessJSON.appVersion, build: HealthAccessJSON.appBuild),
+                      await DriveInterest.send(request) else {
+                    self.results[key] = ActionResult(kind: .failed, text: "Could not send it. Try again when you are online.", at: Date())
+                    return
+                }
+                UserDefaults.standard.set(true, forKey: DriveInterest.key(kind))
+                NetworkLedger.shared.record(host: host, event: "\(DriveInterest.event) (\(kind.rawValue))")
+                self.log("asked for \(kind.name)", .cloud)
+                self.results[key] = ActionResult(kind: .done, text: "Sent. Thank you, that helps to decide what comes next.", at: Date())
+            }
+    }
+
     /// Starts an upload run in the front, where it may take as long as it needs. Does nothing while one runs.
     func kickCloud() {
         guard cloudTask == nil, !cloud.connected.isEmpty, folder != nil else { return }
