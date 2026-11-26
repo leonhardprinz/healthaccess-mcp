@@ -21,7 +21,7 @@ Site: [healthaccessmcp.com](https://healthaccessmcp.com) (built from `site/`). F
 
 **Once, about five minutes, you**
 1. Install the app: [Health Access MCP on the App Store](https://apps.apple.com/app/id6831916470), free. Or build it from this repository with Xcode.
-2. Pick a folder. iCloud Drive is the simple choice, and a network drive (NAS) works too. Google Drive and OneDrive can't be picked on an iPhone: they don't let other apps open their folders. The one rule: your AI has to be able to reach the same folder, so pick one that syncs to the computer where the AI runs.
+2. Pick a folder. iCloud Drive is the simple choice, and a network drive (NAS) works too. Google Drive and OneDrive can't be picked on an iPhone, because they don't let other apps open their folders. From app version 1.1.0 the app uploads to Google Drive, a WebDAV server or S3 storage itself (Settings → Cloud upload, [how it works](https://healthaccessmcp.com/docs/cloud)). The one rule: your AI has to be able to reach the same folder, so pick one that syncs to the computer where the AI runs.
 3. Allow Health access (read only, you choose the types) and notifications (one kind only: "Your AI wrote S27", when a plan arrives).
 4. Give it to your AI. Paste the message the app copies; Claude or Cursor register `npx -y healthaccess-mcp`, which finds your folder on its own. An AI that cannot run a program, such as ChatGPT, works from the summary in the same message.
 

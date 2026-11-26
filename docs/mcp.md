@@ -100,7 +100,10 @@ bounds came from (`bounds_source`: `config`, `estimated` or `file`), and
 
 The folder can live wherever the iOS folder picker lets the athlete pick one: iCloud Drive,
 a NAS, On My iPhone. Google Drive and OneDrive are greyed out there, because they don't let
-other apps open their folders. The one rule: the same folder has to be
+other apps open their folders. From app version 1.1.0 the app can upload the folder itself
+(Settings → Cloud upload) to Google Drive, a WebDAV server or S3 storage; on Google Drive it
+makes a folder "Health Access" at the top level of My Drive, and the Google Drive app for
+the computer syncs it to where this server finds it. The one rule: the same folder has to be
 reachable from the machine the AI runs on.
 
 From 1.0.4 the server starts without a folder: the app may not have written anything yet,

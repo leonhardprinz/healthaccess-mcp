@@ -185,7 +185,7 @@ The last card on the Export tab is the tip jar: `com.healthaccessmcp.app.support
 - The dedupe loser stays on disk (the app never deletes session files).
 - Catalog counts stop at 10,000 samples per type in 90 days (`capped: true`); heart rate and steps hit that on a Watch wearer.
 
-## Cloud upload (Google Drive, OneDrive, Dropbox)
+## Cloud upload (Google Drive, WebDAV, S3; OneDrive, Dropbox, Box and pCloud in the code)
 
 The iOS folder picker only offers storage apps that let other apps open their folders. Google Drive and OneDrive do not, so the app uploads a copy of the folder to them itself (`Services/Cloud/`). The picked folder stays the original; `CloudMirror` uploads what is new or changed after every sync and brings back plan files an AI left in the drive's `plans/` folder (on Google through `plans/inbox.json`, because `drive.file` shows an app only its own files).
 
@@ -199,7 +199,7 @@ WebDAV servers and S3 storage need nothing from us and are always offered: the u
 | Box | Box Developer Console → Create Platform App → Custom App → User Authentication (OAuth 2.0) | Redirect URI `boxsdk-<client id>://boxsdkoauth2redirect`. Scope "Read and write all files and folders". Keys `BoxClientID` and `BoxClientSecret`. Box has no folder-only permission |
 | pCloud | docs.pcloud.com → My applications → New app, access "Specific app folder" | Redirect URI `com.healthaccessmcp.app://oauth/pcloud`. Key `PCloudClientID`. The token comes back in the redirect and does not run out |
 
-Not tested against the real service yet: Google Drive, OneDrive, Dropbox, Box, pCloud (stubbed network only). Tested for real: WebDAV (`scripts/webdav-test-server.sh start` runs the Apache that ships with macOS; `WebDAVLiveTests` then runs the whole mirror against it). The S3 signer is checked against the worked examples in Amazon's Signature Version 4 documentation.
+Offered in 1.1.0: Google Drive, WebDAV and S3. OneDrive and Box are shown greyed out as "Soon" (`CloudKind.announced`); a tap sends one `drive_interest` event (`DriveInterest.swift`). Tested for real: Google Drive on an iPhone against a real account. Not tested against the real service yet: OneDrive, Dropbox, Box, pCloud (stubbed network only), and an S3 upload to a real bucket. Also tested for real: WebDAV (`scripts/webdav-test-server.sh start` runs the Apache that ships with macOS; `WebDAVLiveTests` then runs the whole mirror against it). The S3 signer is checked against the worked examples in Amazon's Signature Version 4 documentation.
 
 Tests: `xcodebuild -project HealthAccess.xcodeproj -scheme HealthAccess -destination 'platform=iOS Simulator,name=iPhone 18 Pro' test` runs `HealthAccessTests` (sign-in building blocks, the mirror against a drive in memory, the three drives against a stubbed network).
 

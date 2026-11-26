@@ -10,7 +10,7 @@ WHAT GOES INTO THE FOLDER
 WHO IT IS FOR
 - You have an Apple Watch and an AI coach (Claude, ChatGPT, Cursor, a local model) and want it to see your actual sessions instead of what you remember to type.
 - You coach yourself in the pool, on the rower or on the road, and want a coach that has read every session, not the last screenshot.
-- You will not put your health data on someone else's server. The folder is yours, on storage you already have: iCloud Drive, a network drive, or just On My iPhone. (Google Drive and OneDrive don't let apps open a folder on iPhone, so they can't be picked.)
+- You will not put your health data on someone else's server. The folder is yours, on storage you already have: iCloud Drive, a network drive, or just On My iPhone. Google Drive can't be picked as a folder on iPhone, so the app uploads to it itself if you switch on Cloud upload. A WebDAV server (Nextcloud, a NAS) or S3 storage works the same way.
 - You have a human coach. Share the same folder and they get the real splits.
 
 PLANS BACK TO THE WATCH
@@ -20,7 +20,7 @@ HOW TO CONNECT YOUR AI
 On your computer, one command: npx -y healthaccess-mcp. It finds the folder on its own. The app copies a setup message you can paste into your AI, and it shows when your AI is connected. Eleven suggested prompts are in the app, from a weekly check-in to planning your week.
 
 PRIVACY
-No account, no server. Your health data goes only into the folder you choose. Usage statistics are off by default; if you turn them on, they are event names and counts, never a health value, file name or folder path. "What left this phone" in Settings lists every request the app made.
+No account, no server of ours. Your health data goes only into the folder you choose and, if you switch on Cloud upload, from your iPhone straight to the drive you connected. Usage statistics are off by default; if you turn them on, they are event names and counts, never a health value, file name or folder path. "What left this phone" in Settings lists every request the app made.
 What you share with an AI, and what it tells you, is between you and that AI.
 
 HONEST LIMITS

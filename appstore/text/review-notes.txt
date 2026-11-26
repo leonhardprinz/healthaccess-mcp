@@ -6,8 +6,11 @@ HOW TO TEST
 3. Import tab: in Safari, open https://healthaccessmcp.com/review/sample-walk-plan.json, Share, Save to Files, and save it into the "plans" folder inside the chosen folder. Back in the app it appears under "Waiting for you". Put on Watch schedules it with WorkoutKit for the next morning at 10:00 and needs a paired Apple Watch. Remove from Watch takes it off again.
 4. The computer part (an MCP server for AI apps such as Claude) is optional and runs on the user's own computer. It reads the same folder. Docs: https://healthaccessmcp.com
 
+CLOUD UPLOAD (new in 1.1.0, optional, off by default)
+Settings > Cloud upload. When the user connects a drive and confirms, the app uploads the JSON files of the user-chosen folder from the device directly to the user's own account: Google Drive (sign-in with Google in ASWebAuthenticationSession; the app asks only for access to files it creates itself and makes a folder "Health Access" in the user's Drive), or a WebDAV server or S3 storage whose address the user types. There is no server of ours and we receive nothing. To test: Settings > Cloud upload > Google Drive > Connect, sign in with any Google account, then Sync on the Export tab; the folder "Health Access" appears in that account's Google Drive. OneDrive and Box are shown greyed out as "Soon"; a tap, after a confirmation, sends one anonymous event so we learn that someone wants them. The local-network permission is asked only when the user enters a server in their own network. The background processing task finishes an upload the user started.
+
 HEALTHKIT
-Health data is written only to the location the user chose, at their request, like an export. The app does not store health data in its own iCloud container and never sends health data to us or to any third party. Background mode "fetch" and HealthKit background delivery export new workouts after the Watch syncs.
+Health data is written only to the location the user chose, at their request, like an export, and uploaded only to a drive the user connected themselves. The app does not store health data in its own iCloud container and never sends health data to us. Background mode "fetch" and HealthKit background delivery export new workouts after the Watch syncs.
 
 IN-APP PURCHASES
 Optional, on the last card of the Export tab. "Remove the support card" (non-consumable) hides the card. "Coffee for the dev" (consumable) is a tip and unlocks nothing. Restore Purchases is in Settings.
