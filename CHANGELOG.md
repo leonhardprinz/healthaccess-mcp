@@ -2,16 +2,19 @@
 
 Versions are one number for everything: the app's `MARKETING_VERSION`, the Rust crates and the npm packages (`scripts/bump-version.sh`). The app's build number counts up on its own. Dates are Europe/Ljubljana.
 
-## 1.1.0 (app build 31), unreleased: a copy in Google Drive, OneDrive, Dropbox, Box, pCloud, on a WebDAV server or in S3 storage, and plans back from there
+## 1.1.0 (app build 36), unreleased: Cloud upload to Google Drive, a WebDAV server or S3 storage, and plans back from there
 
-Not released. WebDAV is tested against a real server (the Apache that ships with macOS, through the unit tests and through the app in the simulator: 1,649 files up, a plan back). The S3 signature matches Amazon's published examples. Google Drive, OneDrive, Dropbox, Box and pCloud are tested against a stubbed network only; a run against the real services needs their client ids (see `app/README.md`, "Cloud upload").
+Not released. What the app offers in this version: Google Drive, any WebDAV server, any S3 storage. Google Drive is tested on a real iPhone against a real account (sign-in, first upload, the folder in My Drive). WebDAV is tested against a real server (the Apache that ships with macOS: unit tests, the simulator with 1,649 files up and a plan back, and a real iPhone over the local network). The S3 signature matches Amazon's published examples; a real upload to a bucket is not tested.
+
+OneDrive and Box are shown greyed out as "Soon": a tap, after a confirmation, sends one anonymous `drive_interest` event so we learn who wants them. The code for OneDrive, Dropbox, Box and pCloud is in the app and tested against a stubbed network only. Each stays hidden until its client id is in `CloudConfig.plist` (see `app/README.md`, "Cloud upload"). What follows describes all seven.
 
 ### New
 - **Cloud upload (Settings).** The app uploads a copy of the folder to Google Drive, OneDrive or Dropbox itself, after a sign-in on the drive's own page. The folder picker cannot reach these storage apps, so this is the way to them. The folder you picked stays the original; after every sync the new and changed files go up, newest first, `index.json` and `briefing.md` last. A first upload of a long history runs while the app is open and picks up where it stopped. Nothing passes through a server of ours.
-- **Seven places.** Google Drive, OneDrive (personal and work accounts), Dropbox, Box and pCloud through a sign-in on their own page. Any WebDAV server (Nextcloud, ownCloud, a Synology or QNAP NAS, Koofr, Hetzner Storage Box and others) through its address, a name and a password. Any S3 storage (Amazon S3, Cloudflare R2, Backblaze B2, MinIO, Wasabi) through a bucket and a key pair. Several can be on at once. Not possible: MEGA and Proton Drive (no public API for an app like this one), iCloud Drive (pick it as the folder).
+- **Seven places in the code, three offered.** Google Drive, OneDrive (personal and work accounts), Dropbox, Box and pCloud through a sign-in on their own page. Any WebDAV server (Nextcloud, ownCloud, a Synology or QNAP NAS, Koofr, Hetzner Storage Box and others) through its address, a name and a password. Any S3 storage (Amazon S3, Cloudflare R2, Backblaze B2, MinIO, Wasabi) through a bucket and a key pair. Several can be on at once. Not possible: MEGA and Proton Drive (no public API for an app like this one), iCloud Drive (pick it as the folder).
 - **A server in your own network** may be reached over plain http (`NSAllowsLocalNetworking`); everything else has to be https. iOS asks once for local network access.
 - **The app asks for one folder, not the drive.** Box is the exception: it has no permission for one folder, so the sign-in covers the account and the app says so before it. pCloud: an app with its own folder. WebDAV: the folder whose address you give. S3: give the key access to one bucket. Google: only the files the app created (`drive.file`). OneDrive: the app's own folder (`Files.ReadWrite.AppFolder`, Apps › Health Access). Dropbox: an app-folder app (Apps › Health Access). The sign-in is OAuth 2 with PKCE in the system sign-in sheet; the long-lived token is in the keychain.
 - **Plans come back.** On OneDrive, Dropbox, Box, pCloud, WebDAV and S3 a plan file that an AI puts into `plans/` there is brought to the phone on the next sync and shows up in the Import tab like any plan. Google shows an app only its own files, so there the AI edits `plans/inbox.json`, a file the app made for that (one plan, or a list). The inbox works on the other two as well.
+- **The app says where the folder goes before you connect.** Google Drive: a new folder, Health Access, at the top level of My Drive, which you may move inside Drive. WebDAV: inside the folder whose address you give. S3: under the folder (prefix) you set. The same sentence is in the confirmation and under the drive's row.
 - **`README.md` in the uploaded folder** tells an AI that reads the drive through its own connector what the files are and how to write a plan, with an example the app's own validator accepts.
 - "What left this phone" lists every upload run by drive, with the number of files.
 
@@ -33,7 +36,7 @@ Not released. WebDAV is tested against a real server (the Apache that ships with
 - Woken in the background the app has a few seconds for uploads; the rest goes with the next sync, when the app is opened, or in a background processing task. How well that works on a locked phone is not tested yet.
 
 ### For developers
-- `Services/Cloud/`: `OAuth.swift`, `CloudHTTP.swift`, the three drives, `CloudMirror.swift` (state in Application Support, decisions in `CloudPlanner`). Unit tests in `HealthAccessTests` (69), run with `xcodebuild test`; `scripts/webdav-test-server.sh start` first, or the two live WebDAV tests are skipped.
+- `Services/Cloud/`: `OAuth.swift`, `CloudHTTP.swift`, the three drives, `CloudMirror.swift` (state in Application Support, decisions in `CloudPlanner`). Unit tests in `HealthAccessTests` (72), run with `xcodebuild test`; `scripts/webdav-test-server.sh start` first, or the two live WebDAV tests are skipped.
 - Client ids come from `Resources/CloudConfig.plist` (gitignored; copy the example). Without the file Cloud upload offers WebDAV and S3 only.
 
 ## 1.0.6, never released on its own, part of 1.1.0: Google Drive and OneDrive can't be picked, and the app says so

@@ -179,7 +179,7 @@
       "name": "Can I export Apple Health data to Google Drive or OneDrive?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Not straight from the iPhone. The app writes into a folder you pick, and iOS only offers storage apps that let other apps open their folders. iCloud Drive, On My iPhone and network drives do. Google Drive and OneDrive don't, so they show up greyed out in the folder picker for every app. Pick a folder in iCloud Drive. A computer that syncs it can copy the files to Google Drive or OneDrive."
+        "text": "Google Drive: yes, from app version 1.1.0. You can't pick it as the folder, because it doesn't let other apps open its folders. So the app uploads your files itself: Settings, Cloud upload, Google Drive, sign in. It makes a new folder called Health Access at the top level of your Drive. A WebDAV server (Nextcloud, a NAS) and S3 storage work the same way. OneDrive is planned, and you can ask for it in the app."
       }
     }
   ]
@@ -249,7 +249,7 @@
 <h3>Why isn't my last workout in the folder yet?</h3>
 <p>Most likely your phone was locked. Apple only lets apps read Health data while the iPhone is unlocked, so the export waits until you next unlock it and then runs on its own. If it still doesn't show up, the sync log in the app tells you why. <a href="/support">Support.</a></p>
 <h3>Can I export Apple Health data to Google Drive or OneDrive?</h3>
-<p>Not straight from the iPhone. The app writes into a folder you pick, and iOS only offers storage apps that let other apps open their folders. iCloud Drive, On My iPhone and network drives do. Google Drive and OneDrive don't, so they show up greyed out in the folder picker for every app. Pick a folder in iCloud Drive. A computer that syncs it can copy the files to Google Drive or OneDrive. <a href="/support#greyed-out">More on the support page.</a></p>
+<p>Google Drive: yes, from app version 1.1.0. You can't pick it as the folder, because it doesn't let other apps open its folders. So the app uploads your files itself: Settings, Cloud upload, Google Drive, sign in. It makes a new folder called Health Access at the top level of your Drive. A WebDAV server (Nextcloud, a NAS) and S3 storage work the same way. OneDrive is planned, and you can ask for it in the app. <a href="/docs/cloud">How Cloud upload works.</a></p>
 <h3>Does it work on Android or without an Apple Watch?</h3>
 <p>There's no Android version. The app needs an iPhone with iOS 17 or later. It exports whatever is in Apple Health, whichever app or device saved it there. Only putting a plan on your wrist needs an Apple Watch.</p>
 
@@ -259,7 +259,7 @@
 <footer class="site">
   <div class="cols">
     <div><h4>Connect an AI</h4><ul><li><a href="/docs/claude-code">Claude Code</a></li><li><a href="/docs/claude-desktop">Claude Desktop</a></li><li><a href="/docs/cursor">Cursor</a></li><li><a href="/docs/chatgpt">ChatGPT</a></li><li><a href="/docs/local-models">Local models</a></li></ul></div>
-    <div><h4>Reference</h4><ul><li><a href="/docs/files">The folder is the API</a></li><li><a href="/docs/plans">Plans and Put on Watch</a></li><li><a href="/docs/prompts">Ideas for your AI</a></li><li><a href="/ref/mcp.md">Tool reference</a></li><li><a href="/ref/schema.md">Data contract</a></li></ul></div>
+    <div><h4>Reference</h4><ul><li><a href="/docs/files">The folder is the API</a></li><li><a href="/docs/plans">Plans and Put on Watch</a></li><li><a href="/docs/cloud">Cloud upload</a></li><li><a href="/docs/prompts">Ideas for your AI</a></li><li><a href="/ref/mcp.md">Tool reference</a></li><li><a href="/ref/schema.md">Data contract</a></li></ul></div>
     <div><h4>For AIs</h4><ul><li><a href="/llms.txt">llms.txt</a></li><li><a href="/llms-full.txt">llms-full.txt</a></li><li><a href="https://www.npmjs.com/package/healthaccess-mcp">npm package</a></li></ul></div>
     <div><h4>About</h4><ul><li><a href="/docs/privacy">Privacy, explained</a></li><li><a href="/privacy-policy">Privacy policy</a></li><li><a href="/support">Support</a></li><li><a href="/docs/compare">How it compares</a></li><li><a href="/docs/faq">Questions and answers</a></li><li><a href="/docs/health-auto-export-alternative">Alternative to Health Auto Export</a></li></ul></div>
   </div>

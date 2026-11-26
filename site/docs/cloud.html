@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Apple Health to Google Drive or your own server: Health Access MCP</title>
+<meta name="description" content="Health Access uploads a copy of your Apple Health files to Google Drive, a WebDAV server or S3 storage, straight from your iPhone. An AI that reads the drive can send workout plans back.">
+<link rel="canonical" href="https://healthaccessmcp.com/docs/cloud">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Health Access MCP">
+<meta property="og:title" content="Apple Health to Google Drive or your own server">
+<meta property="og:description" content="Health Access uploads a copy of your Apple Health files to Google Drive, a WebDAV server or S3 storage, straight from your iPhone. An AI that reads the drive can send workout plans back.">
+<meta property="og:url" content="https://healthaccessmcp.com/docs/cloud">
+<meta property="og:image" content="https://healthaccessmcp.com/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/fonts/fonts.css">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body class="doc">
+<div class="wrap">
+<nav class="top">
+  <a class="brand" href="/"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0D366B"/><g fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" transform="translate(9.6 9.6) scale(0.7)"><path d="M6 34 H20 L26 20 L34 48 L40 34 H52"/><path d="M46 26 L56 34 L46 42"/></g></svg>Health Access <span>MCP</span></a>
+  <a href="/docs/claude-code">Install</a>
+  <a href="/docs/files">Files</a>
+  <a href="/docs/plans">Plans</a>
+  <a href="/docs/prompts">Ideas for your AI</a>
+  <a href="/docs/privacy">Privacy</a>
+  <a href="/docs/compare">Compare</a>
+  <a href="/llms.txt">llms.txt</a>
+  <a href="/support">Support</a>
+</nav>
+<p class="crumbs"><a href="/">Health Access MCP</a> / Reference / Cloud upload</p>
+
+<header class="hero">
+  <span class="label">Reference</span>
+  <h1>Apple Health to Google Drive or your own server</h1>
+<p class="lead">From app version 1.1.0. The iPhone's folder picker can't reach Google Drive, because it doesn't let other apps open its folders. So Health Access uploads a copy itself, after every sync, from your phone straight to your own account.</p>
+</header>
+
+<main>
+<h2 id="where">Where a copy can go</h2>
+<table>
+<tr><th>Place</th><th>How you connect</th><th>Where the files land</th></tr>
+<tr><td>Google Drive</td><td>Sign in on Google's page</td><td>A new folder, Health Access, at the top level of My Drive. The app makes it and can reach only the files it created. You can move the folder inside Drive.</td></tr>
+<tr><td>A WebDAV server: Nextcloud, ownCloud, a Synology or QNAP NAS, Koofr and others</td><td>Address, user name, password</td><td>A new folder, Health Access, inside the folder whose address you give</td></tr>
+<tr><td>S3 storage: Amazon S3, Cloudflare R2, Backblaze B2, MinIO, Wasabi</td><td>Bucket and a key pair</td><td>Under the folder (prefix) you set in the bucket</td></tr>
+</table>
+<p>Several can be on at once. OneDrive and Box are planned: in Settings, Cloud upload, tap one to tell us you want it. iCloud Drive needs none of this, because you pick it as the folder.</p>
+
+<h2 id="setup">Switch it on</h2>
+<ol>
+  <li>If you have no folder yet, choose "Keep it on this iPhone" in the app's first steps. The files then live under On My iPhone › Health Access.</li>
+  <li>Settings → Cloud upload → your drive → Connect. You sign in on the drive's own page. The app never sees your password there.</li>
+  <li>Leave the app open for the first upload. A few years of data are a few thousand small files. What is left goes on when you come back, or while the phone rests.</li>
+</ol>
+<p>After that the upload runs on its own after every sync. Settings → Uploads has an "Upload on Wi-Fi only" switch. In Low Data Mode the app uploads nothing.</p>
+
+<h2 id="ai">Let your AI read it</h2>
+<p>Connect your AI to the same drive (Claude, ChatGPT and others have a connector for Google Drive) and point it at the Health Access folder. The folder starts with a <code>README.md</code> written for the AI: what the files are, and how to write a workout plan. "Copy" under Your AI in the app gives you a message that says where the copy is.</p>
+
+<h2 id="plans">Workout plans back to your Watch</h2>
+<p>On a WebDAV server and on S3 storage the AI writes a plan file into <code>plans/</code>. The app brings it to the phone with the next sync and you find it in the Import tab, like any other plan.</p>
+<p>Google shows an app only the files that app made, so a new file from your AI stays invisible to Health Access. There the AI edits <code>plans/inbox.json</code>, a file the app made for exactly that. Your AI's Google Drive connector has to be able to change an existing file.</p>
+<p>A plan the app can't read gets a status file next to it with the reason, so the AI can see what to fix.</p>
+
+<h2 id="limits">What it doesn't do</h2>
+<ul>
+  <li>It is a copy, not a sync in both directions. The folder on the phone stays the original. Only plans come back.</li>
+  <li>A file you delete on the phone stays on the drive. Disconnecting leaves the files there too. If you want them gone, delete the folder on the drive.</li>
+  <li>Names lose the characters <code>: * ? " &lt; &gt; | \</code> on the drive, because several drives and Windows refuse them. A plan called <code>…T16:02:07Z…</code> is <code>…T16_02_07Z…</code> there.</li>
+  <li>A server with a self-made certificate isn't accepted. Inside your own network <code>http://</code> works. iOS asks once for local network access.</li>
+</ul>
+
+<h2 id="privacy">Where the data goes</h2>
+<p>From your iPhone to the drive you connected, and nowhere else. There is no server of ours in between and we can't see your account. The sign-in is kept in the iPhone's keychain. Settings → What left this phone lists every upload run. Your drive's provider stores the files under your own contract with it.</p>
+
+<div class="next"><b>Next:</b> <a href="/docs/files">What is in the folder</a> <a href="/docs/compare">How the others handle it</a> <a href="/docs/local-models">Keep it on your Mac with a local model</a></div>
+</main>
+
+<footer class="site">
+  <div class="cols">
+    <div><h4>Connect an AI</h4><ul><li><a href="/docs/claude-code">Claude Code</a></li><li><a href="/docs/claude-desktop">Claude Desktop</a></li><li><a href="/docs/cursor">Cursor</a></li><li><a href="/docs/chatgpt">ChatGPT</a></li><li><a href="/docs/local-models">Local models</a></li></ul></div>
+    <div><h4>Reference</h4><ul><li><a href="/docs/files">The folder is the API</a></li><li><a href="/docs/plans">Plans and Put on Watch</a></li><li><a href="/docs/cloud">Cloud upload</a></li><li><a href="/docs/prompts">Ideas for your AI</a></li><li><a href="/ref/mcp.md">Tool reference</a></li><li><a href="/ref/schema.md">Data contract</a></li></ul></div>
+    <div><h4>For AIs</h4><ul><li><a href="/llms.txt">llms.txt</a></li><li><a href="/llms-full.txt">llms-full.txt</a></li><li><a href="https://www.npmjs.com/package/healthaccess-mcp">npm package</a></li></ul></div>
+    <div><h4>About</h4><ul><li><a href="/docs/privacy">Privacy, explained</a></li><li><a href="/privacy-policy">Privacy policy</a></li><li><a href="/support">Support</a></li><li><a href="/docs/compare">How it compares</a></li><li><a href="/docs/faq">Questions and answers</a></li><li><a href="/docs/health-auto-export-alternative">Alternative to Health Auto Export</a></li></ul></div>
+  </div>
+  <p class="fine">Health Access MCP is made by Prinz Technology Consultancy, svetovanje na področju informacijskih tehnologij d.o.o. (Prinz Tech Consulting), Dunajska cesta 33, 1000 Ljubljana, Slovenia. Registration number 7326106000, VAT ID SI86067494, contact@prinz-tc.com. The source is on <a href="https://github.com/leonhardprinz/healthaccess-mcp">GitHub</a> under the MIT licence. Apple, Apple Watch, Apple Health and HealthKit are trademarks of Apple Inc.; this project is not affiliated with Apple.</p>
+</footer>
+</div>
+</body>
+</html>

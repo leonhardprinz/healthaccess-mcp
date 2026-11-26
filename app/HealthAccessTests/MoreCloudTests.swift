@@ -452,3 +452,11 @@ final class ComplicationTests: XCTestCase {
         XCTAssertFalse(FolderStore.usesAppFolder)
     }
 }
+
+final class FolderPlaceTests: XCTestCase {
+    func testEveryDriveSaysWhereTheFolderGoes() {
+        for kind in CloudKind.allCases { XCTAssertFalse(kind.newFolderWhere.isEmpty, kind.rawValue) }
+        XCTAssertTrue(CloudKind.google.newFolderWhere.contains("top level"))
+        XCTAssertFalse(CloudKind.google.isBeta)
+    }
+}

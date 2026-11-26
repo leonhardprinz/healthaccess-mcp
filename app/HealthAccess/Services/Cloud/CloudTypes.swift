@@ -56,7 +56,21 @@ enum CloudKind: String, CaseIterable, Codable, Sendable, Identifiable {
     }
 
     /// Not yet proven against the real service by anyone but the developer. Shown as "Beta" next to the name.
-    var isBeta: Bool { access == .signIn }
+    /// Google Drive is past it: signed in and uploaded from a real phone on 26 Nov 2026.
+    var isBeta: Bool { access == .signIn && self != .google }
+
+    /// Where the app makes its folder on this drive, as the end of a sentence: "… a new folder, Health Access, <this>."
+    var newFolderWhere: String {
+        switch self {
+        case .google: return "at the top level of your Google Drive (My Drive)"
+        case .onedrive: return "under Apps in your OneDrive"
+        case .dropbox: return "under Apps in your Dropbox"
+        case .box: return "at the top level of your Box (All Files)"
+        case .pcloud: return "in the app's own place in your pCloud"
+        case .webdav: return "inside the folder whose address you give"
+        case .s3: return "under the prefix you set in your bucket"
+        }
+    }
 
     /// Drives the app names even while this build cannot sign in to them, so people see they are planned.
     static let announced: [CloudKind] = [.onedrive, .box]

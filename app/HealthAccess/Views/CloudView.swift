@@ -166,7 +166,8 @@ struct CloudView: View {
             } footer: {
                 Text(status.connected
                      ? "The app made this folder itself. You can move it inside \(kind.name). The folder on this phone stays the original, and the upload runs after every sync."
-                     : "A copy of your Health data folder goes into \(kind.place), after every sync." + (kind.access == .signIn && kind.folderOnly ? " Health Access can reach only that one folder in your \(kind.name)." : ""))
+                     : (kind == .s3 ? "The app puts the files under the folder you set in your bucket, after every sync."
+                        : "The app makes a new folder, Health Access, \(kind.newFolderWhere). It uploads your Health data folder into it after every sync.") + (kind.access == .signIn && kind.folderOnly ? " Health Access can reach only that one folder in your \(kind.name)." : ""))
             }
 
             if kind.access == .form, !status.connected {

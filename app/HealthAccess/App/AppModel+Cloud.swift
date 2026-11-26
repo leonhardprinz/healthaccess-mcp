@@ -10,7 +10,7 @@ extension AppModel {
             : "\(kind.name) has no permission for one folder only: the sign-in covers your whole \(kind.name), and the app uses only its own folder."
         confirmation = Confirmation(
             title: "Upload a copy to \(kind.name)",
-            detail: "You sign in on \(kind.name)'s own page. After every sync this phone sends the files of your Health data folder straight to your \(kind.name), into \(kind.place). Nothing goes to us. \(reach)",
+            detail: "You sign in on \(kind.name)'s own page. The app then makes a new folder, Health Access, \(kind.newFolderWhere). You can move it there later. After every sync this phone sends the files of your Health data folder straight into it. Nothing goes to us. \(reach)",
             confirmTitle: "Sign in") { [weak self] in
                 await self?.connectCloud(kind, fields: nil)
             }
@@ -20,7 +20,8 @@ extension AppModel {
     func requestCloudConnect(_ kind: CloudKind, fields: [String: String]) {
         confirmation = Confirmation(
             title: "Upload a copy to your \(kind.name)",
-            detail: "After every sync this phone sends the files of your Health data folder straight to the \(kind == .s3 ? "storage" : "server") you entered. Nothing goes to us. The password or key stays in this phone's keychain.",
+            detail: (kind == .s3 ? "The app puts the files under the folder you set in your bucket." : "The app makes a new folder, Health Access, \(kind.newFolderWhere).")
+                + " After every sync this phone sends the files of your Health data folder straight there. Nothing goes to us. The password or key stays in this phone's keychain.",
             confirmTitle: "Connect") { [weak self] in
                 await self?.connectCloud(kind, fields: fields)
             }
