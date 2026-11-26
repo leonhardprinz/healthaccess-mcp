@@ -27,7 +27,7 @@ Not for: looking at charts in the app. There are none. The AI is the user of thi
 ## App Store
 
 - Name: `Health Access MCP`
-- Subtitle (30 characters max): `Apple Health for your AI`
+- Subtitle (30 characters max): `Workouts & health for your AI` (Apple rejected `Apple Health for your AI` under guideline 5.2.5 on 26 Nov 2026; no Apple product terms in the subtitle)
 - Promotional text: the one sentence above.
 - Description: the paragraph, then the five bullets, then the two limits in "Honest limits" below.
 

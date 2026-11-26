@@ -20,7 +20,7 @@ Drafted 2026-10-24 as "Tidegate", revised 2026-10-25 to "Watchpipe", and the sam
 
 **Competitive intel surfaced while checking:** the Apple-Health-to-AI space got three entrants in two months — Health MCP: Private Sync (encrypted cloud + TEE), Somvia (training load + MCP), HealthPipe (account-based sync). **All three are cloud/account products.** Health Access MCP's position: *no account, no cloud, a folder you own — and the only one that writes workouts back to the Watch.* Add a comparison page row for each.
 
-**Trademark note:** "Health" and "MCP" are generic; the registrable element is the combination and the mark. Never use "Apple Health" in the product name itself, never Apple's device imagery or the Health app's icon language in the mark. Subtitle may say "for Apple Health".
+**Trademark note:** "Health" and "MCP" are generic; the registrable element is the combination and the mark. Never use "Apple Health" in the product name itself, never Apple's device imagery or the Health app's icon language in the mark. No Apple product terms in the App Store subtitle either (Apple rejected one on 26 Nov 2026, guideline 5.2.5).
 
 **Names in use (2026-10-27):** domain `healthaccessmcp.com` (Cloudflare, owned by PTC d.o.o.; `healthaccess.dev` not bought); npm `healthaccess-mcp` plus five `healthaccess-mcp-<platform>` packages (user `pt-consultancy`); official MCP registry `com.healthaccessmcp/healthaccess-mcp`; GitHub `leonhardprinz/healthaccess-mcp` (private); bundle id `com.healthaccessmcp.app`; CLI `healthaccess`; MCP server id `healthaccess` (`claude mcp add --scope user healthaccess -- npx -y healthaccess-mcp`). Still to reserve when published: the crates `healthaccess-core`, `healthaccess-mcp`, `healthaccess-cli`.
 
@@ -37,7 +37,7 @@ A heartbeat that leaves as an arrow: health, going out. One stroke, readable at 
 - Nothing resembling Apple's Health icon, the Health permission sheet or the Fitness rings.
 
 **Headline:** "Apple won't let your AI read your Watch. This does." (site and README). Social preview: "Your Apple Health data, for your AI." (`scripts/make-og.py`).
-- App Store name: `Health Access MCP` · subtitle: `Apple Health for your AI` (see `docs/positioning.md`, the canonical copy).
+- App Store name: `Health Access MCP` · subtitle: `Workouts & health for your AI` (Apple rejected `Apple Health for your AI` under 5.2.5 on 26 Nov 2026) (see `docs/positioning.md`, the canonical copy).
 
 ## 2. Positioning
 
