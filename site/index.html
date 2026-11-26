@@ -47,7 +47,7 @@
         "Daily vitals: resting heart rate, HRV, sleep, weight, steps, VO2max",
         "Local MCP server over stdio with thirteen tools",
         "AI-written plans installed on the Apple Watch as custom workouts",
-        "Any folder the iOS Files app can open: iCloud Drive, Dropbox, Google Drive, OneDrive, Proton Drive, a NAS, local",
+        "A folder you pick on the iPhone: iCloud Drive, a network drive (NAS) or On My iPhone",
         "No account, no server, usage statistics off by default"
       ],
       "author": {
@@ -63,7 +63,7 @@
           "name": "How do I get Apple Health data into Claude?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Install the Health Access app on your iPhone, pick a folder that syncs to your Mac (iCloud Drive, Dropbox, a NAS), and allow Health access. After every workout the app writes a JSON file into that folder. Then register the local MCP server with Claude Code (claude mcp add --scope user healthaccess -- npx -y healthaccess-mcp) or add it to Claude Desktop's config file. Claude can then list workouts, read a session, read vitals and write a plan. Without the MCP, the folder holds plain JSON and a one-page briefing.md that you can drop into a Claude Project."
+            "text": "Install the Health Access app on your iPhone, pick a folder that syncs to your Mac (iCloud Drive or a NAS), and allow Health access. After every workout the app writes a JSON file into that folder. Then register the local MCP server with Claude Code (claude mcp add --scope user healthaccess -- npx -y healthaccess-mcp) or add it to Claude Desktop's config file. Claude can then list workouts, read a session, read vitals and write a plan. Without the MCP, the folder holds plain JSON and a one-page briefing.md that you can drop into a Claude Project."
           }
         },
         {
@@ -153,7 +153,7 @@
     <div class="step"><div class="who you">Once, about five minutes: you</div>
       <ol>
         <li>Install the app: <a href="https://apps.apple.com/app/id6831916470">Health Access MCP on the App Store</a>. <span class="tag live">Free</span></li>
-        <li>Pick a folder. Anything the iOS Files app can see works: iCloud Drive, Dropbox, Google Drive, OneDrive, Proton Drive, a NAS, local. The only rule: your AI needs to reach the same folder, so pick one that syncs to the computer your AI runs on.</li>
+        <li>Pick a folder. iCloud Drive is the simple choice, and a network drive (NAS) works too. The only rule: your AI needs to reach the same folder, so pick one that syncs to the computer your AI runs on. Google Drive and OneDrive can't be picked on an iPhone: they don't let other apps open their folders (<a href="/support#greyed-out">why</a>).</li>
         <li>Allow Health access (read only, you pick the types) and notifications (just one kind, "Your AI wrote S27", when a plan arrives).</li>
         <li>Connect your AI. You paste one paragraph and it sets itself up from these docs, see below.</li>
       </ol></div>

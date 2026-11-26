@@ -19,6 +19,9 @@ final class AppModel {
     /// The support card on the Export tab and Restore purchases in Settings.
     let support = SupportStore(settings: AppSettings.shared)
     @ObservationIgnored let health = HealthService.shared
+    /// The cloud drives the app uploads a copy of the folder to (Settings → Cloud copy).
+    let cloud = CloudCenter()
+    @ObservationIgnored var cloudTask: Task<Void, Never>?
 
     // MARK: folder and files
     var folder: FolderStore?
@@ -350,6 +353,7 @@ final class AppModel {
             await autoPutOnWatchIfOn()
             await syncIfDue(trigger: .foreground)
             kickBacklog()
+            kickCloud()
         case .background:
             results = [:]
             undo = nil
@@ -444,11 +448,28 @@ final class AppModel {
             }
     }
 
+    /// "Keep it on this iPhone": no picker, a folder in the app's own storage. Asked for in the onboarding by people
+    /// whose AI reads a cloud drive.
+    func requestAppFolder(key: String = "folder") {
+        confirmation = Confirmation(
+            title: "Keep the folder on this iPhone",
+            detail: "Your workouts and daily health data are written into Health Access under On My iPhone in the Files app. A folder there reaches no computer on its own; switch on a cloud copy in Settings to carry it to your AI.",
+            confirmTitle: "Use this iPhone") { [weak self] in
+                guard let self else { return }
+                if self.setFolder(nil) {
+                    self.results[key] = ActionResult(kind: .done, text: "Folder: Health Access on this iPhone. Set \(Format.clock(Date())).", at: Date())
+                } else {
+                    self.results[key] = ActionResult(kind: .failed, text: self.lastError ?? "Could not make the folder.", at: Date())
+                }
+            }
+    }
+
+    /// `nil` is the folder in the app's own storage.
     @discardableResult
-    private func setFolder(_ url: URL) -> Bool {
+    private func setFolder(_ url: URL?) -> Bool {
         do {
             let previous = folder?.root.standardizedFileURL.path
-            let store = try FolderStore.save(url)
+            let store = try url.map(FolderStore.save) ?? FolderStore.useAppFolder()
             folder = store
             folderStale = false
             settings.folderSetAt = Date()
@@ -699,6 +720,7 @@ final class AppModel {
             writeBriefing()
             BackgroundRefresh.schedule()
             kickBacklog()
+            await cloudAfterSync()
             return true
         } catch {
             let ns = error as NSError
@@ -1037,7 +1059,8 @@ final class AppModel {
     func rescanPlans() {
         guard let folder else { plans = []; return }
         do {
-            let items = try PlanInstaller.scan(folder: folder)
+            var items = try PlanInstaller.scan(folder: folder)
+            if Self.notePlanProblems(items, folder: folder) { items = try PlanInstaller.scan(folder: folder) }
             var announced = settings.announcedPlanIDs
             let inFront = UIApplication.shared.applicationState == .active
             for item in items where !announced.contains(item.id) {
@@ -1058,6 +1081,24 @@ final class AppModel {
         } catch {
             fail("plan scan failed: \(error.localizedDescription)")
         }
+    }
+
+    nonisolated static let invalidPlanPrefix = "not a valid plan: "
+
+    /// A plan the app cannot read gets a status file saying so, with the reason: an AI that writes plans into a
+    /// cloud drive has no other way to learn why nothing happened. Once the file is a valid plan again the note
+    /// goes. Returns whether anything changed.
+    nonisolated static func notePlanProblems(_ items: [PlanItem], folder: FolderStore) -> Bool {
+        var changed = false
+        for item in items {
+            if item.doc == nil, item.status == nil, let reason = item.parseError {
+                let status = PlanStatus(planId: item.id, state: "failed", at: Date(), error: invalidPlanPrefix + reason)
+                if (try? PlanInstaller.writeStatus(status, for: item, folder: folder)) != nil { changed = true }
+            } else if item.doc != nil, let status = item.status, status.state == "failed", status.error?.hasPrefix(invalidPlanPrefix) == true {
+                if (try? folder.remove(item.statusFile)) != nil { changed = true }
+            }
+        }
+        return changed
     }
 
     /// The MCP's handshake files: who connected, from where, when. Read on launch, on return to the front, after syncs.
@@ -1123,6 +1164,7 @@ final class AppModel {
     /// Plans tab "Check now": read plans/ again, put new plans on the Watch when automatic is on, say what changed.
     func checkPlansNow() async {
         let before = Set(plans.map(\.id))
+        await runCloud(.plansOnly, deadline: Date().addingTimeInterval(20))
         rescanPlans()
         await autoPutOnWatchIfOn()
         let new = plans.filter { !before.contains($0.id) }.count
@@ -1344,7 +1386,7 @@ final class AppModel {
         let summary = folder.flatMap {
             Briefing.summary(folder: $0, entries: index?.workouts ?? [], effortSources: effortSources, plans: plans)
         }
-        let message = SetupMessage.text(for: folder, summary: summary)
+        let message = SetupMessage.text(for: folder, summary: summary, drives: cloud.connected.map { ($0.name, cloud.place($0)) })
         let carries = summary == nil
             ? "There is no health data in it yet; after the first sync it also carries your summary, for ChatGPT and phone AIs."
             : "ChatGPT and phone AIs cannot do that, so it also carries your summary for them: the last four weeks, recent workouts, vitals and the next planned workout."

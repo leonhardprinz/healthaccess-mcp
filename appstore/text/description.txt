@@ -10,7 +10,7 @@ WHAT GOES INTO THE FOLDER
 WHO IT IS FOR
 - You have an Apple Watch and an AI coach (Claude, ChatGPT, Cursor, a local model) and want it to see your actual sessions instead of what you remember to type.
 - You coach yourself in the pool, on the rower or on the road, and want a coach that has read every session, not the last screenshot.
-- You will not put your health data on someone else's server. The folder is yours, on the storage you already use: iCloud Drive, Dropbox, Google Drive, OneDrive, a NAS, or just On My iPhone.
+- You will not put your health data on someone else's server. The folder is yours, on storage you already have: iCloud Drive, a network drive, or just On My iPhone. (Google Drive and OneDrive don't let apps open a folder on iPhone, so they can't be picked.)
 - You have a human coach. Share the same folder and they get the real splits.
 
 PLANS BACK TO THE WATCH

@@ -11,11 +11,11 @@
 class HealthaccessMcp < Formula
   desc "Apple Health workouts, vitals and a briefing for your AI, from a folder you own"
   homepage "https://github.com/leonhardprinz/healthaccess-mcp"
-  version "1.0.5"
+  version "1.1.0"
   license "MIT"
 
   # TODO: the universal macOS tarball attached to the v<version> GitHub release
-  url "https://github.com/leonhardprinz/healthaccess-mcp/releases/download/v1.0.5/healthaccess-mcp-1.0.5-macos-universal.tar.gz" # TODO
+  url "https://github.com/leonhardprinz/healthaccess-mcp/releases/download/v1.1.0/healthaccess-mcp-1.1.0-macos-universal.tar.gz" # TODO
   sha256 "TODO" # TODO: shasum -a 256 of that tarball
 
   depends_on :macos

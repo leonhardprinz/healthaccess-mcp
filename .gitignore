@@ -6,6 +6,7 @@ build/
 target/
 *.swp
 app/HealthAccess/Resources/TelemetryConfig.plist
+app/HealthAccess/Resources/CloudConfig.plist
 dist/
 .wrangler/
 

@@ -55,6 +55,9 @@ npx -y healthaccess-mcp --version                <span class="c"># prints the se
 
 <h2 id="common-problems">Common problems</h2>
 <div class="faq">
+<h3 id="greyed-out">Google Drive or OneDrive is greyed out in the folder picker</h3>
+<p>You haven't missed a step. When an app asks for a folder, iOS only offers storage apps that let other apps open their folders. iCloud Drive, On My iPhone and network drives do. Google Drive and OneDrive don't, so they show up greyed out for every app that asks for a folder, not only this one. Signing in again, switching them on in the Files app or restarting the phone doesn't change it. Pick a folder in iCloud Drive. It syncs to a Mac on its own and to a PC with iCloud for Windows. If your AI can only read Google Drive, the files have to be copied there from a computer for now.</p>
+
 <h3 id="not-connected">The app says "Not connected yet"</h3>
 <p>Your AI client hasn't started the MCP server yet. Clients start it when a new chat or session begins, so start one. The server then writes a small file into <code>mcp/clients/</code> in your folder. Once your folder provider has synced that file to the phone, the app shows the connection. The app checks again every time you bring it to the front, so switch to it after a minute. It also goes back to "Not connected yet" if your AI hasn't used the server for 7 days.</p>
 

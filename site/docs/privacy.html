@@ -50,7 +50,7 @@
 
 <h2>What leaves the phone</h2>
 <h3>1. Your files, to your own storage</h3>
-<p>The folder you picked syncs through the provider you chose: iCloud Drive, Dropbox, Google Drive, OneDrive, Proton Drive, your NAS. It goes through your own account with them, under their terms, the same place your photos or documents already go. If you choose "On My iPhone", nothing leaves the phone at all, but then your AI on the computer can't reach the folder either. The files are plain JSON, so encrypt the folder if your provider offers it. The MCP server on your computer writes one small file into the same folder, <code>mcp/clients/&lt;id&gt;.json</code>: the client's name and version, your computer's name, a call count and the name of the last tool, so the app can show that an AI is connected. It never contains tool arguments or results.</p>
+<p>The folder you picked syncs through the provider you chose, for example iCloud Drive or your NAS. It goes through your own account with them, under their terms, the same place your photos or documents already go. If you choose "On My iPhone", nothing leaves the phone at all, but then your AI on the computer can't reach the folder either. The files are plain JSON, so encrypt the folder if your provider offers it. The MCP server on your computer writes one small file into the same folder, <code>mcp/clients/&lt;id&gt;.json</code>: the client's name and version, your computer's name, a call count and the name of the last tool, so the app can show that an AI is connected. It never contains tool arguments or results.</p>
 
 <h3>2. Usage statistics, only if you turn them on</h3>
 <p>They're off by default. When they're on, the app sends these events from the phone to PostHog, an analytics service:</p>

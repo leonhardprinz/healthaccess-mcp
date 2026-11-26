@@ -8,10 +8,27 @@ struct OnboardingView: View {
     @State private var showPicker = false
 
     var body: some View {
+        // Scrolls only when the text is taller than the screen (the largest accessibility sizes).
+        GeometryReader { geo in
+            ScrollView {
+                content
+                    .padding(.horizontal, 24)
+                    .padding(.bottom, 34)
+                    .frame(minHeight: geo.size.height)
+            }
+            .scrollBounceBehavior(.basedOnSize)
+        }
+        .background(Color(.systemBackground))
+        .fileImporter(isPresented: $showPicker, allowedContentTypes: [.folder]) { result in
+            if case .success(let url) = result { model.requestFolder(url, key: "folder") }
+        }
+    }
+
+    private var content: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Spacer()
+            Spacer(minLength: 16)
             MarkTile(size: 64)
-            Spacer()
+            Spacer(minLength: 16)
             HStack(spacing: 6) {
                 ForEach(0..<4, id: \.self) { i in
                     Capsule().fill(i <= page ? Color.accentColor : Color(.separator)).frame(height: 3)
@@ -28,12 +45,6 @@ struct OnboardingView: View {
                 }
             }
             .animation(.easeInOut(duration: 0.2), value: page)
-        }
-        .padding(.horizontal, 24)
-        .padding(.bottom, 34)
-        .background(Color(.systemBackground))
-        .fileImporter(isPresented: $showPicker, allowedContentTypes: [.folder]) { result in
-            if case .success(let url) = result { model.requestFolder(url, key: "folder") }
         }
     }
 
@@ -54,16 +65,22 @@ struct OnboardingView: View {
 
     private var folder: some View {
         screen("Pick a folder",
-               "Anything the Files app can see: iCloud Drive, Dropbox, Google Drive, OneDrive, a NAS. Pick one that syncs to the computer where your AI runs.") {
+               "iCloud Drive is the simple choice: it syncs to a Mac or PC on its own. A network drive works too. Pick a folder that reaches the computer where your AI runs.") {
             if let result = model.results["folder"] ?? model.storedFolderResult {
                 ResultLine(result: result, undoKey: "folder").padding(.bottom, 4)
             }
             if model.folder == nil {
                 primary("Pick folder") { showPicker = true }
+                secondary("Keep it on this iPhone") { model.requestAppFolder() }
             } else {
                 primary("Continue") { page = 2 }
                 secondary("Pick a different folder") { showPicker = true }
             }
+            Text(FolderPickerCopy.onboarding)
+                .font(.footnote).foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.top, 6)
         }
     }
 

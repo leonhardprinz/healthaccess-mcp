@@ -12,7 +12,7 @@ enum SetupMessage {
     static let command = "npx -y healthaccess-mcp"
 
     /// `summary` is the briefing, or nil while there is nothing to summarise yet (before the first sync).
-    static func text(for folder: FolderStore?, summary: String?) -> String {
+    static func text(for folder: FolderStore?, summary: String?, drives: [(name: String, place: String)] = []) -> String {
         var lines = [
             "Connect me to my Health Access data.",
             "Docs for you: \(docsURL)",
@@ -27,8 +27,15 @@ enum SetupMessage {
             lines.append(hint + "; pass it with --dir.")
         }
         lines.append("Then list my last 5 workouts." + (summary == nil ? "" : " Ignore the summary below; the folder has everything."))
+        if !drives.isEmpty {
+            // A third way in: an AI with its own connection to the drive the app uploads a copy to.
+            let places = drives.map { "\($0.name) (\($0.place))" }.joined(separator: ", ")
+            lines.append("")
+            lines.append("If you can read my \(Format.list(drives.map(\.name))) through a connector:")
+            lines.append("A copy of the folder is there: \(places). Read README.md in it first, then briefing.md. README.md also says how to send me a workout plan." + (summary == nil ? "" : " Ignore the summary below; the folder has everything."))
+        }
         lines.append("")
-        lines.append("If you cannot (ChatGPT, an AI app on a phone, a chat in a browser):")
+        lines.append("If you can do neither (ChatGPT without a connector, an AI app on a phone, a chat in a browser):")
         if let summary {
             lines.append("Do not explain the setup. Tell me in one sentence that you work from the summary below, not a live connection, then ask me what I want to know. It is a snapshot; I can copy a new one in the Health Access app at any time.")
             lines.append("")

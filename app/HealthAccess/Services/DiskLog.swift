@@ -2,7 +2,7 @@ import Foundation
 
 /// The tag in square brackets at the start of every Sync log line. These words are user-visible.
 enum LogTag: String {
-    case launch, sync, observer, refresh, plan, rating, ui, error, health, folder, vitals, usage, briefing
+    case launch, sync, observer, refresh, plan, rating, ui, error, health, folder, vitals, usage, briefing, cloud
 }
 
 /// Append-only text log in Application Support, so wakes while the app was closed can be verified after the fact.

@@ -6,7 +6,25 @@ struct FolderStore: Sendable {
     let root: URL
     private static let bookmarkKey = AppSettings.key("folderBookmark")  // migrated from the pre-rename key by AppSettings
 
+    private static let inAppKey = AppSettings.key("folderInApp")
+    static let inAppName = "Health Access"
+
+    /// A folder in the app's own storage, shown in the Files app under On My iPhone › Health Access. For someone
+    /// who has no synced folder to pick: the files live here and a cloud copy carries them to the AI.
+    /// No bookmark: the app's own storage moves with every update, so the place is worked out each time.
+    static func useAppFolder() throws -> FolderStore {
+        let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let url = documents.appendingPathComponent(inAppName, isDirectory: true)
+        try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+        UserDefaults.standard.removeObject(forKey: bookmarkKey)
+        UserDefaults.standard.set(true, forKey: inAppKey)
+        return FolderStore(root: url)
+    }
+
+    static var usesAppFolder: Bool { UserDefaults.standard.bool(forKey: inAppKey) }
+
     static func save(_ url: URL) throws -> FolderStore {
+        UserDefaults.standard.removeObject(forKey: inAppKey)
         let scoped = url.startAccessingSecurityScopedResource()
         defer { if scoped { url.stopAccessingSecurityScopedResource() } }
         let bookmark = try url.bookmarkData(options: .minimalBookmark, includingResourceValuesForKeys: nil, relativeTo: nil)
@@ -15,6 +33,7 @@ struct FolderStore: Sendable {
     }
 
     static func restore() -> (store: FolderStore, stale: Bool)? {
+        if usesAppFolder, let store = try? useAppFolder() { return (store, false) }
         guard let bookmark = UserDefaults.standard.data(forKey: bookmarkKey) else { return nil }
         var stale = false
         guard let url = try? URL(resolvingBookmarkData: bookmark, options: [], relativeTo: nil, bookmarkDataIsStale: &stale) else { return nil }
@@ -23,7 +42,10 @@ struct FolderStore: Sendable {
         return (FolderStore(root: url), stale)
     }
 
-    static func forget() { UserDefaults.standard.removeObject(forKey: bookmarkKey) }
+    static func forget() {
+        UserDefaults.standard.removeObject(forKey: bookmarkKey)
+        UserDefaults.standard.removeObject(forKey: inAppKey)
+    }
 
     /// Largest file the app reads from the folder.
     static let maxReadBytes = 64 * 1024 * 1024
@@ -192,6 +214,22 @@ struct FolderStore: Sendable {
 }
 
 /// What the Files app calls the place a folder lives. Detected from the resolved bookmark URL only.
+/// Words about the folder picker, in one place: the onboarding and Settings show the same sentence.
+enum FolderPickerCopy {
+    /// iOS greys out a storage app in the folder picker unless that app lets other apps open its folders.
+    /// Google Drive and OneDrive do not (seen on iOS 27.2 with 1.0.5), and no setting on the phone changes it.
+    /// Under the buttons of the onboarding's folder step: the way for someone whose storage cannot be picked.
+    static var onboarding: String {
+        "Google Drive, OneDrive or Dropbox? They can't be picked here, because they don't let other apps open their folders. Keep the folder on this iPhone, then switch on Cloud copy in Settings: Health Access uploads to them itself."
+    }
+
+    static var greyedOut: String {
+        let base = "Greyed out in the picker? Google Drive and OneDrive don't let other apps open their folders. Nothing on your phone is set wrong."
+        // Only promise the upload to them when this build can sign in there.
+        return base + " Cloud copy below uploads to them instead."
+    }
+}
+
 enum StorageProvider: Sendable, Equatable {
     case iCloudDrive
     case onMyiPhone
@@ -209,6 +247,7 @@ enum StorageProvider: Sendable, Equatable {
 
     static func detect(_ url: URL) -> StorageProvider? {
         let path = url.path
+        if FolderStore.usesAppFolder, path.hasSuffix("/Documents/" + FolderStore.inAppName) { return .onMyiPhone }
         if path.contains("Mobile Documents/com~apple~CloudDocs") { return .iCloudDrive }
         if (try? url.resourceValues(forKeys: [.isUbiquitousItemKey]).isUbiquitousItem) == true { return .iCloudDrive }
         if let range = path.range(of: "Mobile Documents/") {

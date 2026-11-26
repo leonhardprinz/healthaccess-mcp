@@ -11,6 +11,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         Notifier.registerCategories()
         Notifier.clearLegacyRatingPrompts()
         BackgroundRefresh.register()
+        CloudBackground.register()
         AppModel.shared.bootstrap(launchedInBackground: application.applicationState == .background)
         Task { await AppModel.shared.appDidLaunch() }
         return true

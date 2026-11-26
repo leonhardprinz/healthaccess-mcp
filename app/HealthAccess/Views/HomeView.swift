@@ -34,10 +34,13 @@ struct HomeView: View {
 
                 Section {
                     FolderRow(pickFolder: { showPicker = true })
+                    CloudStatusRows()
                 } header: {
                     SectionTitle("Folder")
                 } footer: {
-                    Text("Health Access writes here. Your AI reads it on your computer.")
+                    Text(model.cloud.connected.isEmpty
+                         ? "Health Access writes here. Your AI reads it on your computer."
+                         : "Health Access writes here and uploads a copy to \(Format.list(model.cloud.connected.map(\.name), last: "and")).")
                 }
 
                 Section {

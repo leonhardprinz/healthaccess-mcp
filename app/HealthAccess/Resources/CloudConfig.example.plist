@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Copy this file to CloudConfig.plist (gitignored), fill in your own client ids, run `xcodegen generate` again.
+	     A drive without an id is not offered in the app. WebDAV and S3 need no id and are always offered.
+	     How to get the ids: app/README.md, "Cloud copy". -->
+	<!-- Google Cloud → APIs & Services → Credentials → OAuth client ID, type iOS, bundle id com.healthaccessmcp.app. -->
+	<key>GoogleClientID</key>
+	<string>your-id.apps.googleusercontent.com</string>
+	<!-- Microsoft Entra → App registrations → Application (client) ID. Platform iOS/macOS with the bundle id. -->
+	<key>MicrosoftClientID</key>
+	<string>your-application-id</string>
+	<!-- Dropbox → App Console → an app with "App folder" access → App key. -->
+	<key>DropboxAppKey</key>
+	<string>your-app-key</string>
+	<!-- Box → Developer Console → Custom App, User Authentication (OAuth 2.0). Box gives no sign-in without the secret. -->
+	<key>BoxClientID</key>
+	<string>your-box-client-id</string>
+	<key>BoxClientSecret</key>
+	<string>your-box-client-secret</string>
+	<!-- pCloud → docs.pcloud.com → My applications → an app with its own folder → Client ID. -->
+	<key>PCloudClientID</key>
+	<string>your-pcloud-client-id</string>
+</dict>
+</plist>

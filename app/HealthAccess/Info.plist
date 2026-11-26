@@ -5,6 +5,7 @@
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
 		<string>com.healthaccessmcp.app.export</string>
+		<string>com.healthaccessmcp.app.cloud</string>
 	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
@@ -26,10 +27,19 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 	<key>NSHealthShareUsageDescription</key>
 	<string>Health Access writes the Health data you allow into a folder you choose, as files for your AI or coach. Everything is optional, and nothing is sent to us.</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>Health Access never writes to Health. It only reads the data you allow; workout plans go to your Apple Watch through WorkoutKit.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Health Access reaches a server in your own network only when you connect one in Settings, to upload a copy of your folder to it.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>IBMPlexSansCondensed-SemiBold.ttf</string>
@@ -38,7 +48,10 @@
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
+		<string>processing</string>
 	</array>
+	<key>UIFileSharingEnabled</key>
+	<true/>
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>

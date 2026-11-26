@@ -116,7 +116,8 @@ fn no_folder(cause: Error) -> Error {
         "Health Access has no folder to read on this computer yet ({cause}). \
          Nothing is wrong with the connection. What the athlete does once: install the Health Access \
          app on the iPhone (https://apps.apple.com/app/id6831916470), pick a folder there that syncs \
-         to this computer (iCloud Drive, Dropbox, Google Drive, OneDrive or a NAS), allow Health \
+         to this computer (iCloud Drive or a NAS; Google Drive and OneDrive cannot be picked on an \
+         iPhone), allow Health \
          access and let it sync. If the folder exists in a place this server does not search, \
          register the server with --dir \"<folder>\". The server looks again on every call, so \
          no restart is needed."

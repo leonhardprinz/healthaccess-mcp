@@ -69,6 +69,12 @@ enum Format {
     }
 
     /// "Sat 26 Oct 10:00", and "26 Oct 2023 10:00" for a date in another year.
+    /// "A", "A or B", "A, B or C".
+    static func list(_ items: [String], last: String = "or") -> String {
+        guard items.count > 1 else { return items.first ?? "" }
+        return items.dropLast().joined(separator: ", ") + " \(last) " + items[items.count - 1]
+    }
+
     static func dayTime(_ date: Date) -> String {
         if Calendar.current.component(.year, from: date) != Calendar.current.component(.year, from: Date()) {
             return date.formatted(.dateTime.day().month(.abbreviated).year().hour().minute())

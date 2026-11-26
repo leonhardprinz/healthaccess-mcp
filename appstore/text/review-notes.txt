@@ -1,4 +1,4 @@
-Health Access exports the Apple Health data the user allows as JSON files into a folder the user picks with the system folder picker (any Files location: On My iPhone, iCloud Drive, Dropbox and so on). There is no account, no login and no server of ours.
+Health Access exports the Apple Health data the user allows as JSON files into a folder the user picks with the system folder picker (On My iPhone, iCloud Drive, a network drive, or another storage app that allows folder access). There is no account, no login and no server of ours.
 
 HOW TO TEST
 1. Onboarding: pick a folder (On My iPhone is fine), allow Health access (everything is optional), allow notifications or not. The last step, connecting an AI on a computer, can be skipped.

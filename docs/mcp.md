@@ -98,8 +98,9 @@ only the zones a workout file carries are shown. Every zones object says where i
 bounds came from (`bounds_source`: `config`, `estimated` or `file`), and
 `healthaccess-mcp --check` prints the bounds with their source.
 
-The folder can live on any provider the iOS Files app can open (iCloud Drive, Dropbox,
-Google Drive, OneDrive, Proton Drive, a NAS). The one rule: the same folder has to be
+The folder can live wherever the iOS folder picker lets the athlete pick one: iCloud Drive,
+a NAS, On My iPhone. Google Drive and OneDrive are greyed out there, because they don't let
+other apps open their folders. The one rule: the same folder has to be
 reachable from the machine the AI runs on.
 
 From 1.0.4 the server starts without a folder: the app may not have written anything yet,

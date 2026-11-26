@@ -1,6 +1,6 @@
 # healthaccess-mcp
 
-Apple Health for your AI. The Health Access iPhone app writes your workouts, daily health data and a one-page briefing as plain files into a folder you pick (iCloud Drive, Dropbox, any Files provider). This MCP server lets Claude, Cursor or any MCP client read that folder and write workout plans back, which the app puts on your Apple Watch. Local files, no cloud, no account.
+Apple Health for your AI. The Health Access iPhone app writes your workouts, daily health data and a one-page briefing as plain files into a folder you pick (iCloud Drive is the simple choice). This MCP server lets Claude, Cursor or any MCP client read that folder and write workout plans back, which the app puts on your Apple Watch. Local files, no cloud, no account.
 
 ## Run it
 

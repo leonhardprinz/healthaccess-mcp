@@ -21,6 +21,20 @@
                ReferencedContainer = "container:HealthAccess.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "NO"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "5FD0CD15D0CF1878A5AE468B"
+               BuildableName = "HealthAccessTests.xctest"
+               BlueprintName = "HealthAccessTests"
+               ReferencedContainer = "container:HealthAccess.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
@@ -39,6 +53,17 @@
          </BuildableReference>
       </MacroExpansion>
       <Testables>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "5FD0CD15D0CF1878A5AE468B"
+               BuildableName = "HealthAccessTests.xctest"
+               BlueprintName = "HealthAccessTests"
+               ReferencedContainer = "container:HealthAccess.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <CommandLineArguments>
       </CommandLineArguments>

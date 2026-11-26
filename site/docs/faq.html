@@ -67,7 +67,7 @@
       "name": "Do I need a Mac?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "No. The server has prebuilt binaries for macOS, Linux and Windows. The only rule is that the computer your AI runs on can see the folder the phone writes to, for example through iCloud Drive, Dropbox, Google Drive, OneDrive or a NAS. If you have no computer at all, paste the message the app copies into any AI chat on your phone. It includes your summary."
+        "text": "No. The server has prebuilt binaries for macOS, Linux and Windows. The only rule is that the computer your AI runs on can see the folder the phone writes to, for example through iCloud Drive (there is iCloud for Windows too) or a NAS. If you have no computer at all, paste the message the app copies into any AI chat on your phone. It includes your summary."
       }
     },
     {
@@ -173,6 +173,14 @@
         "@type": "Answer",
         "text": "There's no Android version. The app needs an iPhone with iOS 17 or later. It exports whatever is in Apple Health, whichever app or device saved it there. Only putting a plan on your wrist needs an Apple Watch."
       }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I export Apple Health data to Google Drive or OneDrive?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Not straight from the iPhone. The app writes into a folder you pick, and iOS only offers storage apps that let other apps open their folders. iCloud Drive, On My iPhone and network drives do. Google Drive and OneDrive don't, so they show up greyed out in the folder picker for every app. Pick a folder in iCloud Drive. A computer that syncs it can copy the files to Google Drive or OneDrive."
+      }
     }
   ]
 }
@@ -212,7 +220,7 @@
 <h3>Does it work with Cursor, Codex, LM Studio or Ollama?</h3>
 <p>Yes, with any client that can launch a local MCP server over stdio. Ollama doesn't launch MCP servers itself, so there you give the model the files or the output of the <code>healthaccess</code> command line. You'll find the config for Cursor, Codex CLI, LM Studio and Goose on the setup pages for <a href="/docs/cursor">Cursor</a> and <a href="/docs/local-models">local models</a>.</p>
 <h3>Do I need a Mac?</h3>
-<p>No. The server has prebuilt binaries for macOS, Linux and Windows. The only rule is that the computer your AI runs on can see the folder the phone writes to, for example through iCloud Drive, Dropbox, Google Drive, OneDrive or a NAS. If you have no computer at all, paste the message the app copies into any AI chat on your phone. It includes your summary.</p>
+<p>No. The server has prebuilt binaries for macOS, Linux and Windows. The only rule is that the computer your AI runs on can see the folder the phone writes to, for example through iCloud Drive (there is iCloud for Windows too) or a NAS. If you have no computer at all, paste the message the app copies into any AI chat on your phone. It includes your summary.</p>
 <h3>What does my AI get to see?</h3>
 <p>It sees every workout, with heart rate every few seconds, every interval with its name and, for swims, every length with stroke and SWOLF. For each day it gets sleep with its stages, resting heart rate, HRV, VO2max, steps, rings, weight and every other Health group that has data. And a one-page <code>briefing.md</code> sums up the last four weeks. <a href="/docs/files">The folder layout.</a></p>
 <h3>How far back does the data go?</h3>
@@ -240,6 +248,8 @@
 <h2>Limits</h2>
 <h3>Why isn't my last workout in the folder yet?</h3>
 <p>Most likely your phone was locked. Apple only lets apps read Health data while the iPhone is unlocked, so the export waits until you next unlock it and then runs on its own. If it still doesn't show up, the sync log in the app tells you why. <a href="/support">Support.</a></p>
+<h3>Can I export Apple Health data to Google Drive or OneDrive?</h3>
+<p>Not straight from the iPhone. The app writes into a folder you pick, and iOS only offers storage apps that let other apps open their folders. iCloud Drive, On My iPhone and network drives do. Google Drive and OneDrive don't, so they show up greyed out in the folder picker for every app. Pick a folder in iCloud Drive. A computer that syncs it can copy the files to Google Drive or OneDrive. <a href="/support#greyed-out">More on the support page.</a></p>
 <h3>Does it work on Android or without an Apple Watch?</h3>
 <p>There's no Android version. The app needs an iPhone with iOS 17 or later. It exports whatever is in Apple Health, whichever app or device saved it there. Only putting a plan on your wrist needs an Apple Watch.</p>
 

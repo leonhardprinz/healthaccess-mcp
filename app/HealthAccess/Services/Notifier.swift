@@ -20,6 +20,16 @@ enum Notifier {
         await UNUserNotificationCenter.current().notificationSettings().authorizationStatus
     }
 
+    /// The upload to a drive stopped because its sign-in ran out. Posted once per drive.
+    static func postCloudSignIn(drive: String) async {
+        let content = UNMutableNotificationContent()
+        content.title = "\(drive) needs a new sign-in"
+        content.body = "The upload has stopped. Open Health Access, Settings, Cloud copy."
+        content.sound = .default
+        content.threadIdentifier = "healthaccess.cloud"
+        try? await UNUserNotificationCenter.current().add(UNNotificationRequest(identifier: "cloud-\(drive)", content: content, trigger: nil))
+    }
+
     /// "Your AI wrote S27" when a plan file appears while the app is not in front.
     static func postPlanPrompt(planID: String, name: String) async {
         let content = UNMutableNotificationContent()

@@ -24,6 +24,9 @@ struct SettingsView: View {
                 }
                 .buttonStyle(.plain)
                 if let result = model.results["folder"] { ResultLine(result: result, undoKey: "folder") }
+                if !FolderStore.usesAppFolder || model.folder == nil {
+                    Button("Keep the folder on this iPhone instead") { model.requestAppFolder() }
+                }
                 Button { model.openInFiles(subfolder: "plans") } label: {
                     VStack(alignment: .leading, spacing: 2) {
                         row("Workout plans", model.folder.map { "\($0.displayName) / plans" } ?? "None yet")
@@ -50,8 +53,10 @@ struct SettingsView: View {
             } header: {
                 SectionTitle("Access")
             } footer: {
-                Text("Read only. Health Access never writes to Health.")
+                Text("Read only. Health Access never writes to Health.\n\n\(FolderPickerCopy.greyedOut)")
             }
+
+            CloudSection()
 
             Section {
                 Toggle(isOn: Binding(get: { settings.includeReproductive }, set: { model.setIncludeReproductive($0) })) {
@@ -99,7 +104,9 @@ struct SettingsView: View {
             } header: {
                 SectionTitle("Privacy")
             } footer: {
-                Text("No account, no server. Your data stays in your folder.")
+                Text(model.cloud.connected.isEmpty
+                     ? "No account, no server. Your data stays in your folder."
+                     : "No account with us, no server of ours. Your data goes into your folder and to the cloud drive you connected.")
             }
 
             Section {
@@ -198,7 +205,7 @@ struct WhatLeftView: View {
                          ? "Nothing yet this session. With usage statistics on, event names go to \(model.usageStatisticsHost) as they happen."
                          : "Nothing. Health Access has no server.")
                 } footer: {
-                    Text("Your health data goes only into the folder you picked. The folder's own sync (iCloud Drive, Dropbox and so on) is the provider's, not this app's.")
+                    Text("Your health data goes only into the folder you picked. The folder's own sync (iCloud Drive, for example) is the provider's, not this app's.")
                 }
             } else {
                 Section {
@@ -215,7 +222,7 @@ struct WhatLeftView: View {
                 } header: {
                     Text("This session")
                 } footer: {
-                    Text("Event names with counts, durations and the app and iOS versions, sent in batches by the PostHog SDK under a random install id. No health values, file names or folder paths.")
+                    Text("Uploads to a cloud drive you connected are listed by drive with the number of files; the files go to your own account there. Usage statistics, when on, are event names with counts, durations and the app and iOS versions, sent in batches by the PostHog SDK under a random install id: no health values, file names or folder paths.")
                 }
             }
         }
