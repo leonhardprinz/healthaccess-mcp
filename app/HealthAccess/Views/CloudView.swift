@@ -107,7 +107,7 @@ enum CloudCopy {
                 let first = progress.total > 200 ? " Keep the app open. The rest goes up when you come back, or while the phone rests." : ""
                 return "Uploading \(progress.done) of \(progress.total) files.\(first)"
             }
-            return "Checking \(kind.name)."
+            return "Getting \(kind.name) ready. The upload starts in a few seconds."
         }
         var text = "\(status.files) file\(status.files == 1 ? "" : "s") in \(kind.name)."
         if let last = status.lastRun { text += " Last upload \(Format.dayTime(last))." }
@@ -139,8 +139,18 @@ struct CloudView: View {
             Section {
                 InfoRow(symbol: symbol(status), tint: tint(status), title: status.connected ? "Connected" : "Not connected",
                         line: CloudCopy.line(status, kind: kind))
-                if status.busy, let progress = status.progress, progress.total > 0 {
-                    ProgressView(value: Double(progress.done), total: Double(progress.total))
+                if status.busy {
+                    if let progress = status.progress, progress.total > 0 {
+                        ProgressView(value: Double(progress.done), total: Double(progress.total))
+                    } else {
+                        ProgressView().frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+                if status.connected {
+                    InfoRow(symbol: "folder", tint: .accentColor, title: "Folder in \(kind.name)", line: model.cloud.place(kind))
+                    if let url = model.cloud.folderURL(kind) {
+                        Link("Open the folder in \(kind.name)", destination: url)
+                    }
                 }
                 if let error = status.lastError, !status.busy {
                     Text(error).font(.footnote).foregroundStyle(Color.signal).fixedSize(horizontal: false, vertical: true)
@@ -155,7 +165,7 @@ struct CloudView: View {
                 }
             } footer: {
                 Text(status.connected
-                     ? "Your files are in \(model.cloud.place(kind)). The folder on this phone stays the original. The upload runs after every sync."
+                     ? "The app made this folder itself. You can move it inside \(kind.name). The folder on this phone stays the original, and the upload runs after every sync."
                      : "A copy of your Health data folder goes into \(kind.place), after every sync." + (kind.access == .signIn && kind.folderOnly ? " Health Access can reach only that one folder in your \(kind.name)." : ""))
             }
 

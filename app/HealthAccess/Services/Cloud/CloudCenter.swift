@@ -20,6 +20,8 @@ final class CloudCenter {
         var waiting = 0
         /// Files that are in iCloud only right now.
         var inICloud = 0
+        /// The id of the Health Access folder on the drive, where the drive has one (Google Drive, Box).
+        var folderID: String?
     }
 
     let config: CloudConfig
@@ -40,6 +42,7 @@ final class CloudCenter {
                 let state = CloudMirror.loadState(CloudMirror.stateURL(kind))
                 entry.lastRun = state.lastRun
                 entry.files = state.files.count
+                entry.folderID = state.folders[""]
             } else if !on {
                 // The keychain outlives a deleted app. A sign-in without the setting is from an earlier install.
                 CloudKeychain.delete(kind)
@@ -174,6 +177,17 @@ final class CloudCenter {
         }
     }
 
+    /// The folder on the drive's own website, so the user can look at what arrived.
+    func folderURL(_ kind: CloudKind) -> URL? {
+        switch kind {
+        case .google: return state(kind).folderID.flatMap { URL(string: "https://drive.google.com/drive/folders/\($0)") }
+        case .box: return state(kind).folderID.flatMap { URL(string: "https://app.box.com/folder/\($0)") }
+        case .dropbox: return URL(string: "https://www.dropbox.com/home/Apps/Health%20Access")
+        case .onedrive: return URL(string: "https://onedrive.live.com/")
+        default: return nil
+        }
+    }
+
     /// The host an upload went to, for "What left this phone".
     func host(_ kind: CloudKind) -> String {
         guard kind.access == .form, let stored = CloudSecrets.load(kind) else { return kind.host }
@@ -207,6 +221,7 @@ final class CloudCenter {
             let state = await mirror.state
             status[kind]?.lastRun = state.lastRun
             status[kind]?.files = state.files.count
+            status[kind]?.folderID = state.folders[""]
             status[kind]?.needsSignIn = false
             status[kind]?.inICloud = summary.inICloud
             if mode == .full {

@@ -331,8 +331,10 @@ actor CloudMirror {
     private func adopt(_ local: [LocalFile]) async throws {
         var byDirectory: [String: [LocalFile]] = [:]
         for file in local { byDirectory[CloudPath.split(file.path).directory, default: []].append(file) }
-        for (directory, files) in byDirectory.sorted(by: { $0.key < $1.key }) {
-            let remote = try await drive.list(directory)
+        // A first connection finds nothing at the top: then there is nothing below it either, and one call was enough.
+        let top = try await drive.list("")
+        for (directory, files) in byDirectory.sorted(by: { $0.key < $1.key }) where !top.isEmpty {
+            let remote = directory.isEmpty ? top : try await drive.list(directory)
             guard !remote.isEmpty else { continue }
             var byName: [String: RemoteEntry] = [:]
             for entry in remote where !entry.isFolder && byName[entry.name] == nil { byName[entry.name] = entry }
