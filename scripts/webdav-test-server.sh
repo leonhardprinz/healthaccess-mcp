@@ -17,7 +17,7 @@ case "$MODE" in
     rm -rf "$DIR"; echo "stopped (the files of a lan test stay in ~/HealthAccess-webdav-test until you delete them)"; exit 0 ;;
   lan)
     DIR="$HOME/HealthAccess-webdav-test"; LISTEN=0.0.0.0
-    PASSWORD=$(LC_ALL=C tr -dc 'a-z0-9' < /dev/urandom | head -c 12) ;;
+    PASSWORD=$(openssl rand -hex 6) ;;
 esac
 mkdir -p "$DIR/root/files"
 chmod 700 "$DIR"

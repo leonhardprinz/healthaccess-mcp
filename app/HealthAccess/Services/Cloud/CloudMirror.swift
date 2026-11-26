@@ -35,6 +35,8 @@ struct CloudState: Codable, Sendable, Equatable {
 /// The decisions of the mirror, without any network or disk: what to upload, what to fetch, what a plan is called.
 enum CloudPlanner {
     static let guidePath = "README.md"
+    /// Where the guide goes when the folder has a `README.md` of its own, which is then uploaded as it is.
+    static let guidePathBesideOwn = "README-health-access.md"
     static let inboxPath = "plans/inbox.json"
     /// Written last in every run, so they never describe files that are not uploaded yet for long.
     static let lastFiles: Set<String> = ["index.json", "briefing.md", "catalog.json", "profile.json"]
@@ -128,7 +130,7 @@ enum CloudScanner {
     }
 
     private static func skipped(_ path: String) -> Bool {
-        path.hasPrefix("mcp/") || path == CloudPlanner.guidePath || path == CloudPlanner.inboxPath
+        path.hasPrefix("mcp/") || path == CloudPlanner.inboxPath || path == CloudPlanner.guidePathBesideOwn
     }
 
     /// Asks iOS to bring placeholder files back onto the phone. They are uploaded by the run after they arrive.
@@ -237,7 +239,7 @@ actor CloudMirror {
         if mode == .plansOnly { return summary }
         if summary.pulled > 0 { local = try CloudScanner.scan(folder) }
 
-        try await writeGuide()
+        try await writeGuide(ownReadme: local.contains { $0.path == CloudPlanner.guidePath })
 
         let queue = CloudPlanner.uploads(local: local, state: state.files)
         let total = queue.main.count + queue.last.count
@@ -387,12 +389,15 @@ actor CloudMirror {
     }
 
     /// `README.md` on the drive tells an AI that reads the drive directly what the files are and how to send a plan.
-    private func writeGuide() async throws {
+    private func writeGuide(ownReadme: Bool) async throws {
+        let path = ownReadme ? CloudPlanner.guidePathBesideOwn : CloudPlanner.guidePath
         let text = Data(PlanGuide.text(for: kind).utf8)
         let sig = String(text.sha256Hex.prefix(16))
-        let seen = state.cloudOnly[CloudPlanner.guidePath]
+        let seen = state.cloudOnly[path]
         guard seen?.sig != sig else { return }
-        let ref = try await drive.put(text, at: CloudPlanner.guidePath, known: seen?.ref)
-        state.cloudOnly[CloudPlanner.guidePath] = .init(sig: sig, ref: ref)
+        let ref = try await drive.put(text, at: path, known: seen?.ref)
+        state.cloudOnly[path] = .init(sig: sig, ref: ref)
+        // The guide moved aside for the folder's own README.md: that file now owns the name.
+        if ownReadme { state.cloudOnly[CloudPlanner.guidePath] = nil }
     }
 }

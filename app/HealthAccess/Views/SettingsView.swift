@@ -57,6 +57,7 @@ struct SettingsView: View {
             }
 
             CloudSection()
+            CloudOptionsSection()
 
             Section {
                 Toggle(isOn: Binding(get: { settings.includeReproductive }, set: { model.setIncludeReproductive($0) })) {

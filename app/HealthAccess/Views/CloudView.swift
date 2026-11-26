@@ -19,16 +19,32 @@ struct CloudSection: View {
                         }
                     }
                 }
-                Toggle(isOn: Binding(get: { model.cloud.wifiOnly }, set: { model.cloud.wifiOnly = $0 })) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Wi-Fi only")
-                        Text("Off: uploads also use mobile data, except in Low Data Mode.").font(.footnote).foregroundStyle(.secondary)
-                    }
-                }
             } header: {
                 SectionTitle("Cloud copy")
             } footer: {
                 Text("For storage apps that can't be picked as a folder: Health Access uploads a copy of your folder to them itself, from this phone straight to your own account.")
+            }
+        }
+    }
+}
+
+/// Settings → Uploads: how the cloud copy may use the network. Shown once a drive is connected.
+struct CloudOptionsSection: View {
+    @Environment(AppModel.self) private var model
+
+    var body: some View {
+        if model.cloud.kinds.contains(where: { model.cloud.state($0).connected }) {
+            Section {
+                Toggle(isOn: Binding(get: { model.cloud.wifiOnly }, set: { model.cloud.wifiOnly = $0 })) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Upload on Wi-Fi only")
+                        Text("Off: the cloud copy also uses mobile data.").font(.footnote).foregroundStyle(.secondary)
+                    }
+                }
+            } header: {
+                SectionTitle("Uploads")
+            } footer: {
+                Text("In Low Data Mode nothing is uploaded, whatever this says.")
             }
         }
     }
@@ -122,6 +138,7 @@ struct CloudView: View {
             }
         }
         .listStyle(.insetGrouped)
+        .scrollDismissesKeyboard(.interactively)
         .navigationTitle(kind.name)
         .navigationBarTitleDisplayMode(.inline)
     }
@@ -157,7 +174,7 @@ struct CloudForm: View {
         switch kind {
         case .webdav:
             return [Field(id: "address", label: "Address", hint: "https://cloud.example.com/remote.php/dav/files/you"),
-                    Field(id: "user", label: "Name", hint: "your user name"),
+                    Field(id: "user", label: "User name", hint: "the name you sign in with, not the address"),
                     Field(id: "password", label: "Password", hint: "an app password, if your server has them", secret: true)]
         default:
             return [Field(id: "bucket", label: "Bucket", hint: "my-bucket"),
@@ -167,6 +184,19 @@ struct CloudForm: View {
                     Field(id: "region", label: "Region", hint: "us-east-1, or leave empty", optional: true),
                     Field(id: "endpoint", label: "Endpoint", hint: "empty for Amazon S3", optional: true)]
         }
+    }
+
+    private var missing: [String] {
+        fields.filter { !$0.optional && (values[$0.id] ?? "").trimmingCharacters(in: .whitespaces).isEmpty }.map { $0.label.lowercased() }
+    }
+
+    private var complete: Bool { missing.isEmpty }
+
+    private func connect() {
+        var filled = values.mapValues { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.value.isEmpty }
+        if kind == .s3, filled["prefix"] == nil { filled["prefix"] = "health-access" }
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        model.requestCloudConnect(kind, fields: filled)
     }
 
     var body: some View {
@@ -181,14 +211,15 @@ struct CloudForm: View {
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
                     .keyboardType(field.id == "address" || field.id == "endpoint" ? .URL : .default)
+                    .submitLabel(.go)
+                    .onSubmit { if complete { connect() } }
                 }
             }
-            Button("Connect") {
-                var filled = values.mapValues { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.value.isEmpty }
-                if kind == .s3, filled["prefix"] == nil { filled["prefix"] = "health-access" }
-                model.requestCloudConnect(kind, fields: filled)
+            Button("Connect", action: connect).disabled(!complete)
+            if !complete {
+                Text("Connect works once \(Format.list(missing, last: "and")) \(missing.count == 1 ? "is" : "are") filled in.")
+                    .font(.footnote).foregroundStyle(.secondary)
             }
-            .disabled(fields.contains { !$0.optional && (values[$0.id] ?? "").trimmingCharacters(in: .whitespaces).isEmpty })
         } header: {
             SectionTitle(kind == .webdav ? "Your server" : "Your storage")
         } footer: {

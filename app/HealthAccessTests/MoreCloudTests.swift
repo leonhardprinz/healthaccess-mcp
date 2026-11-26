@@ -223,7 +223,12 @@ final class WebDAVLiveTests: XCTestCase {
         var http = CloudHTTP(session: CloudHTTP.makeSession(), tokens: BasicAuth(user: "anna", password: "test-password"))
         http.maxAttempts = 1
         let drive = WebDAVDrive(http: http, base: URL(string: "http://127.0.0.1:\(Self.port)/files")!)
-        do { _ = try await drive.list("") } catch CloudError.offline { throw XCTSkip("no WebDAV server on port \(Self.port)") }
+        do {
+            _ = try await drive.list("")
+        } catch let error as CloudError where error == .signInExpired || error.endsRun {
+            // No server, or one started with `lan` for a phone test, which has another password and real data.
+            throw XCTSkip("no WebDAV test server with the test password on port \(Self.port)")
+        }
         return drive
     }
 
@@ -387,6 +392,27 @@ final class ComplicationTests: XCTestCase {
         XCTAssertTrue(AppModel.notePlanProblems(items, folder: folder.store))
         XCTAssertNil(try folder.store.read("plans/broken.status.json"))
         XCTAssertEqual(try PlanInstaller.scan(folder: folder.store).first?.state, .pending)
+    }
+
+    func testTheGuideStepsAsideForAReadmeTheUserKeeps() async throws {
+        let folder = TempFolder(), drive = FakeDrive()
+        folder.write("index.json", "{}")
+        let mirror = CloudMirror(kind: .dropbox, drive: drive)
+        _ = try await mirror.run(folder: folder.store, mode: .full)
+        var guide = await drive.files["README.md"]?.data
+        XCTAssertTrue(guide.map { String(decoding: $0, as: UTF8.self) }?.contains("How to send a workout plan") == true)
+
+        folder.write("README.md", "my own notes")
+        _ = try await mirror.run(folder: folder.store, mode: .full)
+        let own = await drive.files["README.md"]?.data
+        XCTAssertEqual(own, Data("my own notes".utf8), "the user's file wins the name")
+        guide = await drive.files["README-health-access.md"]?.data
+        XCTAssertTrue(guide.map { String(decoding: $0, as: UTF8.self) }?.contains("How to send a workout plan") == true)
+        await drive.resetLog()
+        let again = try await mirror.run(folder: folder.store, mode: .full)
+        XCTAssertEqual(again.uploaded, 0)
+        let puts = await drive.puts
+        XCTAssertEqual(puts, [], "and the two do not overwrite each other on every run")
     }
 
     func testTheMessageForTheAINamesTheCloudCopy() {

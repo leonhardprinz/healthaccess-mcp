@@ -149,7 +149,7 @@ final class CloudCenter {
         do {
             _ = try await drive(kind, folders: [:], fields: fields).list("")
         } catch CloudError.signInExpired {
-            throw CloudError.unexpected("The server did not accept that name and password.")
+            throw CloudError.unexpected("The server did not accept that user name and password.")
         } catch CloudError.http(403, _) {
             throw CloudError.unexpected(kind == .s3 ? "The storage did not accept that key for this bucket." : "The server does not allow that folder for this name.")
         } catch CloudError.http(404, _) where kind == .s3 {
