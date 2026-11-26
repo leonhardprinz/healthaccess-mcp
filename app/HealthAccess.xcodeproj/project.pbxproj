@@ -64,6 +64,7 @@
 		9EA302C8B6318648BEE31301 /* S3Drive.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E989EB89987D449EADFB71F /* S3Drive.swift */; };
 		9FADC8A2B13FF7C4F54B332B /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3307063233B5342305E7DC25 /* HomeView.swift */; };
 		A18B954B185DAFF25EB9278E /* PlanGuide.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31349808B7CF069B5099158D /* PlanGuide.swift */; };
+		A39D0A757D7DBDB51412A335 /* FolderChoice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63BD1CB9A63DDE97A429B97A /* FolderChoice.swift */; };
 		A832B8D18516BE53AC131EC7 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DDA6BDF2A467D7BC16182DA /* AppModel.swift */; };
 		AFD86A599DC573AC4A43A9DB /* SupportStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C18759841BBA1DCFE423B7 /* SupportStore.swift */; };
 		B14FF474BC1368981392A039 /* OAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D743BC6E831E6A1BEF804E1 /* OAuth.swift */; };
@@ -142,6 +143,7 @@
 		584BE2DE17279CCEB0F2C30B /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
 		5A7AE8B881B3E04BC26236B3 /* PlanInstaller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanInstaller.swift; sourceTree = "<group>"; };
 		5C762F3F3DFF74ECA993B49C /* VitalsExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VitalsExporter.swift; sourceTree = "<group>"; };
+		63BD1CB9A63DDE97A429B97A /* FolderChoice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderChoice.swift; sourceTree = "<group>"; };
 		6450D63E1E2292C3FE72664A /* AppModel+Cloud.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppModel+Cloud.swift"; sourceTree = "<group>"; };
 		6A6FF770CB1E2A77AF93EC16 /* DaysView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaysView.swift; sourceTree = "<group>"; };
 		75886FF0A78521173998777D /* PlanPartsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanPartsView.swift; sourceTree = "<group>"; };
@@ -206,6 +208,7 @@
 				1D5BE3B9CDB8D38A06B12C05 /* CloudView.swift */,
 				AD25E2A91DF039308CF4D5FC /* Components.swift */,
 				6A6FF770CB1E2A77AF93EC16 /* DaysView.swift */,
+				63BD1CB9A63DDE97A429B97A /* FolderChoice.swift */,
 				584BE2DE17279CCEB0F2C30B /* HistoryView.swift */,
 				3307063233B5342305E7DC25 /* HomeView.swift */,
 				EA6248329A197DEBEE7659C1 /* Layout.swift */,
@@ -508,6 +511,7 @@
 				CC937CF7F933C39D70236C60 /* DriveInterest.swift in Sources */,
 				5E77E26EE1EA4E9D9743A115 /* Dropbox.swift in Sources */,
 				27A6534BFBA5353211D44670 /* ECGExporter.swift in Sources */,
+				A39D0A757D7DBDB51412A335 /* FolderChoice.swift in Sources */,
 				1A439A151C66B326C2462A99 /* FolderStore.swift in Sources */,
 				172A82E666A17CC83429F614 /* Format.swift in Sources */,
 				E053ECF5DA57B55021A62BFA /* GoogleDrive.swift in Sources */,
@@ -594,7 +598,7 @@
 				CODE_SIGN_ENTITLEMENTS = HealthAccess/HealthAccess.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 37;
+				CURRENT_PROJECT_VERSION = 38;
 				DEVELOPMENT_TEAM = 72995T7U66;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				INFOPLIST_FILE = HealthAccess/Info.plist;
@@ -677,7 +681,7 @@
 				CODE_SIGN_ENTITLEMENTS = HealthAccess/HealthAccess.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 37;
+				CURRENT_PROJECT_VERSION = 38;
 				DEVELOPMENT_TEAM = 72995T7U66;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				INFOPLIST_FILE = HealthAccess/Info.plist;

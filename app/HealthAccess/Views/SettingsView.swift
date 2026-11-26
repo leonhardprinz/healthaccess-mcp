@@ -4,6 +4,7 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(AppModel.self) private var model
     @State private var showPicker = false
+    @State private var showChoice = false
 
     var body: some View {
         @Bindable var settings = model.settings
@@ -15,7 +16,7 @@ struct SettingsView: View {
             }
 
             Section {
-                Button { showPicker = true } label: {
+                Button { if model.folder == nil { showChoice = true } else { showPicker = true } } label: {
                     VStack(alignment: .leading, spacing: 2) {
                         row("Health data", model.folder?.displayNameWithProvider ?? "None yet")
                         Text("The app writes your finished workouts and days here. Tap to change.").font(.footnote).foregroundStyle(.secondary)
@@ -135,6 +136,7 @@ struct SettingsView: View {
         .fileImporter(isPresented: $showPicker, allowedContentTypes: [.folder]) { result in
             if case .success(let url) = result { model.requestFolder(url) }
         }
+        .folderChoice(isPresented: $showChoice) { showPicker = true }
     }
 
     private func row(_ label: String, _ value: String) -> some View {

@@ -460,3 +460,11 @@ final class FolderPlaceTests: XCTestCase {
         XCTAssertFalse(CloudKind.google.isBeta)
     }
 }
+
+final class FolderChoiceTests: XCTestCase {
+    func testTheQuestionNamesTheDrivesThisBuildOffers() {
+        let line = FolderChoiceCopy.drivesLine(["Google Drive", "WebDAV server", "S3 storage"])
+        XCTAssertTrue(line.hasPrefix("Google Drive, WebDAV server or S3 storage."))
+        XCTAssertTrue(line.contains("keeps your files on this iPhone"))
+    }
+}

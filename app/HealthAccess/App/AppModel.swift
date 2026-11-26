@@ -52,6 +52,8 @@ final class AppModel {
     /// Export (Home) or Plans. A plan notification switches to Plans.
     var selectedTab = Tab.export
     var confirmation: Confirmation?
+    /// True while a sheet of its own shows the confirmation (the drive list opened from "Pick folder").
+    var confirmationInSheet = false
     var shareItems: ShareItems?
     var previewing: PreviewSession?
     var showPreview = false
@@ -197,7 +199,7 @@ final class AppModel {
     var status: StatusLine {
         if folder == nil || folderStale {
             return StatusLine(kind: .needs, title: "Folder missing",
-                              detail: folderStale ? "The saved folder moved or is gone. Pick it again." : "Pick a folder your AI can reach from your computer.",
+                              detail: folderStale ? "The saved folder moved or is gone. Pick it again." : "Pick a folder, or a cloud drive that your AI reads.",
                               action: ("Pick folder", .pickFolder))
         }
         if healthStatus == .notRequested {
@@ -244,7 +246,7 @@ final class AppModel {
     /// One plain paragraph under the status tile: what happens on its own from here, and what needs you.
     var statusExplainer: String {
         if folder == nil || folderStale {
-            return "The app writes nothing until you pick a folder. Pick one your computer can reach too, like iCloud Drive, so your AI can read it."
+            return "The app writes nothing until you pick where your files go. Pick a folder your computer can reach too, like iCloud Drive. Or pick a cloud drive that your AI reads."
         }
         if healthStatus == .notRequested {
             return "The app reads nothing until you allow Health access. You choose the types. The app only reads. It never writes to Health."
@@ -463,6 +465,17 @@ final class AppModel {
                 }
             }
     }
+
+    /// A drive was connected while no folder was set: the files then live in the app's own storage, and the
+    /// app uploads them from there.
+    func keepFolderHereForCloud() {
+        guard hasNoFolder else { return }
+        if setFolder(nil) {
+            results["folder"] = ActionResult(kind: .done, text: "Folder: Health Access on this iPhone. Set \(Format.clock(Date())).", at: Date())
+        }
+    }
+
+    var hasNoFolder: Bool { folder == nil || folderStale }
 
     /// `nil` is the folder in the app's own storage.
     @discardableResult

@@ -16,6 +16,7 @@ struct HomeView: View {
     @Environment(AppModel.self) private var model
     @State private var path: [HomeRoute] = []
     @State private var showPicker = false
+    @State private var showChoice = false
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -33,7 +34,7 @@ struct HomeView: View {
                 }
 
                 Section {
-                    FolderRow(pickFolder: { showPicker = true })
+                    FolderRow(pickFolder: { pickFolder() })
                     CloudStatusRows()
                 } header: {
                     SectionTitle("Folder")
@@ -116,7 +117,13 @@ struct HomeView: View {
             .fileImporter(isPresented: $showPicker, allowedContentTypes: [.folder]) { result in
                 if case .success(let url) = result { model.requestFolder(url) }
             }
+            .folderChoice(isPresented: $showChoice) { showPicker = true }
         }
+    }
+
+    /// No folder yet: ask first whether it is a folder or a cloud drive. A folder that moved is picked again.
+    private func pickFolder() {
+        if model.folder == nil { showChoice = true } else { showPicker = true }
     }
 
     /// The status of the export: a green check when everything is written, otherwise the state and its one fix.
@@ -144,7 +151,7 @@ struct HomeView: View {
     private func handle(_ action: AppModel.StatusAction) {
         switch action {
         case .pickFolder:
-            showPicker = true
+            pickFolder()
         case .allowHealth:
             Task { await model.requestHealthAccess() }
         case .allowNotifications:

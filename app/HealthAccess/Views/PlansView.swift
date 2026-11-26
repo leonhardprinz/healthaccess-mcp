@@ -5,6 +5,7 @@ struct PlansView: View {
     @Environment(AppModel.self) private var model
     @State private var path: [HomeRoute] = []
     @State private var showPicker = false
+    @State private var showChoice = false
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -18,7 +19,7 @@ struct PlansView: View {
                 }
 
                 Section {
-                    FolderRow(subfolder: "plans", pickFolder: { showPicker = true })
+                    FolderRow(subfolder: "plans", pickFolder: { pickFolder() })
                 } header: {
                     SectionTitle("Folder")
                 } footer: {
@@ -122,13 +123,18 @@ struct PlansView: View {
             .fileImporter(isPresented: $showPicker, allowedContentTypes: [.folder]) { result in
                 if case .success(let url) = result { model.requestFolder(url) }
             }
+                .folderChoice(isPresented: $showChoice) { showPicker = true }
         }
+    }
+
+    private func pickFolder() {
+        if model.folder == nil { showChoice = true } else { showPicker = true }
     }
 
     /// One plain paragraph under the tile: what happens to plans on their own, and what needs a tap.
     private var plansExplainer: String {
         if model.folder == nil || model.folderStale {
-            return "Your AI writes workout plans into a plans folder inside your Health data folder. Pick that folder so the app can see them."
+            return "Your AI writes workout plans into a plans folder inside your Health data folder. Pick that folder, or the cloud drive, so the app can see them."
         }
         let waiting = model.needsYou.filter { model.results["plan:\($0.id)"] == nil }.count
         if model.settings.autoPutOnWatch {
@@ -149,8 +155,8 @@ struct PlansView: View {
         let noFolder = model.folder == nil || model.folderStale
         let checked = model.lastPlanCheck.map { "checked \(Format.ago($0))" } ?? "not checked yet"
         if noFolder {
-            return StatusTile(state: .needs, title: "Folder missing", detail: "Pick the folder your AI writes to.",
-                              buttonTitle: "Pick folder", action: { showPicker = true })
+            return StatusTile(state: .needs, title: "Folder missing", detail: "Pick a folder, or a cloud drive that your AI writes to.",
+                              buttonTitle: "Pick folder", action: { pickFolder() })
         }
         if waiting > 0 {
             return StatusTile(state: .needs,

@@ -2,6 +2,6 @@ Cloud upload. Health Access can now upload your files to Google Drive, a WebDAV 
 
 Google Drive can't be picked as a folder on iPhone, so the app does the upload itself. It makes a new folder, Health Access, at the top level of your Drive. An AI that reads the drive can send workout plans back.
 
-No synced folder? Choose "Keep it on this iPhone" in the first steps and switch on Cloud upload in Settings.
+"Pick folder" now asks where your files go: a folder, or a cloud drive. No synced folder? Choose "A cloud drive".
 
 OneDrive and Box are planned. Tap one in Settings > Cloud upload to tell us you want it.

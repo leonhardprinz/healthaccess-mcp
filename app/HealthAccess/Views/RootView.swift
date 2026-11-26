@@ -17,7 +17,7 @@ struct RootView: View {
                 OnboardingView()
             }
         }
-        .sheet(item: $model.confirmation, onDismiss: { model.confirmationDismissed() }) { confirmation in
+        .sheet(item: model.confirmationInSheet ? .constant(nil) : $model.confirmation, onDismiss: { model.confirmationDismissed() }) { confirmation in
             ConfirmSheet(confirmation: confirmation)
         }
         .sheet(item: $model.shareItems) { share in

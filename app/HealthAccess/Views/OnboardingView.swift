@@ -6,6 +6,7 @@ struct OnboardingView: View {
     @Environment(AppModel.self) private var model
     @State private var page = 0
     @State private var showPicker = false
+    @State private var showChoice = false
 
     var body: some View {
         // Scrolls only when the text is taller than the screen (the largest accessibility sizes).
@@ -22,6 +23,7 @@ struct OnboardingView: View {
         .fileImporter(isPresented: $showPicker, allowedContentTypes: [.folder]) { result in
             if case .success(let url) = result { model.requestFolder(url, key: "folder") }
         }
+        .folderChoice(isPresented: $showChoice) { showPicker = true }
     }
 
     private var content: some View {
@@ -70,7 +72,7 @@ struct OnboardingView: View {
                 ResultLine(result: result, undoKey: "folder").padding(.bottom, 4)
             }
             if model.folder == nil {
-                primary("Pick folder") { showPicker = true }
+                primary("Pick folder") { showChoice = true }
                 secondary("Keep it on this iPhone") { model.requestAppFolder() }
             } else {
                 primary("Continue") { page = 2 }

@@ -130,6 +130,7 @@ enum CloudCopy {
 /// One drive: connect, see what the upload is doing, upload now, disconnect.
 struct CloudView: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.closeDriveSheet) private var closeDriveSheet
     let kind: CloudKind
 
     var body: some View {
@@ -191,6 +192,11 @@ struct CloudView: View {
         .listStyle(.insetGrouped)
         .scrollDismissesKeyboard(.interactively)
         .navigationTitle(kind.name)
+        .toolbar {
+            if let close = closeDriveSheet {
+                ToolbarItem(placement: .confirmationAction) { Button("Done", action: close) }
+            }
+        }
         .navigationBarTitleDisplayMode(.inline)
     }
 

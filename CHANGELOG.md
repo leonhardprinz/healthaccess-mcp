@@ -2,7 +2,7 @@
 
 Versions are one number for everything: the app's `MARKETING_VERSION`, the Rust crates and the npm packages (`scripts/bump-version.sh`). The app's build number counts up on its own. Dates are Europe/Ljubljana.
 
-## 1.1.0 (app build 37), unreleased: Cloud upload to Google Drive, a WebDAV server or S3 storage, and plans back from there
+## 1.1.0 (app build 38), unreleased: Cloud upload to Google Drive, a WebDAV server or S3 storage, and plans back from there
 
 Not released. What the app offers in this version: Google Drive, any WebDAV server, any S3 storage. Google Drive is tested on a real iPhone against a real account (sign-in, first upload, the folder in My Drive). WebDAV is tested against a real server (the Apache that ships with macOS: unit tests, the simulator with 1,649 files up and a plan back, and a real iPhone over the local network). The S3 signature matches Amazon's published examples; a real upload to a bucket is not tested.
 
@@ -19,6 +19,7 @@ OneDrive and Box are shown greyed out as "Soon": a tap, after a confirmation, se
 - "What left this phone" lists every upload run by drive, with the number of files.
 
 ### Thought through before anyone had to ask
+- **"Pick folder" asks first: a folder or a cloud drive.** On the Export tab, the Import tab, in the first steps and in Settings, the button opens one question, "Where do your files go?". "A folder" opens the iOS picker. "A cloud drive" shows the drives; when one is connected, the app keeps the files on this iPhone (On My iPhone › Health Access) and uploads them from there, with no second step. The confirmation says so. Before this, the picker and the drives were two separate places, and a tester without a folder did not find the drives.
 - **No folder to pick? "Keep it on this iPhone."** The first steps and Settings offer a folder in the app's own storage (On My iPhone › Health Access in the Files app), for someone whose AI reads a cloud drive. The Export tab shows Cloud upload under the folder, and each connected drive with what it is doing.
 - **A new connection starts from nothing.** Connecting again may mean another account or another server, so what the last one held is forgotten and the files already there are found by name. Before this, a reconnect to a different account could have skipped the upload.
 - **A sign-in that ran out says so.** The Export tab shows it, and a notification is posted once.
@@ -37,7 +38,7 @@ OneDrive and Box are shown greyed out as "Soon": a tap, after a confirmation, se
 - Woken in the background the app has a few seconds for uploads; the rest goes with the next sync, when the app is opened, or in a background processing task. How well that works on a locked phone is not tested yet.
 
 ### For developers
-- `Services/Cloud/`: `OAuth.swift`, `CloudHTTP.swift`, the three drives, `CloudMirror.swift` (state in Application Support, decisions in `CloudPlanner`). Unit tests in `HealthAccessTests` (72), run with `xcodebuild test`; `scripts/webdav-test-server.sh start` first, or the two live WebDAV tests are skipped.
+- `Services/Cloud/`: `OAuth.swift`, `CloudHTTP.swift`, the three drives, `CloudMirror.swift` (state in Application Support, decisions in `CloudPlanner`). Unit tests in `HealthAccessTests` (73), run with `xcodebuild test`; `scripts/webdav-test-server.sh start` first, or the two live WebDAV tests are skipped.
 - Client ids come from `Resources/CloudConfig.plist` (gitignored; copy the example). Without the file Cloud upload offers WebDAV and S3 only.
 
 ## 1.0.6, never released on its own, part of 1.1.0: Google Drive and OneDrive can't be picked, and the app says so

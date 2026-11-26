@@ -4,13 +4,18 @@ import UIKit
 /// Cloud upload: the app uploads the folder to Google Drive, OneDrive or Dropbox itself, because the folder
 /// picker cannot reach them, and brings back the plans an AI left there.
 extension AppModel {
+    /// Said before a connection that also sets the folder: someone who came from "Pick folder" has none yet.
+    var keepHereNote: String {
+        hasNoFolder ? "The app keeps your files on this iPhone, under On My iPhone › Health Access. " : ""
+    }
+
     func requestCloudConnect(_ kind: CloudKind) {
         let reach = kind.folderOnly
             ? "The app can reach only that one folder there."
             : "\(kind.name) has no permission for one folder only. The sign-in covers your whole \(kind.name), but the app uses only its own folder."
         confirmation = Confirmation(
             title: "Upload a copy to \(kind.name)",
-            detail: "You sign in on \(kind.name)'s own page. The app then makes a new folder, Health Access, \(kind.newFolderWhere). You can move it there later. After every sync, this phone uploads the files of your Health data folder straight into it. Nothing goes to us. \(reach)",
+            detail: keepHereNote + "You sign in on \(kind.name)'s own page. The app then makes a new folder, Health Access, \(kind.newFolderWhere). You can move it there later. After every sync, this phone uploads the files of your Health data folder straight into it. Nothing goes to us. \(reach)",
             confirmTitle: "Sign in") { [weak self] in
                 await self?.connectCloud(kind, fields: nil)
             }
@@ -20,7 +25,7 @@ extension AppModel {
     func requestCloudConnect(_ kind: CloudKind, fields: [String: String]) {
         confirmation = Confirmation(
             title: "Upload a copy to your \(kind.name)",
-            detail: (kind == .s3 ? "The app puts the files under the folder you set in your bucket." : "The app makes a new folder, Health Access, \(kind.newFolderWhere).")
+            detail: keepHereNote + (kind == .s3 ? "The app puts the files under the folder you set in your bucket." : "The app makes a new folder, Health Access, \(kind.newFolderWhere).")
                 + " After every sync, this phone uploads the files of your Health data folder straight there. Nothing goes to us. The password or key stays in this phone's keychain.",
             confirmTitle: "Connect") { [weak self] in
                 await self?.connectCloud(kind, fields: fields)
@@ -31,6 +36,7 @@ extension AppModel {
         let key = "cloud:\(kind.rawValue)"
         do {
             if let fields { try await cloud.connect(kind, fields: fields) } else { try await cloud.connect(kind) }
+            keepFolderHereForCloud()
             UserDefaults.standard.removeObject(forKey: Self.expiredNoticeKey(kind))
             NetworkLedger.shared.record(host: cloud.host(kind), event: "signed in")
             log("\(kind.name) connected", .cloud)

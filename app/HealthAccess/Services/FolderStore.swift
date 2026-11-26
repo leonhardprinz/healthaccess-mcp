@@ -223,11 +223,11 @@ enum FolderPickerCopy {
         // Name only the drives this build can really upload to.
         let drives = CloudConfig.shared.kinds.filter { $0.access == .signIn }.map(\.name)
         guard !drives.isEmpty else {
-            return "Google Drive or OneDrive? You can't pick them here, because they don't let other apps open their folders. Use iCloud Drive. Or keep the folder on this iPhone and upload it to your own server in Settings."
+            return "Google Drive or OneDrive? You can't pick them as a folder, because they don't let other apps open their folders. Use iCloud Drive. Or tap Pick folder and choose \"\(FolderChoiceCopy.drivesTitle)\" to upload to your own server."
         }
         let them = drives.count == 1 ? "it" : "them"
         let they = drives.count == 1 ? "it doesn't" : "they don't"
-        return "\(Format.list(drives))? You can't pick \(them) here, because \(they) let other apps open \(drives.count == 1 ? "its" : "their") folders. Keep the folder on this iPhone. Then switch on Cloud upload in Settings, and Health Access uploads the folder to \(them)."
+        return "\(Format.list(drives))? You can't pick \(them) as a folder, because \(they) let other apps open \(drives.count == 1 ? "its" : "their") folders. Tap Pick folder and choose \"\(FolderChoiceCopy.drivesTitle)\". Health Access then uploads your files to \(them)."
     }
 
     static var greyedOut: String {
