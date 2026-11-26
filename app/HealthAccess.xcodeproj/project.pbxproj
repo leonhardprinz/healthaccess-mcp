@@ -69,6 +69,7 @@
 		B14FF474BC1368981392A039 /* OAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D743BC6E831E6A1BEF804E1 /* OAuth.swift */; };
 		B219F810ED99E90821962011 /* Layout.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA6248329A197DEBEE7659C1 /* Layout.swift */; };
 		BA61623AC1952AD1387C443C /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = B5B81722A2CEB2A40A4E8F52 /* PrivacyInfo.xcprivacy */; };
+		BF7913DD73F8C7A85909482B /* CloudConfig.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8116D1B473634809C7AD8EFF /* CloudConfig.plist */; };
 		C06030FED37674949A1D7005 /* ProfileExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = EABD884B92E7F1125A7E7420 /* ProfileExporter.swift */; };
 		C3D282016E6303296A049935 /* AppModel+Cloud.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6450D63E1E2292C3FE72664A /* AppModel+Cloud.swift */; };
 		CA436D6278B9E0D04CFE1383 /* AppModel+Backlog.swift in Sources */ = {isa = PBXBuildFile; fileRef = A07BBDE31D98E2854A983A50 /* AppModel+Backlog.swift */; };
@@ -146,6 +147,7 @@
 		792090BF1999A6A9AB4114AA /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		7B66EE6DCB12E131F7E78B40 /* OneDrive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OneDrive.swift; sourceTree = "<group>"; };
 		7D9C6B352512E1055B60D1ED /* GoogleDrive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleDrive.swift; sourceTree = "<group>"; };
+		8116D1B473634809C7AD8EFF /* CloudConfig.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = CloudConfig.plist; sourceTree = "<group>"; };
 		82402C4D11C6CA667E00DEFE /* PCloudDrive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PCloudDrive.swift; sourceTree = "<group>"; };
 		84D1AFDDE5C4CFCEE4971A85 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
 		8878247CB4260BBCB3E1139A /* ActivityMapping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActivityMapping.swift; sourceTree = "<group>"; };
@@ -266,6 +268,7 @@
 			isa = PBXGroup;
 			children = (
 				16072767D3F04FDE5980F137 /* Assets.xcassets */,
+				8116D1B473634809C7AD8EFF /* CloudConfig.plist */,
 				B5B81722A2CEB2A40A4E8F52 /* PrivacyInfo.xcprivacy */,
 				EFE5E2A46E6E94DA39767AB3 /* TelemetryConfig.plist */,
 				3809558ED0C74C6FF43A1336 /* Fonts */,
@@ -451,6 +454,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				29A1035DD5031459522B3021 /* Assets.xcassets in Resources */,
+				BF7913DD73F8C7A85909482B /* CloudConfig.plist in Resources */,
 				78A77D89689F7331D88A97B0 /* IBMPlexSansCondensed-Bold.ttf in Resources */,
 				4BDCE38BD097B15968F8A592 /* IBMPlexSansCondensed-SemiBold.ttf in Resources */,
 				FBA977A817580880676C0C9B /* OFL.txt in Resources */,
@@ -586,7 +590,7 @@
 				CODE_SIGN_ENTITLEMENTS = HealthAccess/HealthAccess.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 31;
+				CURRENT_PROJECT_VERSION = 32;
 				DEVELOPMENT_TEAM = 72995T7U66;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				INFOPLIST_FILE = HealthAccess/Info.plist;
@@ -669,7 +673,7 @@
 				CODE_SIGN_ENTITLEMENTS = HealthAccess/HealthAccess.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 31;
+				CURRENT_PROJECT_VERSION = 32;
 				DEVELOPMENT_TEAM = 72995T7U66;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				INFOPLIST_FILE = HealthAccess/Info.plist;
