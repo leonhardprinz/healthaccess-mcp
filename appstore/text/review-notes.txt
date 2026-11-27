@@ -1,3 +1,5 @@
+CHINA: Following the Guideline 5 review of 27 Nov 2026, the app is no longer distributed on the China mainland App Store (removed in Availability). The app has no built-in AI or chatbot. It writes files that the user's own AI tools read.
+
 Health Access exports the Apple Health data the user allows as JSON files into a folder the user picks with the system folder picker (On My iPhone, iCloud Drive, a network drive, or another storage app that allows folder access). There is no account, no login and no server of ours.
 
 HOW TO TEST
